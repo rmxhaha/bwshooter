@@ -10,6 +10,22 @@ function _extend( x, y ){
 	return x;	
 }
 
+var Time = function () {
+	this.time = new Date();
+	this.reset = function () {
+		var out = this.getElapsedTime();
+		this.time = new Date();
+
+		return out;
+	}
+
+	this.getElapsedTime = function () {
+		return new Date() - this.time;
+	}
+
+	this.reset();
+}
+
 function Player( setup ){
 	_extend( this, setup );
 }
@@ -33,22 +49,50 @@ Player.prototype = {
 	height : 140
 };
 
-var one = new Player({
-	x : 100,
-	y : -200
-});
-
 
 var camera_x = 0;
 var camera_y = 0;
 
+var one = new Player({
+	x : 100,
+	y : -200,
+	vy : 0
+});
+
+var players = [];
+
+players.push( one );
+
+function update( dt ){
+	var gravity = 100; // only applied to y axis
+	
+	// to all object out there apply gravity
+	for( var i = 0; i < players.length; ++ i ){
+		var p = players[i];
+		
+		p.vy -= gravity * dt;
+		p.y += p.vy * dt;
+	}
+}
+
+var timer = new Time;
+
 function loop(){	
+	var dt = timer.reset() / 1000;
+	update( dt );
+	
+	
+	context.clearRect( 0,0,window.innerWidth, window.innerHeight );
+	// drawing all player
+	for( var i = 0; i < players.length; ++ i ){
+		players[i].draw( context );
+	}	
+
 	requestAnimationFrame( loop );
 }
 
 window.addEventListener("load", function(){
 	adjustCanvas();
-	one.draw( context );
 	
 	loop();
 });
