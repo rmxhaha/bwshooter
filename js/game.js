@@ -49,7 +49,15 @@ Player.prototype = {
 		return function (ctx) {
 			ctx.save();
 			ctx.translate(camera_x, camera_y);
-			ctx.drawImage(pimage, this.x - this.width / 2, -this.y - this.height / 2, this.width, this.height);
+			ctx.drawImage(
+				pimage, 
+				0,
+				( this.vx > 0 ? 0 : 1 ) * this.height,
+				this.width, this.height,				
+
+				this.x - this.width / 2, 
+				-this.y - this.height / 2, 
+				this.width, this.height);
 
 			ctx.restore();
 		}
