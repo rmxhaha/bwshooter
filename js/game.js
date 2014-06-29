@@ -30,7 +30,8 @@ function Player(setup) {
 	var _default = {
 		x : 0,
 		y : 0,
-		vy : 0
+		vy : 0,
+		vx : 0
 	};
 
 	_extend(this, _default);
@@ -60,7 +61,8 @@ var camera_y = 0;
 var one = new Player({
 		x : 100,
 		y : -200,
-		vy : 0
+		vy : 0,
+		vx : 50
 	});
 
 var players = [];
@@ -76,6 +78,7 @@ function update(dt) {
 
 		p.vy -= gravity * dt;
 		p.y += p.vy * dt;
+		p.x += p.vx * dt;
 	}
 }
 
