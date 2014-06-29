@@ -22,13 +22,15 @@ Player.prototype = {
 		return function( ctx ){
 			ctx.save();
 			ctx.translate( camera_x, camera_y );
-			ctx.drawImage( pimage, this.x - 75, -this.y-70 ,150, 140 );
+			ctx.drawImage( pimage, this.x - this.width/2, -this.y - this.height/2 ,this.width, this.height );
 			this.x;
 			this.y;
 			
 			ctx.restore();
 		}
-	})()
+	})(),
+	width : 150,
+	height : 140
 };
 
 var one = new Player({
