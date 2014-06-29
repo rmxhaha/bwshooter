@@ -1,13 +1,13 @@
 var context = document.getElementById("canvas").getContext("2d");
 
-function _extend( x, y ){
+function _extend(x, y) {
 	for (var key in y) {
 		if (y.hasOwnProperty(key)) {
 			x[key] = y[key];
 		}
 	}
 
-	return x;	
+	return x;
 }
 
 var Time = function () {
@@ -26,29 +26,27 @@ var Time = function () {
 	this.reset();
 }
 
-function Player( setup ){
+function Player(setup) {
 	var _default = {
 		x : 0,
 		y : 0,
 		vy : 0
 	};
 
-	_extend( this, _default );
-	_extend( this, setup );
+	_extend(this, _default);
+	_extend(this, setup);
 }
 
 Player.prototype = {
-	draw : ( function(){
+	draw : (function () {
 		var pimage = new Image();
 		pimage.src = "art/player.png";
 
-		return function( ctx ){
+		return function (ctx) {
 			ctx.save();
-			ctx.translate( camera_x, camera_y );
-			ctx.drawImage( pimage, this.x - this.width/2, -this.y - this.height/2 ,this.width, this.height );
-			this.x;
-			this.y;
-			
+			ctx.translate(camera_x, camera_y);
+			ctx.drawImage(pimage, this.x - this.width / 2, -this.y - this.height / 2, this.width, this.height);
+
 			ctx.restore();
 		}
 	})(),
@@ -56,27 +54,26 @@ Player.prototype = {
 	height : 140
 };
 
-
 var camera_x = 0;
 var camera_y = 0;
 
 var one = new Player({
-	x : 100,
-	y : -200,
-	vy : 0
-});
+		x : 100,
+		y : -200,
+		vy : 0
+	});
 
 var players = [];
 
-players.push( one );
+players.push(one);
 
-function update( dt ){
+function update(dt) {
 	var gravity = 100; // only applied to y axis
-	
+
 	// to all object out there apply gravity
-	for( var i = 0; i < players.length; ++ i ){
+	for (var i = 0; i < players.length; ++i) {
 		var p = players[i];
-		
+
 		p.vy -= gravity * dt;
 		p.y += p.vy * dt;
 	}
@@ -84,31 +81,29 @@ function update( dt ){
 
 var timer = new Time;
 
-function loop(){	
+function loop() {
 	var dt = timer.reset() / 1000;
-	update( dt );
-	
-	
-	context.clearRect( 0,0,window.innerWidth, window.innerHeight );
-	// drawing all player
-	for( var i = 0; i < players.length; ++ i ){
-		players[i].draw( context );
-	}	
+	update(dt);
 
-	requestAnimationFrame( loop );
+	context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+	// drawing all player
+	for (var i = 0; i < players.length; ++i) {
+		players[i].draw(context);
+	}
+
+	requestAnimationFrame(loop);
 }
 
-window.addEventListener("load", function(){
+window.addEventListener("load", function () {
 	adjustCanvas();
-	
 	loop();
 });
 
-window.addEventListener("resize", function(){
+window.addEventListener("resize", function () {
 	adjustCanvas();
 });
 
-function adjustCanvas(){
+function adjustCanvas() {
 	var canvas = document.getElementById("canvas");
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
