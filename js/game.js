@@ -1,3 +1,5 @@
+var gravity = 100; // only applied to y axis
+
 var context = document.getElementById("canvas").getContext("2d");
 
 function _extend(x, y) {
@@ -52,7 +54,12 @@ Player.prototype = {
 		}
 	})(),
 	width : 150,
-	height : 140
+	height : 140,
+	update : function( dt ){
+		this.vy -= gravity * dt;
+		this.x += this.vx * dt;
+		this.y += this.vy * dt;
+	}
 };
 
 var camera_x = 0;
@@ -70,15 +77,8 @@ var players = [];
 players.push(one);
 
 function update(dt) {
-	var gravity = 100; // only applied to y axis
-
-	// to all object out there apply gravity
 	for (var i = 0; i < players.length; ++i) {
-		var p = players[i];
-
-		p.vy -= gravity * dt;
-		p.y += p.vy * dt;
-		p.x += p.vx * dt;
+		players[i].update( dt );
 	}
 }
 
