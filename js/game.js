@@ -28,6 +28,29 @@ var Time = function () {
 	this.reset();
 }
 
+function Plateform(setup){
+	var _default = {
+		x : 0,
+		y : 0,
+		width : 100
+	};
+
+	_extend(this, _default);
+	_extend(this, setup);
+}
+
+Plateform.prototype = {
+	draw : function(ctx){
+		ctx.save();
+		ctx.translate(camera_x, camera_y);
+		ctx.fillStyle = "#888888";
+		ctx.fillRect( this.x, -this.y, this.width, this.height );
+		console.log( this.x, -this.y, this.width, this.height );
+		ctx.restore();
+	},
+	height : 30
+};
+
 function Player(setup) {
 	var _default = {
 		x : 0,
@@ -94,6 +117,9 @@ function update(dt) {
 
 var timer = new Time;
 
+
+var p = new Plateform({ x : 100, y : -300, width : 300 });
+
 function loop() {
 	var dt = timer.reset() / 1000;
 	update(dt);
@@ -103,6 +129,8 @@ function loop() {
 	for (var i = 0; i < players.length; ++i) {
 		players[i].draw(context);
 	}
+	
+	p.draw( context );
 
 	requestAnimationFrame(loop);
 }
