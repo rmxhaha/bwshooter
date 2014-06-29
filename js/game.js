@@ -28,7 +28,7 @@ var Time = function () {
 	this.reset();
 }
 
-function Plateform(setup){
+function Platform(setup){
 	var _default = {
 		x : 0,
 		y : 0,
@@ -39,7 +39,7 @@ function Plateform(setup){
 	_extend(this, setup);
 }
 
-Plateform.prototype = {
+Platform.prototype = {
 	draw : function(ctx){
 		ctx.save();
 		ctx.translate(camera_x, camera_y);
@@ -118,7 +118,7 @@ function update(dt) {
 var timer = new Time;
 
 
-var p = new Plateform({ x : 100, y : -300, width : 300 });
+var p = new Platform({ x : 100, y : -300, width : 300 });
 
 function loop() {
 	var dt = timer.reset() / 1000;
@@ -146,6 +146,15 @@ window.addEventListener("keydown", function(event){
 		one.vx = one.walkSpeed;
 		break;
 	case 40: // down
+		break;
+	}
+});
+
+window.addEventListener("keyup", function(event){
+	switch( event.keyCode ){
+	case 37: // left
+	case 39: // right
+		one.vx = 0;
 		break;
 	}
 });
