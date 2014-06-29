@@ -33,7 +33,8 @@ function Player(setup) {
 		x : 0,
 		y : 0,
 		vy : 0,
-		vx : 0
+		vx : 0,
+		walkSpeed : 50
 	};
 
 	_extend(this, _default);
@@ -69,7 +70,8 @@ var one = new Player({
 		x : 100,
 		y : -200,
 		vy : 0,
-		vx : 50
+		vx : 0,
+		walkSpeed : 50
 	});
 
 var players = [];
@@ -96,6 +98,21 @@ function loop() {
 
 	requestAnimationFrame(loop);
 }
+
+window.addEventListener("keydown", function(event){
+	switch( event.keyCode ){
+	case 37: // left
+		one.vx = -one.walkSpeed;
+		break;
+	case 38: // up
+		break;
+	case 39: // right
+		one.vx = one.walkSpeed;
+		break;
+	case 40: // down
+		break;
+	}
+});
 
 window.addEventListener("load", function () {
 	adjustCanvas();
