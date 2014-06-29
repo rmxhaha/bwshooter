@@ -27,6 +27,13 @@ var Time = function () {
 }
 
 function Player( setup ){
+	var _default = {
+		x : 0,
+		y : 0,
+		vy : 0
+	};
+
+	_extend( this, _default );
 	_extend( this, setup );
 }
 
