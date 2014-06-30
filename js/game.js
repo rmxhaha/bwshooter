@@ -201,7 +201,7 @@ Player.prototype = {
 			ctx.drawImage(
 				pimage, 
 				0,
-				( this.vx > 0 ? 0 : 1 ) * this.height,
+				( this.sideRight ? 0 : 1 ) * this.height,
 				this.width, this.height,				
 
 				this.x, 
@@ -210,6 +210,7 @@ Player.prototype = {
 			ctx.restore();
 		}
 	})(),
+	sideRight : true, 
 	width : 150,
 	height : 140,
 	update : function( dt ){
@@ -254,11 +255,13 @@ window.addEventListener("keydown", function(event){
 	switch( event.keyCode ){
 	case 37: // left
 		one.vx = -one.walkSpeed;
+		one.sideRight = false;
 		break;
 	case 38: // up
 		break;
 	case 39: // right
 		one.vx = one.walkSpeed;
+		one.sideRight = true;
 		break;
 	case 40: // down
 		break;
