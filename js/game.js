@@ -77,8 +77,8 @@ World.prototype = {
 		
 		function isInPlatformArea( platform, minX, maxX ){
 			return( 
-				(platform.x < minX && minX <= platform.x + platform.width) || 
-				(platform.x <= maxX && maxX < platform.x + platform.width) );
+				(platform.x < minX && minX < platform.x + platform.width) || 
+				(platform.x < maxX && maxX < platform.x + platform.width) );
 		}
 		
 		for( var i = 0; i < this.players.length; ++ i ){
@@ -100,6 +100,7 @@ World.prototype = {
 				if( bottomY < p.topPlatform.y ){
 					// fix coordinate 
 					p.y = p.topPlatform.y + p.height;
+					p.vy = 0;
 
 					// previous data is still valid
 					return;
