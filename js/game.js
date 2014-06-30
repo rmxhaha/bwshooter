@@ -37,7 +37,7 @@ function World(setup){
 	 */
 	 
 	var _default = {
-		timestep : 0.02,
+		timestep : 0.05,
 		iteration : 6 
 	};
 	
@@ -65,15 +65,78 @@ World.prototype = {
 			throw new Error('Unknown Type Added' );
 		}
 	},
+	updateCoordinate : function(dt){
+		for( var i = 0; i < this.players.length; ++ i ){
+			this.players[i].update(dt);
+		}
+	},
+	fixCoordinate : function(){
+		function isInBetween( bottom, data , top ){
+			return bottem < data && data < top;
+		}
+		
+		function isInPlatformArea( platform, minX, maxX ){
+			return( 
+				(platform.x < minX && minX <= platform.x + platform.width) || 
+				(platform.x <= maxX && maxX < platform.x + platform.width) );
+		}
+		
+		for( var i = 0; i < this.players.length; ++ i ){
+			var p = this.players[i];
+			
+			// don't check if hero is moving up
+			if( p.vy > 0 ) continue;
+
+			// pre-calculation
+			var leftX = p.x;
+			var rightX = p.x + p.width;
+			
+			var bottomY = p.y - p.height;
+			
+			// if previous data is still valid
+			if( p.topPlatform && isInPlatformArea( p.topPlatform, leftX, rightX ) ){
+				console.log("R");
+				// coordinate need to be fixed
+
+				if( bottomY < p.topPlatform.y ){
+					// fix coordinate 
+					p.y = p.topPlatform.y + p.height;
+
+					// previous data is still valid
+					return;
+				}
+			}
+
+			// prepare data correction for next iteration			
+			var topPlatform = false;
+			
+			for( var k = 0; k < this.platforms.length; ++ k ){
+				var q = this.platforms[k];
+
+				if( q.y > bottomY ) continue;
+				
+				if( isInPlatformArea(q, leftX, rightX ) ){
+					if( !topPlatform || topPlatform.y < q.y ) 
+						topPlatform = q;
+				}
+			}
+			
+			if( topPlatform == false ){
+				throw new Error('bottemless pit is found');
+			}
+			
+			p.topPlatform = topPlatform;
+			
+		}
+	},
 	update : function( real_dt ){
 		this.timebuffer += real_dt;
 		var dt = this.timestep;
+		
 		// platforms and lights doesn't need update yet
 		while( this.timebuffer > dt ){
-			for( var i = 0; i < this.players.length; ++ i ){
-				this.players[i].update(dt);
-			}
-			
+			this.updateCoordinate(dt);
+			this.fixCoordinate();
 			this.timebuffer -= dt;
 		}
 	},
@@ -141,10 +204,9 @@ Player.prototype = {
 				( this.vx > 0 ? 0 : 1 ) * this.height,
 				this.width, this.height,				
 
-				this.x - this.width / 2, 
-				-this.y - this.height / 2, 
+				this.x, 
+				-this.y, 
 				this.width, this.height);
-
 			ctx.restore();
 		}
 	})(),
@@ -170,7 +232,7 @@ var one = new Player({
 		walkSpeed : 50
 	});
 
-var p = new Platform({ x : 100, y : -300, width : 300 });
+var p = new Platform({ x : 100, y : -600, width : 300 });
 
 world.add(one);
 world.add(p);
