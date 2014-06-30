@@ -28,6 +28,70 @@ var Time = function () {
 	this.reset();
 }
 
+function World(setup){
+	/**
+	 *  @param timestep
+	 *  	fix delta time per update
+	 *  @param iteration 
+	 *  	how many iteration per update ( more better, too much doesn't make a difference )
+	 */
+	 
+	var _default = {
+		timestep : 0.02,
+		iteration : 6 
+	};
+	
+	this.players = [];
+	this.platforms = [];
+	this.lights = [];
+	
+	_extend( this, _default );
+	_extend( this, setup );
+};
+
+World.prototype = {
+	timebuffer : 0,
+	add : function(item){
+		if( item instanceof Platform ){
+			this.platforms.push( item );
+		}
+		else if( item instanceof Player ){
+			this.players.push( item );
+		}
+		else if( item instanceof Light ){
+			this.lights.push( item );
+		}
+		else {
+			throw new Error('Unknown Type Added' );
+		}
+	},
+	update : function( real_dt ){
+		this.timebuffer += real_dt;
+		var dt = this.timestep;
+		// platforms and lights doesn't need update yet
+		while( this.timebuffer > dt ){
+			for( var i = 0; i < this.players.length; ++ i ){
+				this.players[i].update(dt);
+			}
+			
+			this.timebuffer -= dt;
+		}
+	},
+	draw : function(ctx){
+		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+		for( var i = 0; i < this.players.length; ++ i ){
+			this.players[i].draw(ctx);
+		}
+		for( var i = 0; i < this.lights.length; ++ i ){
+			this.lights[i].draw(ctx);
+		}
+		for( var i = 0; i < this.platforms.length; ++ i ){
+			this.platforms[i].draw(ctx);
+		}
+	}
+};
+
 function Platform(setup){
 	var _default = {
 		x : 0,
@@ -45,7 +109,6 @@ Platform.prototype = {
 		ctx.translate(camera_x, camera_y);
 		ctx.fillStyle = "#888888";
 		ctx.fillRect( this.x, -this.y, this.width, this.height );
-		console.log( this.x, -this.y, this.width, this.height );
 		ctx.restore();
 	},
 	height : 30
@@ -97,6 +160,8 @@ Player.prototype = {
 var camera_x = 0;
 var camera_y = 0;
 
+var world = new World;
+
 var one = new Player({
 		x : 100,
 		y : -200,
@@ -105,32 +170,20 @@ var one = new Player({
 		walkSpeed : 50
 	});
 
-var players = [];
-
-players.push(one);
-
-function update(dt) {
-	for (var i = 0; i < players.length; ++i) {
-		players[i].update( dt );
-	}
-}
-
-var timer = new Time;
-
-
 var p = new Platform({ x : 100, y : -300, width : 300 });
 
+world.add(one);
+world.add(p);
+
+
+
+
+var timer = new Time;
 function loop() {
 	var dt = timer.reset() / 1000;
-	update(dt);
 
-	context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-	// drawing all player
-	for (var i = 0; i < players.length; ++i) {
-		players[i].draw(context);
-	}
-	
-	p.draw( context );
+	world.update(dt);
+	world.draw(context);
 
 	requestAnimationFrame(loop);
 }
