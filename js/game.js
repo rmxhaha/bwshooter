@@ -243,6 +243,11 @@ var one = new Player({
 		walkSpeed : 150
 	});
 
+function focusCamera(){
+	camera_x = -one.x + window.innerWidth/2 - one.width/2;
+	camera_y = one.y + window.innerHeight/2 - one.height/2;
+}
+
 var p = new Platform({ x : 100, y : -600, width : 300 });
 
 world.add(one);
@@ -256,6 +261,7 @@ function loop() {
 	var dt = timer.reset() / 1000;
 
 	world.update(dt);
+	focusCamera();
 	world.draw(context);
 
 	requestAnimationFrame(loop);
