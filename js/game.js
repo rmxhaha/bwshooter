@@ -1,4 +1,4 @@
-var gravity = 100; // only applied to y axis
+var gravity = 400; // only applied to y axis
 
 var context = document.getElementById("canvas").getContext("2d");
 
@@ -183,7 +183,7 @@ function Player(setup) {
 		y : 0,
 		vy : 0,
 		vx : 0,
-		walkSpeed : 50
+		walkSpeed : 150
 	};
 
 	_extend(this, _default);
@@ -217,6 +217,11 @@ Player.prototype = {
 		this.vy -= gravity * dt;
 		this.x += this.vx * dt;
 		this.y += this.vy * dt;
+	},
+	jump : function(){
+		if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
+			this.vy = 400;
+		}
 	}
 };
 
@@ -230,7 +235,7 @@ var one = new Player({
 		y : -200,
 		vy : 0,
 		vx : 0,
-		walkSpeed : 50
+		walkSpeed : 150
 	});
 
 var p = new Platform({ x : 100, y : -600, width : 300 });
@@ -258,6 +263,8 @@ window.addEventListener("keydown", function(event){
 		one.sideRight = false;
 		break;
 	case 38: // up
+	case 32: // spacebar
+		one.jump();
 		break;
 	case 39: // right
 		one.vx = one.walkSpeed;
