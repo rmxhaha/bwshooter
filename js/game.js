@@ -52,6 +52,10 @@ function World(setup){
 World.prototype = {
 	timebuffer : 0,
 	add : function(item){
+		
+		// adding pointer to the world where they belong
+		item.world = this;
+		
 		if( item instanceof Platform ){
 			this.platforms.push( item );
 		}
