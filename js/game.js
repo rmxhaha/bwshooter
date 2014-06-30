@@ -95,9 +95,8 @@ World.prototype = {
 			
 			// if previous data is still valid
 			if( p.topPlatform && isInPlatformArea( p.topPlatform, leftX, rightX ) ){
-				console.log("R");
+				
 				// coordinate need to be fixed
-
 				if( bottomY < p.topPlatform.y ){
 					// fix coordinate 
 					p.y = p.topPlatform.y + p.height;
