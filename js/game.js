@@ -194,23 +194,28 @@ Player.prototype = {
 		var pimage = new Image();
 		pimage.src = "art/player.png";
 
+		// sprite specific coordinate
+		var dx = 30;
+		var dw = 150;
+		var dh = 140;
+
 		return function (ctx) {
 			ctx.save();
 			ctx.translate(camera_x, camera_y);
 			ctx.drawImage(
 				pimage, 
 				0,
-				( this.sideRight ? 0 : 1 ) * this.height,
-				this.width, this.height,				
+				( this.sideRight ? 0 : 1 ) * dh,
+				dw, dh,				
 
-				this.x, 
+				this.x - dx, 
 				-this.y, 
-				this.width, this.height);
+				dw, dh);
 			ctx.restore();
 		}
 	})(),
 	sideRight : true, 
-	width : 150,
+	width : 90,
 	height : 140,
 	update : function( dt ){
 		this.vy -= gravity * dt;
@@ -242,7 +247,7 @@ var p = new Platform({ x : 100, y : -600, width : 300 });
 world.add(one);
 world.add(p);
 
-
+world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
 
 var timer = new Time;
