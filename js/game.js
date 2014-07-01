@@ -156,6 +156,47 @@ World.prototype = {
 		for( var i = 0; i < this.platforms.length; ++ i ){
 			this.platforms[i].draw(ctx);
 		}
+	},
+	RayCast : function(option){
+		// adaptation from : http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
+		var rx = option.x;
+		var ry = option.y;
+		var dx = option.tx - option.x;
+		var dy = option.ty - option.y;
+		
+		var r = Math.sqrt( dx * dx + dy * dy );
+		
+		// diraction fraction 1 / normalize( vector )
+		var dfx = r/dx;
+		var dfy = r/dy;
+		
+		var range = r;
+		
+		for( var i = 0; i < this.platforms.length; ++ i ){
+			var p = this.platforms[i];
+			var t1 = ( p.x - rx ) * dfx;
+			var t2 = ( p.x + p.width - rx ) * dfx;
+	
+			var t3 = ( p.y - ry ) * dfy;
+			var t4 = ( p.y - p.height - ry ) * dfy;
+			
+			var tmin = Math.max( Math.min(t1,t2), Math.min(t3,t4) );
+			var tmax = Math.min( Math.max(t1,t2), Math.max(t3,t4) );
+			
+			// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behing us
+			if (tmax < 0){
+				continue;
+			}
+			
+			// if tmin > tmax, ray doesn't intersect AABB
+			if (tmin > tmax){
+				continue;
+			}
+			
+			range = Math.min( tmin, range );
+		}
+		
+		return range;
 	}
 };
 
@@ -259,14 +300,46 @@ world.add(p);
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
+var TestRayCast = ( function(){
+	var deg = 0;
+	return function( ctx, dt )
+	{
+		deg += Math.PI * dt;
+		
+		var opt = {
+			x : 500,
+			y : -500,
+			tx : 500 + Math.sin( deg ) * 1000,
+			ty : -500 - Math.cos( deg ) * 1000
+		};
+
+		
+		var range = world.RayCast( opt );
+		opt.tx = 500 + Math.sin( deg ) * range;
+		opt.ty = -500 - Math.cos( deg ) * range;
+		
+		
+		ctx.save();
+		ctx.translate( camera_x, camera_y );
+		ctx.beginPath();
+		ctx.moveTo(opt.x,-opt.y);
+		ctx.lineTo(
+			opt.tx, 
+			-opt.ty );
+		ctx.stroke();		
+		ctx.restore();
+	}
+})();
 
 var timer = new Time;
 function loop() {
 	var dt = timer.reset() / 1000;
 
+	
 	world.update(dt);
 	focusCamera();
 	world.draw(context);
+	TestRayCast( context, dt );
 
 	requestAnimationFrame(loop);
 }
