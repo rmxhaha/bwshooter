@@ -300,7 +300,16 @@ Light.prototype = {
 	opacity : 1,
 	start_rotation : 0,
 	delta_rotation : Math.PI*2,
+	state : true, // true for on and false of off
+	turnOn : function(){
+		this.state = true;
+	},
+	turnOff : function(){
+		this.state = false;
+	},
 	draw : function( ctx ){
+		if( !this.state ) return;
+		
 		var ddeg = Math.PI * 2 / this.rayCount;
 		var x = [this.x];
 		var y = [this.y];
@@ -358,10 +367,13 @@ function LightFlickeringMod(option){
 		}
 		
 		if( time < setup.flickerDuration ){
-			this.color = ( Math.floor( time / setup.flickerSpeed ) % 2 == 0 ? "white" : "black" );			
+			if( Math.floor( time / setup.flickerSpeed ) % 2 == 0 ) 
+				this.turnOn();
+			else 
+				this.turnOff();
 		}
 		else { // time < flickerDuration + offDuration
-			this.color = "black";
+			this.turnOff();
 		}
 	}
 }
@@ -387,9 +399,9 @@ function SunFxMod(option){
 	if( typeof option !== "object" ) option = {};
 	// in seconds
 	var setup = {
-		dayTime : 3, 
+		dayTime : 30, 
 		nightTime : 3,
-		switchTime : 3
+		switchTime : 30
 	};
 	
 	var dayTime = option.dayTime || setup.dayTime;
