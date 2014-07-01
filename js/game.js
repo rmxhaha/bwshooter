@@ -298,7 +298,7 @@ Light.prototype = {
 		var x = [];
 		var y = [];
 		
-		var mRange = this.maxRange - 10;
+		var mRange = this.maxRange;
 		for( var deg = 0; deg < Math.PI * 2; deg += ddeg ){
 			var range = this.world.RayCast({ 
 				x : this.x, 
@@ -306,9 +306,7 @@ Light.prototype = {
 				tx : this.x + Math.sin( deg ) * mRange,
 				ty : this.y + Math.cos( deg ) * mRange
 			});
-			
-			range += 10;
-			
+						
 			x.push( this.x + Math.sin( deg ) * range );
 			y.push( this.y + Math.cos( deg ) * range );
 		}
@@ -365,8 +363,8 @@ world.add(p);
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
-var light = new Light({x : 300, y : -400, color : "red", opacity : 0.5, rayCount : 1000 });
-var light2 = new Light({x : 300, y : -800, color : "yellow", opacity : 0.5, rayCount : 1000 });
+var light = new Light({x : 300, y : -400, color : "black", opacity : 0.9, rayCount : 1000 });
+var light2 = new Light({x : 300, y : -800, color : "black", opacity : 0.9, rayCount : 1000 });
 world.add(light);
 world.add(light2);
 
