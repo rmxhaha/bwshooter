@@ -380,6 +380,45 @@ function LightSwingingMod(option){
 	}
 }
 
+function SunFxMod(option){
+	if( typeof option !== "object" ) option = {};
+	// in seconds
+	var setup = {
+		dayTime : 3, 
+		nightTime : 3,
+		switchTime : 3
+	};
+	
+	var dayTime = option.dayTime || setup.dayTime;
+	var nightTime = option.nightTime || setup.nightTime;
+	var switchTime = option.switchTime || setup.switchTime;
+	
+	var time = 0;
+	
+	return function( dt ){
+		time += dt;
+		
+		if( time > dayTime + switchTime + nightTime + switchTime ){
+			time -= dayTime + switchTime + nightTime + switchTime;
+		}
+		
+		if( time < dayTime ){
+			this.opacity = 1;
+		}
+		else if( time < dayTime + switchTime ){
+			this.opacity = Math.cos( (time-dayTime) / switchTime * Math.PI/2 );
+		}
+		else if( time < dayTime + switchTime + nightTime ){
+			this.opacity = 0;
+		}
+		else {
+			this.opacity = Math.sin( (time-dayTime-switchTime-nightTime) / switchTime * Math.PI/2 );			
+		}
+		
+	}
+	
+}
+
 var camera_x = 0;
 var camera_y = 0;
 
@@ -403,16 +442,27 @@ var p = new Platform({ x : 100, y : -600, width : 300 });
 world.add(one);
 world.add(p);
 
+for( var i = 0; i < 3; ++ i ){
+	world.add( new Platform({ 
+			x : 460 + 150*i, 
+			y : -610 - i*10, 
+			width : 100 
+		})
+	);
+}
+
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
-var light = new Light({x : 300, y : -400, color : "white", opacity : 0.9, rayCount : 400 });
+var light = new Light({x : 209, y : 400, color : "white", opacity : 0.9, rayCount : 4000, maxRange : 5000 });
 var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.9, rayCount : 400, start_rotation : Math.PI, delta_rotation : Math.PI /2, maxRange : 1000 });
 
 light2.addMod( LightSwingingMod() );
 light2.addMod( LightFlickeringMod() );
+light.addMod( SunFxMod() );
 
 world.add(light);
 world.add(light2);
+
 
 var timer = new Time;
 function loop() {
