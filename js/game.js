@@ -287,29 +287,48 @@ Light.prototype = {
 	color : "red",
 	opacity : 1,
 	draw : function( ctx ){
-		var cast = this.world.RayCast;
-		
 		ctx.save();
 		ctx.translate( camera_x, camera_y );
 		ctx.fillStyle = this.color;
 		ctx.globalAlpha = this.opacity;
 		ctx.beginPath();
 		ctx.moveTo( this.x, this.y );
-		
+				
 		var ddeg = Math.PI * 2 / this.rayCount;
+		var x = [];
+		var y = [];
+		
+		var mRange = this.maxRange - 10;
 		for( var deg = 0; deg < Math.PI * 2; deg += ddeg ){
 			var range = this.world.RayCast({ 
 				x : this.x, 
 				y : this.y, 
-				tx : this.x + Math.sin( deg ) * this.maxRange,
-				ty : this.y + Math.cos( deg ) * this.maxRange
+				tx : this.x + Math.sin( deg ) * mRange,
+				ty : this.y + Math.cos( deg ) * mRange
 			});
 			
 			range += 10;
-			ctx.lineTo(
-				this.x + Math.sin( deg ) * range,
-				-(this.y + Math.cos( deg ) * range)
-			);
+			
+			x.push( this.x + Math.sin( deg ) * range );
+			y.push( this.y + Math.cos( deg ) * range );
+		}
+		
+		// optimize for object in one line
+
+		// record index that need to be drawn 
+		// Note : index 0 is a must draw
+		var n = [0];
+		
+		for( var i = 1, prev = 0; i < x.length; ++ i ){
+			
+			if( x[prev] != x[i] && y[prev] != y[i] ){
+				prev = i;
+				n.push( i );
+			}
+		}
+		
+		for( var i = 0; i < n.length; ++ i ){
+			ctx.lineTo( x[n[i]], -y[n[i]] );
 		}
 
 		ctx.closePath();
@@ -377,8 +396,8 @@ var TestRayCast = ( function(){
 	}
 })();
 
-var light = new Light({x : 300, y : -400, color : "red", opacity : 0.5, rayCount : 100 });
-var light2 = new Light({x : 300, y : -800, color : "yellow", opacity : 0.5, rayCount : 100 });
+var light = new Light({x : 300, y : -400, color : "red", opacity : 0.5, rayCount : 1000 });
+var light2 = new Light({x : 300, y : -800, color : "yellow", opacity : 0.5, rayCount : 1000 });
 world.add(light);
 world.add(light2);
 
