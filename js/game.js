@@ -158,11 +158,11 @@ World.prototype = {
 		for( var i = 0; i < this.lights.length; ++ i ){
 			this.lights[i].draw(ctx);
 		}
-		for( var i = 0; i < this.players.length; ++ i ){
-			this.players[i].draw(ctx);
-		}
 		for( var i = 0; i < this.platforms.length; ++ i ){
 			this.platforms[i].draw(ctx);
+		}
+		for( var i = 0; i < this.players.length; ++ i ){
+			this.players[i].draw(ctx);
 		}
 	},
 	RayCast : function(option){
@@ -263,7 +263,7 @@ Player.prototype = {
 				dw, dh,				
 
 				this.x - dx, 
-				-this.y, 
+				-this.y - 1, 
 				dw, dh);
 			ctx.restore();
 		}
@@ -280,6 +280,9 @@ Player.prototype = {
 		if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
 			this.vy = 400;
 		}
+	},
+	fall : function(){
+		this.topPlatform = false;
 	}
 };
 
@@ -476,6 +479,8 @@ function loop() {
 	requestAnimationFrame(loop);
 }
 
+var keyDownPressed = false;
+
 window.addEventListener("keydown", function(event){
 	switch( event.keyCode ){
 	case 37: // left
@@ -484,13 +489,19 @@ window.addEventListener("keydown", function(event){
 		break;
 	case 38: // up
 	case 32: // spacebar
-		one.jump();
+		if( !keyDownPressed ){
+			one.jump();
+		}
+		else {
+			one.fall();
+		}
 		break;
 	case 39: // right
 		one.vx = one.walkSpeed;
 		one.sideRight = true;
 		break;
 	case 40: // down
+		keyDownPressed = true;
 		break;
 	}
 });
@@ -501,6 +512,8 @@ window.addEventListener("keyup", function(event){
 	case 39: // right
 		one.vx = 0;
 		break;
+	case 40:
+		keyDownPressed = false;
 	}
 });
 
