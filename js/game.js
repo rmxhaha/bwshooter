@@ -147,14 +147,14 @@ World.prototype = {
 	draw : function(ctx){
 		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-		for( var i = 0; i < this.players.length; ++ i ){
-			this.players[i].draw(ctx);
-		}
 		for( var i = 0; i < this.lights.length; ++ i ){
 			this.lights[i].draw(ctx);
 		}
 		for( var i = 0; i < this.platforms.length; ++ i ){
 			this.platforms[i].draw(ctx);
+		}
+		for( var i = 0; i < this.players.length; ++ i ){
+			this.players[i].draw(ctx);
 		}
 	},
 	RayCast : function(option){
@@ -275,6 +275,52 @@ Player.prototype = {
 	}
 };
 
+function Light(setup){
+	_extend( this, setup );
+}
+
+Light.prototype = {
+	x : 0,
+	y : 0,
+	maxRange : 400,
+	rayCount : 100,
+	color : "red",
+	opacity : 1,
+	draw : function( ctx ){
+		var cast = this.world.RayCast;
+		
+		ctx.save();
+		ctx.translate( camera_x, camera_y );
+		ctx.fillStyle = this.color;
+		ctx.globalAlpha = this.opacity;
+		ctx.beginPath();
+		ctx.moveTo( this.x, this.y );
+		
+		var ddeg = Math.PI * 2 / this.rayCount;
+		for( var deg = 0; deg < Math.PI * 2; deg += ddeg ){
+			var range = this.world.RayCast({ 
+				x : this.x, 
+				y : this.y, 
+				tx : this.x + Math.sin( deg ) * this.maxRange,
+				ty : this.y + Math.cos( deg ) * this.maxRange
+			});
+			
+			range += 10;
+			ctx.lineTo(
+				this.x + Math.sin( deg ) * range,
+				-(this.y + Math.cos( deg ) * range)
+			);
+		}
+
+		ctx.closePath();
+		ctx.fill();
+		
+		ctx.restore();
+	}
+};
+
+
+
 var camera_x = 0;
 var camera_y = 0;
 
@@ -330,6 +376,13 @@ var TestRayCast = ( function(){
 		ctx.restore();
 	}
 })();
+
+var light = new Light({x : 300, y : -400, color : "red", opacity : 0.5, rayCount : 100 });
+var light2 = new Light({x : 300, y : -800, color : "yellow", opacity : 0.5, rayCount : 100 });
+world.add(light);
+world.add(light2);
+
+
 
 var timer = new Time;
 function loop() {
