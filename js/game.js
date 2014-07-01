@@ -363,6 +363,23 @@ function LightFlickeringMod(option){
 	}
 }
 
+function LightSwingingMod(option){
+	var setup = {
+		speed : 0.5, // in swing
+		angleDeviation : Math.PI/10,
+		flickerSpeed : 0.2,
+		angleBase : Math.PI * 3/4
+	};
+	
+	_extend( setup, option );
+	
+	var deg = 0;
+	return function( dt ){
+		this.start_rotation = setup.angleBase + Math.sin( deg ) * setup.angleDeviation;
+		deg += Math.PI * 2 * setup.speed * dt;
+	}
+}
+
 var camera_x = 0;
 var camera_y = 0;
 
@@ -391,17 +408,11 @@ world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 var light = new Light({x : 300, y : -400, color : "white", opacity : 0.9, rayCount : 400 });
 var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.9, rayCount : 400, start_rotation : Math.PI, delta_rotation : Math.PI /2, maxRange : 1000 });
 
-light2.addMod( LightFlickeringMod());
+light2.addMod( LightSwingingMod() );
+light2.addMod( LightFlickeringMod() );
 
-var deg = 0;
-setInterval( function(){
-	light2.start_rotation = Math.PI*3/4 + Math.sin( deg ) * Math.PI/10;
-	deg += Math.PI/20;
-}, 10 );
 world.add(light);
 world.add(light2);
-
-
 
 var timer = new Time;
 function loop() {
