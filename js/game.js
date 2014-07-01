@@ -365,37 +365,6 @@ world.add(p);
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
-var TestRayCast = ( function(){
-	var deg = 0;
-	return function( ctx, dt )
-	{
-		deg += Math.PI * dt;
-		
-		var opt = {
-			x : 500,
-			y : -500,
-			tx : 500 + Math.sin( deg ) * 1000,
-			ty : -500 - Math.cos( deg ) * 1000
-		};
-
-		
-		var range = world.RayCast( opt );
-		opt.tx = 500 + Math.sin( deg ) * range;
-		opt.ty = -500 - Math.cos( deg ) * range;
-		
-		
-		ctx.save();
-		ctx.translate( camera_x, camera_y );
-		ctx.beginPath();
-		ctx.moveTo(opt.x,-opt.y);
-		ctx.lineTo(
-			opt.tx, 
-			-opt.ty );
-		ctx.stroke();		
-		ctx.restore();
-	}
-})();
-
 var light = new Light({x : 300, y : -400, color : "red", opacity : 0.5, rayCount : 1000 });
 var light2 = new Light({x : 300, y : -800, color : "yellow", opacity : 0.5, rayCount : 1000 });
 world.add(light);
@@ -411,7 +380,6 @@ function loop() {
 	world.update(dt);
 	focusCamera();
 	world.draw(context);
-	TestRayCast( context, dt );
 
 	requestAnimationFrame(loop);
 }
