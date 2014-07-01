@@ -286,6 +286,8 @@ Light.prototype = {
 	rayCount : 100,
 	color : "red",
 	opacity : 1,
+	start_rotation : 0,
+	delta_rotation : Math.PI*2,
 	draw : function( ctx ){
 		ctx.save();
 		ctx.translate( camera_x, camera_y );
@@ -299,7 +301,8 @@ Light.prototype = {
 		var y = [];
 		
 		var mRange = this.maxRange;
-		for( var deg = 0; deg < Math.PI * 2; deg += ddeg ){
+		var limit = this.start_rotation + this.delta_rotation;
+		for( var deg = this.start_rotation; deg < limit; deg += ddeg ){
 			var range = this.world.RayCast({ 
 				x : this.x, 
 				y : this.y, 
@@ -328,6 +331,8 @@ Light.prototype = {
 		for( var i = 0; i < n.length; ++ i ){
 			ctx.lineTo( x[n[i]], -y[n[i]] );
 		}
+		
+		ctx.lineTo( this.x, -this.y );
 
 		ctx.closePath();
 		ctx.fill();
@@ -364,7 +369,7 @@ world.add(p);
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
 var light = new Light({x : 300, y : -400, color : "black", opacity : 0.9, rayCount : 1000 });
-var light2 = new Light({x : 300, y : -800, color : "black", opacity : 0.9, rayCount : 1000 });
+var light2 = new Light({x : 300, y : -800, color : "black", opacity : 0.9, rayCount : 1000, delta_rotation : Math.PI /2 });
 world.add(light);
 world.add(light2);
 
