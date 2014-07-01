@@ -143,6 +143,14 @@ World.prototype = {
 			this.fixCoordinate();
 			this.timebuffer -= dt;
 		}
+		
+		// update that doesn't concern physical coordination
+		for( var i = 0; i < this.lights.length; ++ i ){
+			var mod = this.lights[i].mod;
+			for( var k = 0; k < mod.length; ++ k ){
+				mod[k]( real_dt );
+			}
+		}
 	},
 	draw : function(ctx){
 		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -276,6 +284,7 @@ Player.prototype = {
 };
 
 function Light(setup){
+	this.mod = [];
 	_extend( this, setup );
 }
 
@@ -322,10 +331,37 @@ Light.prototype = {
 		
 		ctx.fill();
 		ctx.restore();
+	},
+	addMod : function( mod ){
+		this.mod.push( mod.bind( this ) );
 	}
 };
 
+function LightFlickeringMod(option){
+	var setup = {
+		offDuration : 1,
+		flickerDuration : 0.6,
+		flickerSpeed : 0.2
+	};
+	
+	_extend( setup, option );
+	
+	var time = 0;
+	return function( dt ){
+		time += dt;
 
+		if( time >= setup.flickerDuration + setup.offDuration ){
+			time -= setup.flickerDuration + setup.offDuration;
+		}
+		
+		if( time < setup.flickerDuration ){
+			this.color = ( Math.floor( time / setup.flickerSpeed ) % 2 == 0 ? "white" : "black" );			
+		}
+		else { // time < flickerDuration + offDuration
+			this.color = "black";
+		}
+	}
+}
 
 var camera_x = 0;
 var camera_y = 0;
@@ -354,6 +390,8 @@ world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
 var light = new Light({x : 300, y : -400, color : "white", opacity : 0.9, rayCount : 400 });
 var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.9, rayCount : 400, start_rotation : Math.PI, delta_rotation : Math.PI /2, maxRange : 1000 });
+
+light2.addMod( LightFlickeringMod());
 
 var deg = 0;
 setInterval( function(){
