@@ -150,11 +150,11 @@ World.prototype = {
 		for( var i = 0; i < this.lights.length; ++ i ){
 			this.lights[i].draw(ctx);
 		}
-		for( var i = 0; i < this.platforms.length; ++ i ){
-			this.platforms[i].draw(ctx);
-		}
 		for( var i = 0; i < this.players.length; ++ i ){
 			this.players[i].draw(ctx);
+		}
+		for( var i = 0; i < this.platforms.length; ++ i ){
+			this.platforms[i].draw(ctx);
 		}
 	},
 	RayCast : function(option){
@@ -289,16 +289,9 @@ Light.prototype = {
 	start_rotation : 0,
 	delta_rotation : Math.PI*2,
 	draw : function( ctx ){
-		ctx.save();
-		ctx.translate( camera_x, camera_y );
-		ctx.fillStyle = this.color;
-		ctx.globalAlpha = this.opacity;
-		ctx.beginPath();
-		ctx.moveTo( this.x, this.y );
-				
 		var ddeg = Math.PI * 2 / this.rayCount;
-		var x = [];
-		var y = [];
+		var x = [this.x];
+		var y = [this.y];
 		
 		var mRange = this.maxRange;
 		var limit = this.start_rotation + this.delta_rotation;
@@ -314,29 +307,20 @@ Light.prototype = {
 			y.push( this.y + Math.cos( deg ) * range );
 		}
 		
-		// optimize for object in one line
-
-		// record index that need to be drawn 
-		// Note : index 0 is a must draw
-		var n = [0];
+		x.push( this.x );
+		y.push( this.y );
 		
-		for( var i = 1, prev = 0; i < x.length; ++ i ){
-			
-			if( x[prev] != x[i] && y[prev] != y[i] ){
-				prev = i;
-				n.push( i );
-			}
+		ctx.save();
+		ctx.translate( camera_x, camera_y );
+		ctx.fillStyle = this.color;
+		ctx.globalAlpha = this.opacity;
+		ctx.beginPath();
+		
+		for( var i = 0; i < x.length; ++ i ){
+			ctx.lineTo( x[i], -y[i] );
 		}
 		
-		for( var i = 0; i < n.length; ++ i ){
-			ctx.lineTo( x[n[i]], -y[n[i]] );
-		}
-		
-		ctx.lineTo( this.x, -this.y );
-
-		ctx.closePath();
 		ctx.fill();
-		
 		ctx.restore();
 	}
 };
@@ -368,8 +352,14 @@ world.add(p);
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
-var light = new Light({x : 300, y : -400, color : "black", opacity : 0.9, rayCount : 1000 });
-var light2 = new Light({x : 300, y : -800, color : "black", opacity : 0.9, rayCount : 1000, delta_rotation : Math.PI /2 });
+var light = new Light({x : 300, y : -400, color : "white", opacity : 0.9, rayCount : 400 });
+var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.9, rayCount : 400, start_rotation : Math.PI, delta_rotation : Math.PI /2, maxRange : 1000 });
+
+var deg = 0;
+setInterval( function(){
+	light2.start_rotation = Math.PI*3/4 + Math.sin( deg ) * Math.PI/10;
+	deg += Math.PI/20;
+}, 10 );
 world.add(light);
 world.add(light2);
 
