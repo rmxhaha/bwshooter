@@ -234,14 +234,24 @@ Platform.prototype = {
 };
 
 function Player(setup) {
+	/**
+	 *  Player class	
+	 *   @param type 
+	 *  	0 for black 
+	 *  	1 for white
+	 *  	2 for dead
+	 *   @param main
+	 *  	state whether this player is being played the user
+	 */
+
 	var _default = {
 		x : 0,
 		y : 0,
 		vy : 0,
 		vx : 0,
 		walkSpeed : 150,
-		type : 0, // 0 for black and 1 for white
-		main : false // if this current player is the player that this current user is using
+		type : 0, 
+		main : false 
 	};
 
 	_extend(this, _default);
@@ -254,9 +264,19 @@ Player.prototype = {
 			ctx.save();
 
 			// drawing hero manually 
-			ctx.fillStyle = ( this.type == 0 ? "black" : "white" );
+			
+			switch( this.type ){
+			case 0:
+				ctx.fillStyle = "black";
+				break;
+			case 1:
+				ctx.fillStyle = "white";
+				break;
+			case 2:
+				ctx.fillStyle = "red";
+			}
 
-			if( this.main ){
+			if( !this.isDead() && this.main ){
 				// apply highlighting
 				ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
 				ctx.lineWidth = 3;
@@ -318,9 +338,15 @@ Player.prototype = {
 	width : 90,
 	height : 140,
 	update : function( dt ){
+		if( this.isDead() ){
+			this.dieTime += dt;
+			return;
+		}
+
 		this.vy -= gravity * dt;
 		this.x += this.vx * dt;
 		this.y += this.vy * dt;
+		
 	},
 	jump : function(){
 		if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
@@ -329,6 +355,13 @@ Player.prototype = {
 	},
 	fall : function(){
 		this.topPlatform = false;
+	},
+	dieTime : 0,
+	die : function(){
+		this.type = 2;
+	},
+	isDead : function(){
+		return this.type == 2;
 	}
 };
 
