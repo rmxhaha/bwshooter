@@ -262,6 +262,21 @@ Player.prototype = {
 				ctx.lineWidth = 3;
 			}
 			
+			var applyToScreen;
+			if( this.main ){
+				applyToScreen = function(){
+					ctx.fill();
+					ctx.globalAlpha = 0.2;
+					ctx.stroke();
+					ctx.globalAlpha = 1;
+				}
+			}
+			else {
+				applyToScreen = function(){
+					ctx.fill();
+				}
+			}
+						
 			ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
 			
 			// draw body
@@ -270,14 +285,12 @@ Player.prototype = {
 			ctx.lineTo( 0, this.height );
 			ctx.lineTo( this.width, this.height );			
 			ctx.closePath();
-			ctx.fill();
-			ctx.stroke();
-
+			applyToScreen();
+			
 			// draw head
 			ctx.beginPath();
 			ctx.arc( 45, 50,50,Math.PI*116.5/180,2.353*Math.PI);
-			ctx.fill();
-			ctx.stroke();
+			applyToScreen();
 			
 
 			// draw gun
@@ -296,8 +309,7 @@ Player.prototype = {
 			ctx.lineTo( 92, 102 );
 			ctx.lineTo( 87, 112 );
 			ctx.closePath();
-			ctx.fill();
-			ctx.stroke();
+			applyToScreen();
 
 			ctx.restore();
 		}
