@@ -1,5 +1,28 @@
+/**
+ *  Unit Guide
+ *  	Time 								is in seconds
+ *  	Length, Width, Height 				is in pixel
+ *  	Angle								is in radian
+ *  	Velocity, Acceleration, Gravity 	is in pixel
+ *  	Speed								is in swings, rotation, etc.
+ *
+ *  Class Parameter Guide
+ *  	function name(){
+ *  		constructor ...
+ *  	}
+ *  	
+ *  	name.prototype = {
+ *  		defaultValueParam : ...,
+ *  		privateVariable : .. ,
+ *  		method : ...
+ *  	}
+ */
+
 var context = document.getElementById("canvas").getContext("2d");
 
+/**
+ *  extend one array with another
+ */
 function _extend(x, y) {
 	for (var key in y) {
 		if (y.hasOwnProperty(key)) {
@@ -10,15 +33,19 @@ function _extend(x, y) {
 	return x;
 }
 
+/**
+ *  Bar in circular form
+ */
 function CircularBarUI(option){
+	/** The default parameter value*/
 	var _default = {
 		x : 0,
 		y : 0,
 		outerWidth : 100,
 		innerWidth : 90,
-		startDegree : 0,
-		endDegree : Math.PI,
-		barColor : "yellow",
+		startAngle : 0,
+		endAngle : Math.PI,
+		color : "yellow",
 		opacity : 0.5
 	};
 	
@@ -27,17 +54,23 @@ function CircularBarUI(option){
 }
 
 CircularBarUI.prototype = {
+	/**
+	 *  Apply new property to the class in bulk
+	 */
 	apply : function(opt){
 		_extend( this, opt );
 	},
 	draw : function(ctx){
 		ctx.save();
-		ctx.fillStyle = this.barColor;
+
+		ctx.fillStyle = this.color;
 		ctx.globalAlpha = this.opacity;
+
 		ctx.beginPath();
-		ctx.arc( this.x, this.y, this.outerWidth, this.startDegree, this.endDegree, true  );
-		ctx.arc( this.x, this.y, this.innerWidth, this.endDegree, this.startDegree, false );
+		ctx.arc( this.x, this.y, this.outerWidth, this.startAngle, this.endAngle, true  );
+		ctx.arc( this.x, this.y, this.innerWidth, this.endAngle, this.startAngle, false );
 		ctx.closePath();
+
 		ctx.fill();
 		ctx.restore();
 	}
@@ -61,16 +94,22 @@ var Time = function () {
 
 var RayCast = function( option ){
 	// adaptation from : http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
+
+	// ray starting position
 	var rx = option.x;
 	var ry = option.y;
+	
+	// ray direction
 	var dx = option.tx - option.x;
 	var dy = option.ty - option.y;
+
 	var walls = option.walls;
 	var callback = option.callback || function(){};
 	
+	// ray length
 	var r = Math.sqrt( dx * dx + dy * dy );
 	
-	// diraction fraction 1 / normalize( vector )
+	// direction fraction 1 / normalize( vector )
 	var dfx = r/dx;
 	var dfy = r/dy;
 	
@@ -110,33 +149,24 @@ var RayCast = function( option ){
 	return { range : range, wall : wall };
 }
 
-function World(setup){
-	/**
-	 *  @param timestep
-	 *  	fix delta time per update
-	 *  @param iteration 
-	 *  	how many iteration per update ( more better, too much doesn't make a difference )
-	 */
-	 
-	var _default = {
-		timestep : 0.05,
-		iteration : 6 
-	};
-	
+function World(setup){	 
 	this.players = [];
 	this.platforms = [];
 	this.lights = [];
 	this.bullets = [];
 	
-	_extend( this, _default );
 	_extend( this, setup );
 };
 
 World.prototype = {
+	timestep : 0.05,
+	
 	camera_x : 0,
 	camera_y : 0,
+
 	gravity : 800,
-	timebuffer : 0,
+
+	
 	add : function(item){
 		
 		// adding pointer to the world where they belong
@@ -152,7 +182,7 @@ World.prototype = {
 			this.lights.push( item );
 		}
 		else if( item instanceof Bullet ){
-			this.applyBullet( item );
+			this.applyBulletToPlayers( item );
 			this.bullets.push( item );
 		}
 		else {
@@ -226,18 +256,21 @@ World.prototype = {
 			
 		}
 	},
+
+	timebuffer : 0,
 	update : function( real_dt ){
 		this.timebuffer += real_dt;
+
+		/** fix time update for consistency */
 		var dt = this.timestep;
 		
-		// platforms and lights doesn't need update yet
 		while( this.timebuffer > dt ){
 			this.updateEntities(dt);
 			this.fixCoordinate();
 			this.timebuffer -= dt;
 		}
 		
-		// update that doesn't concern physical coordination
+		/** update that doesn't concern physical coordination */
 		for( var i = 0; i < this.lights.length; ++ i ){
 			var mod = this.lights[i].mod;
 			for( var k = 0; k < mod.length; ++ k ){
@@ -278,12 +311,16 @@ World.prototype = {
 		}
 		ctx.restore();
 	},
+	
+	/** 
+	 *  Ray Cast only to platforms for lighting convenience
+	 */
 	RayCast : function(option){
 		_extend( option, { walls : this.platforms });
 		
 		return RayCast( option ).range;
 	},
-	applyBullet : function( bullet ){
+	applyBulletToPlayers : function( bullet ){
 		var livingPlayer = [];
 		
 		for( var i = 0; i < this.players.length; ++ i ){
@@ -306,23 +343,20 @@ World.prototype = {
 };
 
 function Platform(setup){
-	/**
-	 *  @param penetrable
-	 *  	penetrable from above, when player request to fall 
-	 *  	if the current platform is penetrable it can 
-	 */
-	var _default = {
-		x : 0,
-		y : 0,
-		width : 100,
-		penetrable : true
-	};
-
-	_extend(this, _default);
 	_extend(this, setup);
 }
 
 Platform.prototype = {
+	x : 0,
+	y : 0,
+	width : 100,
+	/**
+	 *  @param penetrable
+	 *  	penetrable from above, when player request to fall 
+	 *  	if the current platform is penetrable he can fall
+	 */
+	penetrable : true,
+
 	draw : function(ctx){
 		ctx.save();
 		ctx.fillStyle = "#888888";
@@ -333,34 +367,37 @@ Platform.prototype = {
 };
 
 function Player(setup) {
+	_extend(this, setup);
+}
+
+Player.prototype = {
+	/** default parameter */
+	x : 0,
+	y : 0,
+	vy : 0,
+	vx : 0,
+	walkVelocity : 150,
 	/**
 	 *  Player class	
 	 *   @param type 
 	 *  	0 for black 
 	 *  	1 for white
 	 *  	2 for dead
+	 */
+	type : 0, 
+	/**
 	 *   @param main
 	 *  	state whether this player is being played the user
 	 */
+	main : false,
+	
 
-	var _default = {
-		x : 0,
-		y : 0,
-		vy : 0,
-		vx : 0,
-		walkSpeed : 150,
-		type : 0, 
-		main : false 
-	};
-
-	_extend(this, _default);
-	_extend(this, setup);
-}
-
-Player.prototype = {
+	/** public method */
+	
+	/** a time duration before the body is removed from the world*/
 	rotDuration : 2,
 	hasRotten : function(){
-		return this.isDead() && ( new Date() - this.dieTime )/1000 >= this.rotDuration;
+		return this.isDead() && this.hasBeenDeadFor() >= this.rotDuration;
 	},
 	draw : (function () {
 		var fadeOutDuration = 0.5; 
@@ -377,15 +414,15 @@ Player.prototype = {
 				ctx.fillStyle = "white";
 				break;
 			case 2:
-				var deathDuration = (new Date() - this.dieTime)/1000;
+				var duration = this.hasBeenDeadFor();
 
-				if( deathDuration < this.rotDuration - fadeOutDuration ){
+				if( duration < this.rotDuration - fadeOutDuration ){
 					ctx.fillStyle = "red";
 					ctx.globalAlpha = 1;
 				}
-				else if( deathDuration < this.rotDuration ){
+				else if( duration < this.rotDuration ){
 					ctx.fillStyle = "red";
-					ctx.globalAlpha = 1 - (deathDuration - this.rotDuration + fadeOutDuration) / fadeOutDuration;
+					ctx.globalAlpha = 1 - (duration - this.rotDuration + fadeOutDuration) / fadeOutDuration;
 				}
 				else {
 					ctx.globalAlpha = 0;
@@ -471,12 +508,12 @@ Player.prototype = {
 	},
 	goLeft : function(){
 		if ( this.isDead() ) return;
-		this.vx = -this.walkSpeed;
+		this.vx = -this.walkVelocity;
 		this.sideRight = false;
 	},
 	goRight : function(){
 		if ( this.isDead() ) return;
-		this.vx = this.walkSpeed;
+		this.vx = this.walkVelocity;
 		this.sideRight = true;		
 	},
 	fall : function(){
@@ -491,6 +528,9 @@ Player.prototype = {
 	},
 	isDead : function(){
 		return this.type == 2;
+	},
+	hasBeenDeadFor : function(){
+		return (new Date() - this.dieTime) / 1000;
 	},
 	getGunCoordinate : function(){
 		if( this.sideRight ){
@@ -710,7 +750,7 @@ var one = new Player({
 		y : -200,
 		vy : 0,
 		vx : 0,
-		walkSpeed : 150,
+		walkVelocity : 150,
 		type : 0,
 		main : true
 	});
@@ -793,8 +833,8 @@ var bar = new CircularBarUI({
 		y : window.innerHeight/2,
 		innerWidth : 90,
 		outerWidth : 100,
-		startDegree : 0,
-		endDegree : -Math.PI/4
+		startAngle : 0,
+		endAngle : -Math.PI/4
 	});
 
 var timer = new Time;
@@ -809,12 +849,9 @@ function loop() {
 		var frac = d/one.reloadSpeed/1000;
 		
 		bar.apply({
-			startDegree : frac*Math.PI*2 - Math.PI/4
+			startAngle : frac*Math.PI*2 - Math.PI/4
 		});
 		bar.draw(context);
-//		context.save();
-//		context.translate( world.camera_x, world.camera_y );
-//		context.restore();
 	}
 	
 	requestAnimationFrame(loop);
