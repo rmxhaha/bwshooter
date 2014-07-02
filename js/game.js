@@ -240,7 +240,8 @@ function Player(setup) {
 		vy : 0,
 		vx : 0,
 		walkSpeed : 150,
-		type : 0 // 0 for black and 1 for white
+		type : 0, // 0 for black and 1 for white
+		main : false // if this current player is the player that this current user is using
 	};
 
 	_extend(this, _default);
@@ -254,12 +255,14 @@ Player.prototype = {
 
 			// drawing hero manually 
 			ctx.fillStyle = ( this.type == 0 ? "black" : "white" );
+
+			if( this.main ){
+				// apply highlighting
+				ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
+				ctx.lineWidth = 3;
+			}
+			
 			ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
-	
-			// draw head
-			ctx.beginPath();
-			ctx.arc( 45, 50,50,0,2*Math.PI);
-			ctx.fill();
 			
 			// draw body
 			ctx.beginPath();
@@ -268,6 +271,14 @@ Player.prototype = {
 			ctx.lineTo( this.width, this.height );			
 			ctx.closePath();
 			ctx.fill();
+			ctx.stroke();
+
+			// draw head
+			ctx.beginPath();
+			ctx.arc( 45, 50,50,Math.PI*116.5/180,2.353*Math.PI);
+			ctx.fill();
+			ctx.stroke();
+			
 
 			// draw gun
 			if( !this.sideRight ){
@@ -286,6 +297,7 @@ Player.prototype = {
 			ctx.lineTo( 87, 112 );
 			ctx.closePath();
 			ctx.fill();
+			ctx.stroke();
 
 			ctx.restore();
 		}
@@ -467,7 +479,8 @@ var one = new Player({
 		vy : 0,
 		vx : 0,
 		walkSpeed : 150,
-		type : 0
+		type : 0,
+		main : true
 	});
 
 function focusCamera(){
