@@ -246,26 +246,45 @@ function Player(setup) {
 
 Player.prototype = {
 	draw : (function () {
-		var pimage = new Image();
-		pimage.src = "art/player.png";
-
-		// sprite specific coordinate
-		var dx = 30;
-		var dw = 150;
-		var dh = 140;
-
 		return function (ctx) {
 			ctx.save();
 			ctx.translate(camera_x, camera_y);
-			ctx.drawImage(
-				pimage, 
-				this.type * dw,
-				( this.sideRight ? 0 : 1 ) * dh,
-				dw, dh,				
 
-				this.x - dx, 
-				-this.y - 1, 
-				dw, dh);
+			// drawing hero manually 
+			ctx.fillStyle = ( this.type == 0 ? "black" : "white" );
+			ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
+	
+			// draw head
+			ctx.beginPath();
+			ctx.arc( 45, 50,50,0,2*Math.PI);
+			ctx.fill();
+			
+			// draw body
+			ctx.beginPath();
+			ctx.moveTo( 45, 50 );
+			ctx.lineTo( 0, this.height );
+			ctx.lineTo( this.width, this.height );			
+			ctx.closePath();
+			ctx.fill();
+
+			// draw gun
+			if( !this.sideRight ){
+				// mirror the drawing if siding left
+				ctx.scale(-1, 1);
+				ctx.translate( -this.width, 0 );
+			}
+
+			ctx.beginPath();
+
+			ctx.moveTo( 80, 111 );
+			ctx.lineTo( 83, 93 );
+			ctx.lineTo( 111, 93 );
+			ctx.lineTo( 105, 102 );
+			ctx.lineTo( 92, 102 );
+			ctx.lineTo( 87, 112 );
+			ctx.closePath();
+			ctx.fill();
+
 			ctx.restore();
 		}
 	})(),

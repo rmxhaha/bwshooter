@@ -1,0 +1,42 @@
+[1mdiff --git a/js/game.js b/js/game.js[m
+[1mindex efd6e45..2d76448 100644[m
+[1m--- a/js/game.js[m
+[1m+++ b/js/game.js[m
+[36m@@ -236,7 +236,8 @@[m [mfunction Player(setup) {[m
+ 		y : 0,[m
+ 		vy : 0,[m
+ 		vx : 0,[m
+[31m-		walkSpeed : 150[m
+[32m+[m		[32mwalkSpeed : 150,[m
+[32m+[m		[32mtype : 0 // 0 for black and 1 for white[m
+ 	};[m
+ [m
+ 	_extend(this, _default);[m
+[36m@@ -258,7 +259,7 @@[m [mPlayer.prototype = {[m
+ 			ctx.translate(camera_x, camera_y);[m
+ 			ctx.drawImage([m
+ 				pimage, [m
+[31m-				0,[m
+[32m+[m				[32mthis.type * dw,[m
+ 				( this.sideRight ? 0 : 1 ) * dh,[m
+ 				dw, dh,				[m
+ [m
+[36m@@ -448,7 +449,8 @@[m [mvar one = new Player({[m
+ 		y : -200,[m
+ 		vy : 0,[m
+ 		vx : 0,[m
+[31m-		walkSpeed : 150[m
+[32m+[m		[32mwalkSpeed : 150,[m
+[32m+[m		[32mtype : 1[m
+ 	});[m
+ [m
+ function focusCamera(){[m
+[36m@@ -472,7 +474,7 @@[m [mfor( var i = 0; i < 3; ++ i ){[m
+ [m
+ world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );[m
+ [m
+[31m-var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.8, rayCount : 400, width : Math.PI/4, maxRange : 1000 });[m
+[32m+[m[32mvar light2 = new Light({x : 250, y : -640, color : "white", opacity : 1, rayCount : 400, width : Math.PI/4, maxRange : 1000 });[m
+ [m
+ light2.addMod( LightSwingingMod({ speed : 0.2 }) );[m
+ //light2.addMod( LightFlickeringMod() );[m
