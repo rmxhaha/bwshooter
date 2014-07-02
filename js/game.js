@@ -731,6 +731,13 @@ for( var i = 0; i < 3; ++ i ){
 			width : 100 
 		})
 	);
+	
+	world.add( new Platform({ 
+			x : -400 + 150*i, 
+			y : -800 + i*100, 
+			width : 100 
+		})
+	);
 }
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000, penetrable : false }) );
