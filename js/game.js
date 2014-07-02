@@ -244,6 +244,14 @@ World.prototype = {
 				mod[k]( real_dt );
 			}
 		}
+		
+		// removing dead stuff
+		for( var i = this.players.length; i --; ){
+			
+			if( this.players[i].hasRotten() ){
+				this.players.splice( i, 1 );
+			}
+		}
 	},
 	draw : function(ctx){
 		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -343,7 +351,12 @@ function Player(setup) {
 }
 
 Player.prototype = {
+	rotDuration : 2,
+	hasRotten : function(){
+		return this.isDead() && ( new Date() - this.dieTime )/1000 >= this.rotDuration;
+	},
 	draw : (function () {
+		var fadeOutDuration = 0.5; 
 		return function (ctx) {
 			ctx.save();
 
@@ -357,7 +370,19 @@ Player.prototype = {
 				ctx.fillStyle = "white";
 				break;
 			case 2:
-				ctx.fillStyle = "red";
+				var deathDuration = (new Date() - this.dieTime)/1000;
+
+				if( deathDuration < this.rotDuration - fadeOutDuration ){
+					ctx.fillStyle = "red";
+					ctx.globalAlpha = 1;
+				}
+				else if( deathDuration < this.rotDuration ){
+					ctx.fillStyle = "red";
+					ctx.globalAlpha = 1 - (deathDuration - this.rotDuration + fadeOutDuration) / fadeOutDuration;
+				}
+				else {
+					ctx.globalAlpha = 0;
+				}
 			}
 
 			if( !this.isDead() && this.main ){
@@ -424,7 +449,6 @@ Player.prototype = {
 	height : 140,
 	update : function( dt ){
 		if( this.isDead() ){
-			this.dieTime += dt;
 			return;
 		}
 
@@ -455,6 +479,7 @@ Player.prototype = {
 	},
 	dieTime : 0,
 	die : function(){
+		this.dieTime = new Date();
 		this.type = 2;
 	},
 	isDead : function(){
@@ -604,8 +629,8 @@ function SunFxMod(option){
 	// in seconds
 	var setup = {
 		dayTime : 30, 
-		nightTime : 3,
-		switchTime : 30
+		nightTime : 30,
+		switchTime : 3
 	};
 	
 	var dayTime = option.dayTime || setup.dayTime;
@@ -711,10 +736,13 @@ for( var i = 0; i < 3; ++ i ){
 world.add( new Platform({ x : -1000, y : -1000, width : 3000, penetrable : false }) );
 
 var light2 = new Light({x : 250, y : -640, color : "white", opacity : 1, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
+var light = new Light({ x : 0, y : 500, color : "white", opacity : 1, rayCount : 4000, maxRange : 4000 });
 
+light.addMod( SunFxMod({dayTime : 3, nightTime : 3 }) );
 light2.addMod( LightSwingingMod({ speed : 0.2 }) );
 //light2.addMod( LightFlickeringMod() );
 
+world.add(light);
 world.add(light2);
 
 var bar = new CircularBarUI({
