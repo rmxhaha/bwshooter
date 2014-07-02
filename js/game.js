@@ -42,6 +42,7 @@ function World(setup){
 	this.players = [];
 	this.platforms = [];
 	this.lights = [];
+	this.bullets = [];
 	
 	_extend( this, _default );
 	_extend( this, setup );
@@ -66,14 +67,21 @@ World.prototype = {
 		else if( item instanceof Light ){
 			this.lights.push( item );
 		}
+		else if( item instanceof Bullet ){
+			this.bullets.push( item );
+		}
 		else {
 			throw new Error('Unknown Type Added' );
 		}
 	},
-	updateCoordinate : function(dt){
+	updateEntities : function(dt){
 		for( var i = 0; i < this.players.length; ++ i ){
 			this.players[i].update(dt);
 		}
+		for( var i = 0; i < this.bullets.length; ++ i ){
+			this.bullets[i].update(dt);
+		}
+		
 	},
 	fixCoordinate : function(){
 		function isInBetween( bottom, data , top ){
@@ -140,7 +148,7 @@ World.prototype = {
 		
 		// platforms and lights doesn't need update yet
 		while( this.timebuffer > dt ){
-			this.updateCoordinate(dt);
+			this.updateEntities(dt);
 			this.fixCoordinate();
 			this.timebuffer -= dt;
 		}
@@ -162,6 +170,9 @@ World.prototype = {
 		}
 		for( var i = 0; i < this.platforms.length; ++ i ){
 			this.platforms[i].draw(ctx);
+		}
+		for( var i = 0; i < this.bullets.length; ++ i ){
+			this.bullets[i].draw(ctx);
 		}
 		for( var i = 0; i < this.players.length; ++ i ){
 			this.players[i].draw(ctx);
@@ -533,6 +544,33 @@ function SunFxMod(option){
 	
 }
 
+function Bullet(setup){
+	_extend( this, setup );
+}
+
+Bullet.prototype = {
+	x : 0,
+	y : 0,
+	length : 300,
+	time : 0,
+	animationDuration : 0.4, // in seconds
+	draw : function(ctx){
+		// animation Function
+		function Af(t){
+			return t*t*t*t;
+		}
+		var height = Math.max(0, (1 - Af( this.time / this.animationDuration)) * 10);
+		
+		ctx.save();
+		ctx.fillStyle = "yellow";
+		ctx.fillRect( this.x, -this.y + height/2, this.length, height );
+		ctx.restore();
+	},
+	update : function(dt){
+		this.time += dt;
+	}
+};
+
 var world = new World;
 
 var one = new Player({
@@ -573,11 +611,12 @@ light2.addMod( LightSwingingMod({ speed : 0.2 }) );
 
 world.add(light2);
 
+world.add( new Bullet({ x : 200, y : -300, length : 1000 }) );
+
 var timer = new Time;
 function loop() {
 	var dt = timer.reset() / 1000;
 
-	
 	world.update(dt);
 	focusCamera();
 	world.draw(context);
