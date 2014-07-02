@@ -10,6 +10,39 @@ function _extend(x, y) {
 	return x;
 }
 
+function CircularBarUI(option){
+	var _default = {
+		x : 0,
+		y : 0,
+		outerWidth : 100,
+		innerWidth : 90,
+		startDegree : 0,
+		endDegree : Math.PI,
+		barColor : "yellow",
+		opacity : 0.5
+	};
+	
+	_extend( this, _default );
+	_extend( this, option );
+}
+
+CircularBarUI.prototype = {
+	apply : function(opt){
+		_extend( this, opt );
+	},
+	draw : function(ctx){
+		ctx.save();
+		ctx.fillStyle = this.barColor;
+		ctx.globalAlpha = this.opacity;
+		ctx.beginPath();
+		ctx.arc( this.x, this.y, this.outerWidth, this.startDegree, this.endDegree, true  );
+		ctx.arc( this.x, this.y, this.innerWidth, this.endDegree, this.startDegree, false );
+		ctx.closePath();
+		ctx.fill();
+		ctx.restore();
+	}
+};
+
 var Time = function () {
 	this.time = new Date();
 	this.reset = function () {
@@ -439,7 +472,7 @@ Player.prototype = {
 	reloadSpeed : 3,
 	shoot : function(){
 		console.log( this.lastShoot );
-		if( new Date() - this.lastShoot > this.reloadSpeed * 1000 ){
+		if( !this.isReloading() ){
 			this.lastShoot = new Date();
 			var option = {};
 			
@@ -448,6 +481,9 @@ Player.prototype = {
 			
 			this.world.add( new Bullet( option ) );
 		}
+	},
+	isReloading : function(){
+		return new Date() - this.lastShoot < this.reloadSpeed * 1000
 	}
 };
 
@@ -681,6 +717,15 @@ light2.addMod( LightSwingingMod({ speed : 0.2 }) );
 
 world.add(light2);
 
+var bar = new CircularBarUI({
+		x : window.innerWidth/2,
+		y : window.innerHeight/2,
+		innerWidth : 90,
+		outerWidth : 100,
+		startDegree : 0,
+		endDegree : -Math.PI/4
+	});
+
 var timer = new Time;
 function loop() {
 	var dt = timer.reset() / 1000;
@@ -688,7 +733,19 @@ function loop() {
 	world.update(dt);
 	focusCamera();
 	world.draw(context);
-
+	if( one.isReloading() ){
+		var d = new Date() - one.lastShoot;
+		var frac = d/one.reloadSpeed/1000;
+		
+		bar.apply({
+			startDegree : frac*Math.PI*2 - Math.PI/4
+		});
+		bar.draw(context);
+//		context.save();
+//		context.translate( world.camera_x, world.camera_y );
+//		context.restore();
+	}
+	
 	requestAnimationFrame(loop);
 }
 
