@@ -50,6 +50,8 @@ function World(setup){
 };
 
 World.prototype = {
+	camera_x : 0,
+	camera_y : 0,
 	timebuffer : 0,
 	add : function(item){
 		
@@ -154,7 +156,8 @@ World.prototype = {
 	},
 	draw : function(ctx){
 		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
+		ctx.save();
+		ctx.translate( this.camera_x, this.camera_y );
 		for( var i = 0; i < this.lights.length; ++ i ){
 			this.lights[i].draw(ctx);
 		}
@@ -164,6 +167,7 @@ World.prototype = {
 		for( var i = 0; i < this.players.length; ++ i ){
 			this.players[i].draw(ctx);
 		}
+		ctx.restore();
 	},
 	RayCast : function(option){
 		// adaptation from : http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
@@ -222,7 +226,6 @@ function Platform(setup){
 Platform.prototype = {
 	draw : function(ctx){
 		ctx.save();
-		ctx.translate(camera_x, camera_y);
 		ctx.fillStyle = "#888888";
 		ctx.fillRect( this.x, -this.y, this.width, this.height );
 		ctx.restore();
@@ -248,7 +251,6 @@ Player.prototype = {
 	draw : (function () {
 		return function (ctx) {
 			ctx.save();
-			ctx.translate(camera_x, camera_y);
 
 			// drawing hero manually 
 			ctx.fillStyle = ( this.type == 0 ? "black" : "white" );
@@ -355,7 +357,6 @@ Light.prototype = {
 		y.push( this.y );
 		
 		ctx.save();
-		ctx.translate( camera_x, camera_y );
 		ctx.fillStyle = this.color;
 		ctx.globalAlpha = this.opacity;
 		ctx.beginPath();
@@ -458,9 +459,6 @@ function SunFxMod(option){
 	
 }
 
-var camera_x = 0;
-var camera_y = 0;
-
 var world = new World;
 
 var one = new Player({
@@ -469,12 +467,12 @@ var one = new Player({
 		vy : 0,
 		vx : 0,
 		walkSpeed : 150,
-		type : 1
+		type : 0
 	});
 
 function focusCamera(){
-	camera_x = -one.x + window.innerWidth/2 - one.width/2;
-	camera_y = one.y + window.innerHeight/2 - one.height/2;
+	world.camera_x = -one.x + window.innerWidth/2 - one.width/2;
+	world.camera_y = one.y + window.innerHeight/2 - one.height/2;
 }
 
 var p = new Platform({ x : 100, y : -600, width : 300 });
