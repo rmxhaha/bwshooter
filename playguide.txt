@@ -1,0 +1,11 @@
+to play the game, open prototype.html
+
+Game Keys
+
+Arrow left ------------> Move left
+Arrow Right -----------> Move right
+Space / Arrow Up / C --> Jump
+Arrow Down + Space ----> Fall
+Ctrl / X --------------> Shoot
+
+Enjoy !
