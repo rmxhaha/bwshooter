@@ -407,7 +407,7 @@ Player.prototype = {
 			}
 						
 			ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
-			
+						
 			// draw body
 			ctx.beginPath();
 			ctx.moveTo( 45, 50 );
@@ -686,7 +686,7 @@ Bullet.prototype = {
 		
 		ctx.save();
 		ctx.fillStyle = "yellow";
-		ctx.fillRect( this.x, -this.y + height/2, this.length, height );
+		ctx.fillRect( this.x, -this.y - height/2, this.length, height );
 		ctx.restore();
 	},
 	update : function(dt){
