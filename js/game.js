@@ -435,13 +435,19 @@ Player.prototype = {
 			return { x : this.x - 10, y : this.y - 100 };
 		}
 	},
+	lastShoot : 0,
+	reloadSpeed : 3,
 	shoot : function(){
-		var option = {};
-		
-		_extend( option, this.getGunCoordinate() );
-		option.direction = ( this.sideRight ? "right" : "left" );
-		
-		this.world.add( new Bullet( option ) );
+		console.log( this.lastShoot );
+		if( new Date() - this.lastShoot > this.reloadSpeed * 1000 ){
+			this.lastShoot = new Date();
+			var option = {};
+			
+			_extend( option, this.getGunCoordinate() );
+			option.direction = ( this.sideRight ? "right" : "left" );
+			
+			this.world.add( new Bullet( option ) );
+		}
 	}
 };
 
