@@ -1,5 +1,3 @@
-var gravity = 800; // only applied to y axis
-
 var context = document.getElementById("canvas").getContext("2d");
 
 function _extend(x, y) {
@@ -52,6 +50,7 @@ function World(setup){
 World.prototype = {
 	camera_x : 0,
 	camera_y : 0,
+	gravity : 800,
 	timebuffer : 0,
 	add : function(item){
 		
@@ -349,7 +348,7 @@ Player.prototype = {
 			return;
 		}
 
-		this.vy -= gravity * dt;
+		this.vy -= this.world.gravity * dt;
 		this.x += this.vx * dt;
 		this.y += this.vy * dt;
 		
