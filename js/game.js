@@ -213,10 +213,16 @@ World.prototype = {
 };
 
 function Platform(setup){
+	/**
+	 *  @param penetrable
+	 *  	penetrable from above, when player request to fall 
+	 *  	if the current platform is penetrable it can 
+	 */
 	var _default = {
 		x : 0,
 		y : 0,
-		width : 100
+		width : 100,
+		penetrable : true
 	};
 
 	_extend(this, _default);
@@ -364,6 +370,8 @@ Player.prototype = {
 		this.sideRight = true;		
 	},
 	fall : function(){
+		if( !this.topPlatform.penetrable ) return;
+		
 		this.topPlatform = false;
 	},
 	dieTime : 0,
@@ -557,7 +565,7 @@ for( var i = 0; i < 3; ++ i ){
 	);
 }
 
-world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
+world.add( new Platform({ x : -1000, y : -1000, width : 3000, penetrable : false }) );
 
 var light2 = new Light({x : 250, y : -640, color : "white", opacity : 1, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
 
