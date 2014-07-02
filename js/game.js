@@ -26,6 +26,57 @@ var Time = function () {
 	this.reset();
 }
 
+var RayCast = function( option ){
+	// adaptation from : http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
+	var rx = option.x;
+	var ry = option.y;
+	var dx = option.tx - option.x;
+	var dy = option.ty - option.y;
+	var walls = option.walls;
+	var callback = option.callback || function(){};
+	
+	var r = Math.sqrt( dx * dx + dy * dy );
+	
+	// diraction fraction 1 / normalize( vector )
+	var dfx = r/dx;
+	var dfy = r/dy;
+	
+	var range = r;
+	var wall = false;
+
+	for( var i = 0; i < walls.length; ++ i ){
+		var p = walls[i];
+		var t1 = ( p.x - rx ) * dfx;
+		var t2 = ( p.x + p.width - rx ) * dfx;
+
+		var t3 = ( p.y - ry ) * dfy;
+		var t4 = ( p.y - p.height - ry ) * dfy;
+		
+		var tmin = Math.max( Math.min(t1,t2), Math.min(t3,t4) );
+		var tmax = Math.min( Math.max(t1,t2), Math.max(t3,t4) );
+		
+		// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behing us
+		if (tmax < 0){
+			continue;
+		}
+		
+		// if tmin > tmax, ray doesn't intersect AABB
+		if (tmin > tmax){
+			continue;
+		}
+		
+		// finding first object to collide with the ray
+		if( tmin < range ){
+			range = tmin;
+			wall = p;
+			
+			callback({ range : tmin, wall : p });
+		}
+	}
+	
+	return { range : range, wall : wall };
+}
+
 function World(setup){
 	/**
 	 *  @param timestep
@@ -68,6 +119,7 @@ World.prototype = {
 			this.lights.push( item );
 		}
 		else if( item instanceof Bullet ){
+			this.applyBullet( item );
 			this.bullets.push( item );
 		}
 		else {
@@ -108,7 +160,6 @@ World.prototype = {
 			
 			// if previous data is still valid
 			if( p.topPlatform && isInPlatformArea( p.topPlatform, leftX, rightX ) ){
-				
 				// coordinate need to be fixed
 				if( bottomY < p.topPlatform.y ){
 					// fix coordinate 
@@ -116,7 +167,7 @@ World.prototype = {
 					p.vy = 0;
 
 					// previous data is still valid
-					return;
+					continue;
 				}
 			}
 
@@ -180,45 +231,29 @@ World.prototype = {
 		ctx.restore();
 	},
 	RayCast : function(option){
-		// adaptation from : http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
-		var rx = option.x;
-		var ry = option.y;
-		var dx = option.tx - option.x;
-		var dy = option.ty - option.y;
+		_extend( option, { walls : this.platforms });
 		
-		var r = Math.sqrt( dx * dx + dy * dy );
+		return RayCast( option ).range;
+	},
+	applyBullet : function( bullet ){
+		var livingPlayer = [];
 		
-		// diraction fraction 1 / normalize( vector )
-		var dfx = r/dx;
-		var dfy = r/dy;
-		
-		var range = r;
-		
-		for( var i = 0; i < this.platforms.length; ++ i ){
-			var p = this.platforms[i];
-			var t1 = ( p.x - rx ) * dfx;
-			var t2 = ( p.x + p.width - rx ) * dfx;
-	
-			var t3 = ( p.y - ry ) * dfy;
-			var t4 = ( p.y - p.height - ry ) * dfy;
-			
-			var tmin = Math.max( Math.min(t1,t2), Math.min(t3,t4) );
-			var tmax = Math.min( Math.max(t1,t2), Math.max(t3,t4) );
-			
-			// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behing us
-			if (tmax < 0){
-				continue;
-			}
-			
-			// if tmin > tmax, ray doesn't intersect AABB
-			if (tmin > tmax){
-				continue;
-			}
-			
-			range = Math.min( tmin, range );
+		for( var i = 0; i < this.players.length; ++ i ){
+			if( this.players[i].isDead() ) continue;
+
+			livingPlayer.push( this.players[i] );
 		}
 		
-		return range;
+		var option = {
+			x : bullet.x,
+			y : bullet.y,
+			tx : bullet.x + bullet.length,
+			ty : bullet.y,
+			walls : livingPlayer
+		};
+
+		var killedPlayer = RayCast(option).wall;
+		if( killedPlayer ) killedPlayer.die();
 	}
 };
 
@@ -351,6 +386,7 @@ Player.prototype = {
 		}
 	})(),
 	sideRight : true, 
+	topPlatform : false,
 	width : 90,
 	height : 140,
 	update : function( dt ){
@@ -390,6 +426,22 @@ Player.prototype = {
 	},
 	isDead : function(){
 		return this.type == 2;
+	},
+	getGunCoordinate : function(){
+		if( this.sideRight ){
+			return { x : this.x + this.width + 10, y : this.y - 100 };
+		}
+		else {
+			return { x : this.x - 10, y : this.y - 100 };
+		}
+	},
+	shoot : function(){
+		var option = {};
+		
+		_extend( option, this.getGunCoordinate() );
+		option.direction = ( this.sideRight ? "right" : "left" );
+		
+		this.world.add( new Bullet( option ) );
 	}
 };
 
@@ -546,6 +598,10 @@ function SunFxMod(option){
 
 function Bullet(setup){
 	_extend( this, setup );
+	if( setup.direction && setup.direction == "left" ){
+		// bullet is going left
+		this.x -= this.length;
+	}
 }
 
 Bullet.prototype = {
@@ -582,6 +638,14 @@ var one = new Player({
 		type : 0,
 		main : true
 	});
+	
+for( var i = 0; i < 10; ++ i ){
+	world.add( new Player({
+		x : Math.random() * 3000 - 1000,
+		y : 0,
+		type : 1
+	}));
+}
 
 function focusCamera(){
 	world.camera_x = -one.x + window.innerWidth/2 - one.width/2;
@@ -611,8 +675,6 @@ light2.addMod( LightSwingingMod({ speed : 0.2 }) );
 
 world.add(light2);
 
-world.add( new Bullet({ x : 200, y : -300, length : 1000 }) );
-
 var timer = new Time;
 function loop() {
 	var dt = timer.reset() / 1000;
@@ -628,6 +690,9 @@ var keyDownPressed = false;
 
 window.addEventListener("keydown", function(event){
 	switch( event.keyCode ){
+	case 17: // ctrl
+		one.shoot();
+		break;
 	case 37: // left
 		one.goLeft();
 		break;
