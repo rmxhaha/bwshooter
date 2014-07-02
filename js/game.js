@@ -266,8 +266,15 @@ World.prototype = {
 		for( var i = 0; i < this.bullets.length; ++ i ){
 			this.bullets[i].draw(ctx);
 		}
+		
+		/* draw dead players on top of living players */
 		for( var i = 0; i < this.players.length; ++ i ){
-			this.players[i].draw(ctx);
+			if( !this.players[i].isDead() ) 
+				this.players[i].draw(ctx);
+		}
+		for( var i = 0; i < this.players.length; ++ i ){
+			if( this.players[i].isDead() ) 
+				this.players[i].draw(ctx);
 		}
 		ctx.restore();
 	},
