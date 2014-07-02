@@ -862,6 +862,7 @@ var keyDownPressed = false;
 window.addEventListener("keydown", function(event){
 	switch( event.keyCode ){
 	case 17: // ctrl
+	case 88: // X
 		one.shoot();
 		break;
 	case 37: // left
@@ -872,6 +873,7 @@ window.addEventListener("keydown", function(event){
 		break;
 	case 38: // up
 	case 32: // spacebar
+	case 67: // C
 		if( !keyDownPressed ){
 			one.jump();
 		}
