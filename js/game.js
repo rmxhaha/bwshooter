@@ -1,4 +1,4 @@
-var gravity = 400; // only applied to y axis
+var gravity = 800; // only applied to y axis
 
 var context = document.getElementById("canvas").getContext("2d");
 
@@ -278,7 +278,7 @@ Player.prototype = {
 	},
 	jump : function(){
 		if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
-			this.vy = 400;
+			this.vy = 600;
 		}
 	},
 	fall : function(){
@@ -298,8 +298,8 @@ Light.prototype = {
 	rayCount : 100,
 	color : "red",
 	opacity : 1,
-	start_rotation : 0,
-	delta_rotation : Math.PI*2,
+	direction : 0, // in radian
+	width : Math.PI*2, // in radian
 	state : true, // true for on and false of off
 	turnOn : function(){
 		this.state = true;
@@ -315,8 +315,11 @@ Light.prototype = {
 		var y = [this.y];
 		
 		var mRange = this.maxRange;
-		var limit = this.start_rotation + this.delta_rotation;
-		for( var deg = this.start_rotation; deg < limit; deg += ddeg ){
+		
+		var deg = this.direction - this.width/2;
+		var limit = this.direction + this.width/2;
+		
+		for( ; deg < limit; deg += ddeg ){
 			var range = this.world.RayCast({ 
 				x : this.x, 
 				y : this.y, 
@@ -382,16 +385,17 @@ function LightSwingingMod(option){
 	var setup = {
 		speed : 0.5, // in swing
 		angleDeviation : Math.PI/10,
-		flickerSpeed : 0.2,
-		angleBase : Math.PI * 3/4
+		angleBase : Math.PI
 	};
 	
 	_extend( setup, option );
 	
+	setup.speed *= Math.PI*2; // change metrics to radian
+	
 	var deg = 0;
 	return function( dt ){
-		this.start_rotation = setup.angleBase + Math.sin( deg ) * setup.angleDeviation;
-		deg += Math.PI * 2 * setup.speed * dt;
+		this.direction = setup.angleBase + Math.sin( deg ) * setup.angleDeviation;
+		deg += setup.speed * dt;
 	}
 }
 
@@ -468,16 +472,12 @@ for( var i = 0; i < 3; ++ i ){
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
-var light = new Light({x : 209, y : 400, color : "white", opacity : 0.9, rayCount : 4000, maxRange : 5000 });
-var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.9, rayCount : 400, start_rotation : Math.PI, delta_rotation : Math.PI /2, maxRange : 1000 });
+var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.8, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
 
-light2.addMod( LightSwingingMod() );
-light2.addMod( LightFlickeringMod() );
-light.addMod( SunFxMod() );
+light2.addMod( LightSwingingMod({ speed : 0.2 }) );
+//light2.addMod( LightFlickeringMod() );
 
-world.add(light);
 world.add(light2);
-
 
 var timer = new Time;
 function loop() {
