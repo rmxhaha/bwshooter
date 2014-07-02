@@ -236,7 +236,8 @@ function Player(setup) {
 		y : 0,
 		vy : 0,
 		vx : 0,
-		walkSpeed : 150
+		walkSpeed : 150,
+		type : 0 // 0 for black and 1 for white
 	};
 
 	_extend(this, _default);
@@ -258,7 +259,7 @@ Player.prototype = {
 			ctx.translate(camera_x, camera_y);
 			ctx.drawImage(
 				pimage, 
-				0,
+				this.type * dw,
 				( this.sideRight ? 0 : 1 ) * dh,
 				dw, dh,				
 
@@ -448,7 +449,8 @@ var one = new Player({
 		y : -200,
 		vy : 0,
 		vx : 0,
-		walkSpeed : 150
+		walkSpeed : 150,
+		type : 1
 	});
 
 function focusCamera(){
@@ -472,7 +474,7 @@ for( var i = 0; i < 3; ++ i ){
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000 }) );
 
-var light2 = new Light({x : 250, y : -640, color : "white", opacity : 0.8, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
+var light2 = new Light({x : 250, y : -640, color : "white", opacity : 1, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
 
 light2.addMod( LightSwingingMod({ speed : 0.2 }) );
 //light2.addMod( LightFlickeringMod() );
