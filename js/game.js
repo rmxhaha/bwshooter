@@ -353,6 +353,16 @@ Player.prototype = {
 			this.vy = 600;
 		}
 	},
+	goLeft : function(){
+		if ( this.isDead() ) return;
+		this.vx = -this.walkSpeed;
+		this.sideRight = false;
+	},
+	goRight : function(){
+		if ( this.isDead() ) return;
+		this.vx = this.walkSpeed;
+		this.sideRight = true;		
+	},
 	fall : function(){
 		this.topPlatform = false;
 	},
@@ -573,8 +583,10 @@ var keyDownPressed = false;
 window.addEventListener("keydown", function(event){
 	switch( event.keyCode ){
 	case 37: // left
-		one.vx = -one.walkSpeed;
-		one.sideRight = false;
+		one.goLeft();
+		break;
+	case 39: // right
+		one.goRight();
 		break;
 	case 38: // up
 	case 32: // spacebar
@@ -584,10 +596,6 @@ window.addEventListener("keydown", function(event){
 		else {
 			one.fall();
 		}
-		break;
-	case 39: // right
-		one.vx = one.walkSpeed;
-		one.sideRight = true;
 		break;
 	case 40: // down
 		keyDownPressed = true;
