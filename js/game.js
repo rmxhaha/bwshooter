@@ -630,12 +630,14 @@ function SunFxMod(option){
 	var setup = {
 		dayTime : 30, 
 		nightTime : 30,
-		switchTime : 3
+		switchTime : 3,
+		maxOpacity : 1
 	};
 	
 	var dayTime = option.dayTime || setup.dayTime;
 	var nightTime = option.nightTime || setup.nightTime;
 	var switchTime = option.switchTime || setup.switchTime;
+	var maxOpacity = option.maxOpacity || setup.maxOpacity;
 	
 	var time = 0;
 	
@@ -647,10 +649,10 @@ function SunFxMod(option){
 		}
 		
 		if( time < dayTime ){
-			this.opacity = 1;
+			this.opacity = maxOpacity;
 		}
 		else if( time < dayTime + switchTime ){
-			this.opacity = Math.cos( (time-dayTime) / switchTime * Math.PI/2 );
+			this.opacity = Math.cos( (time-dayTime) / switchTime * Math.PI/2 ) * maxOpacity;
 		}
 		else if( time < dayTime + switchTime + nightTime ){
 			this.opacity = 0;
@@ -724,7 +726,7 @@ var p = new Platform({ x : 100, y : -600, width : 300 });
 world.add(one);
 world.add(p);
 
-for( var i = 0; i < 3; ++ i ){
+for( var i = 0; i < 4; ++ i ){
 	world.add( new Platform({ 
 			x : 460 + 150*i, 
 			y : -610 - i*10, 
@@ -733,24 +735,51 @@ for( var i = 0; i < 3; ++ i ){
 	);
 	
 	world.add( new Platform({ 
-			x : -400 + 150*i, 
+			x : -600 + 200*i, 
 			y : -800 + i*100, 
-			width : 100 
+			width : 150 
 		})
 	);
+
+	world.add( new Platform({ 
+			x : -800 + 200*i, 
+			y : -100 - i*100, 
+			width : 150 
+		})
+	);
+}
+
+for( var i = 10; i -- ; ){
+	world.add( new Platform({
+		x : Math.random() * 2000 - 1000,
+		y : Math.random()* 500 + -300,
+		width : 100
+	}));
 }
 
 world.add( new Platform({ x : -1000, y : -1000, width : 3000, penetrable : false }) );
 
 var light2 = new Light({x : 250, y : -640, color : "white", opacity : 1, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
-var light = new Light({ x : 0, y : 500, color : "white", opacity : 1, rayCount : 4000, maxRange : 4000 });
+
+
+var light = new Light({ x : 0, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
+var light3 = new Light({ x : -250, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
+var light4 = new Light({ x : 250, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
+var light5 = new Light({ x : 500, y : 1000, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
 
 light.addMod( SunFxMod({dayTime : 3, nightTime : 3 }) );
+light3.addMod( SunFxMod({dayTime : 3, nightTime : 3 }) );
+light4.addMod( SunFxMod({dayTime : 3, nightTime : 3}) );
+light5.addMod( SunFxMod({dayTime : 3, nightTime : 3}) );
+
 light2.addMod( LightSwingingMod({ speed : 0.2 }) );
 //light2.addMod( LightFlickeringMod() );
 
 world.add(light);
 world.add(light2);
+world.add(light5);
+world.add(light3);
+world.add(light4);
 
 var bar = new CircularBarUI({
 		x : window.innerWidth/2,
