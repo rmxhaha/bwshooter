@@ -67,8 +67,8 @@ CircularBarUI.prototype = {
 		ctx.globalAlpha = this.opacity;
 
 		ctx.beginPath();
-		ctx.arc( this.x, this.y, this.outerWidth, this.startAngle, this.endAngle, true  );
-		ctx.arc( this.x, this.y, this.innerWidth, this.endAngle, this.startAngle, false );
+		ctx.arc( this.x, -this.y, this.outerWidth, this.startAngle, this.endAngle, true  );
+		ctx.arc( this.x, -this.y, this.innerWidth, this.endAngle, this.startAngle, false );
 		ctx.closePath();
 
 		ctx.fill();
@@ -91,6 +91,48 @@ var Time = function () {
 
 	this.reset();
 }
+
+var ModPrototype = {
+	initMod : function(){
+		if( this.mod ) return;
+		this.mod = [];
+	},
+	addMod : function( mod ){
+		this.initMod();
+
+		if( typeof mod === 'function' ){
+			// update only mod
+			this.mod.push({ update : mod.bind(this) });
+		}
+		else if( typeof mod === 'object' ){
+			if( !mod.update && !mod.draw ) throw new Error('Mod is missing update or draw function');
+			if( mod.update )
+				mod.update = mod.update.bind( this );
+			if( mod.draw )
+				mod.draw = mod.draw.bind( this );
+			
+			this.mod.push( mod );
+		}
+	},
+	updateMod : function( dt ){
+		if( !this.mod ) return;
+		
+		for( var i = 0; i < this.mod.length; ++ i ){
+			if( !this.mod[i].update ) continue;
+
+			this.mod[i].update.bind(this)( dt );
+		}
+	},
+	drawMod : function(ctx){
+		if( !this.mod ) return;
+
+		for( var i = 0; i < this.mod.length; ++ i ){
+			if( !this.mod[i].draw ) continue;
+			
+			this.mod[i].draw( ctx );
+		}		
+	}
+};
 
 var RayCast = function( option ){
 	// adaptation from : http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
@@ -198,6 +240,16 @@ World.prototype = {
 		}
 		
 	},
+	updateMods : function(dt){
+		for( var i = 0; i < this.players.length; ++ i ){
+			this.players[i].updateMod( dt );
+		}
+		
+		for( var i = 0; i < this.lights.length; ++ i ){
+			this.lights[i].updateMod( dt );
+		}
+		
+	},
 	fixCoordinate : function(){
 		function isInBetween( bottom, data , top ){
 			return bottem < data && data < top;
@@ -271,13 +323,8 @@ World.prototype = {
 		}
 		
 		/** update that doesn't concern physical coordination */
-		for( var i = 0; i < this.lights.length; ++ i ){
-			var mod = this.lights[i].mod;
-			for( var k = 0; k < mod.length; ++ k ){
-				mod[k]( real_dt );
-			}
-		}
-		
+		this.updateMods( real_dt );
+
 		// removing dead stuff
 		for( var i = this.players.length; i --; ){
 			
@@ -290,6 +337,7 @@ World.prototype = {
 		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 		ctx.save();
 		ctx.translate( this.camera_x, this.camera_y );
+		
 		for( var i = 0; i < this.lights.length; ++ i ){
 			this.lights[i].draw(ctx);
 		}
@@ -309,6 +357,12 @@ World.prototype = {
 			if( this.players[i].isDead() ) 
 				this.players[i].draw(ctx);
 		}
+		
+		/** draw mods */
+		for( var i = 0; i < this.players.length; ++ i ){
+			this.players[i].drawMod( ctx );
+		}
+		
 		ctx.restore();
 	},
 	
@@ -560,7 +614,6 @@ Player.prototype = {
 };
 
 function Light(setup){
-	this.mod = [];
 	_extend( this, setup );
 }
 
@@ -618,11 +671,11 @@ Light.prototype = {
 		
 		ctx.fill();
 		ctx.restore();
-	},
-	addMod : function( mod ){
-		this.mod.push( mod.bind( this ) );
 	}
 };
+
+_extend( Light.prototype, ModPrototype );
+_extend( Player.prototype, ModPrototype );
 
 function LightFlickeringMod(option){
 	var setup = {
@@ -712,6 +765,32 @@ function SunFxMod(option){
 	
 }
 
+function reloadBarMod(option){
+	var UI = new CircularBarUI({
+		innerWidth : 90,
+		outerWidth : 100,
+		endAngle : -Math.PI/4
+	});
+	UI.apply( option );
+	
+	return {
+		draw : function( ctx ){
+			if( !this.isReloading() ) return;
+
+			var d = new Date() - this.lastShoot;
+			var frac = d / (this.reloadSpeed*1000);
+
+			UI.apply({
+				x : this.x + this.width/2,
+				y : this.y - this.height/2,
+				startAngle : frac*Math.PI*2 + UI.endAngle
+			});
+			
+			UI.draw( ctx );
+		}
+	};
+}
+
 function Bullet(setup){
 	_extend( this, setup );
 	if( setup.direction && setup.direction == "left" ){
@@ -743,6 +822,7 @@ Bullet.prototype = {
 	}
 };
 
+
 var world = new World;
 
 var one = new Player({
@@ -754,6 +834,8 @@ var one = new Player({
 		type : 0,
 		main : true
 	});
+
+one.addMod( reloadBarMod() );
 	
 for( var i = 0; i < 10; ++ i ){
 	world.add( new Player({
@@ -828,14 +910,6 @@ world.add(light5);
 world.add(light3);
 world.add(light4);
 
-var bar = new CircularBarUI({
-		x : window.innerWidth/2,
-		y : window.innerHeight/2,
-		innerWidth : 90,
-		outerWidth : 100,
-		startAngle : 0,
-		endAngle : -Math.PI/4
-	});
 
 var timer = new Time;
 function loop() {
@@ -844,15 +918,6 @@ function loop() {
 	world.update(dt);
 	focusCamera();
 	world.draw(context);
-	if( one.isReloading() ){
-		var d = new Date() - one.lastShoot;
-		var frac = d/one.reloadSpeed/1000;
-		
-		bar.apply({
-			startAngle : frac*Math.PI*2 - Math.PI/4
-		});
-		bar.draw(context);
-	}
 	
 	requestAnimationFrame(loop);
 }
