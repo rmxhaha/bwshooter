@@ -430,7 +430,6 @@ Player.prototype = {
 	y : 0,
 	vy : 0,
 	vx : 0,
-	walkVelocity : 150,
 	/**
 	 *  Player class	
 	 *   @param type 
@@ -445,9 +444,25 @@ Player.prototype = {
 	 */
 	main : false,
 	
-
+	
 	/** public method */
 	
+	getAllProperties : function(){
+		var all = [];
+
+		var p = ['x','y','vy','vx','type'];
+		for( var i in p ){
+			all[ p[i] ] = this[ p[i] ];
+		}
+		
+		return all;
+	},
+	
+	applyProperties : function( prop ){
+		_extend( this, prop );
+	},
+	
+	walkVelocity : 150,
 	/** a time duration before the body is removed from the world*/
 	rotDuration : 2,
 	hasRotten : function(){
@@ -890,6 +905,9 @@ world.add( new Platform({ x : -1000, y : -1000, width : 3000, penetrable : false
 
 var light2 = new Light({x : 250, y : -640, color : "white", opacity : 1, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
 
+setInterval( function(){
+	console.log( one.getAllProperties() );
+}, 1000 );
 
 var light = new Light({ x : 0, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
 var light3 = new Light({ x : -250, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
