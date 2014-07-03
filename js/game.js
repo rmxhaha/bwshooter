@@ -19,6 +19,8 @@
  */
 
 var context = document.getElementById("canvas").getContext("2d");
+var global = ( global ? global : window );
+
 
 /**
  *  extend one array with another
@@ -94,8 +96,18 @@ var Time = function () {
 
 var ModPrototype = {
 	initMod : function(){
-		if( this.mod ) return;
+		if( this.modInitialized ) return;
+		this.modInitialized = true;
+		
+		var modSetup = this.mod;
 		this.mod = [];
+
+		if( modSetup ){
+			for( var modName in modSetup )
+			{
+				this.addMod( global[ modName ]( modSetup[modName] ) );
+			}
+		}
 	},
 	addMod : function( mod ){
 		this.initMod();
@@ -115,7 +127,7 @@ var ModPrototype = {
 		}
 	},
 	updateMod : function( dt ){
-		if( !this.mod ) return;
+		if( !this.modInitialized ) return;
 		
 		for( var i = 0; i < this.mod.length; ++ i ){
 			if( !this.mod[i].update ) continue;
@@ -124,7 +136,7 @@ var ModPrototype = {
 		}
 	},
 	drawMod : function(ctx){
-		if( !this.mod ) return;
+		if( !this.modInitialized ) return;
 
 		for( var i = 0; i < this.mod.length; ++ i ){
 			if( !this.mod[i].draw ) continue;
@@ -422,6 +434,7 @@ Platform.prototype = {
 
 function Player(setup) {
 	_extend(this, setup);
+	this.initMod();
 }
 
 Player.prototype = {
@@ -630,6 +643,7 @@ Player.prototype = {
 
 function Light(setup){
 	_extend( this, setup );
+	this.initMod();
 }
 
 Light.prototype = {
@@ -847,10 +861,9 @@ var one = new Player({
 		vx : 0,
 		walkVelocity : 150,
 		type : 0,
-		main : true
+		main : true,
+		mod : { reloadBarMod : {} }
 	});
-
-one.addMod( reloadBarMod() );
 	
 for( var i = 0; i < 10; ++ i ){
 	world.add( new Player({
