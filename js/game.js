@@ -625,7 +625,6 @@ Player.prototype = {
 	lastShoot : 0,
 	reloadSpeed : 3,
 	shoot : function(){
-		console.log( this.lastShoot );
 		if( !this.isReloading() ){
 			this.lastShoot = new Date();
 			var option = {};
@@ -854,92 +853,36 @@ Bullet.prototype = {
 
 var world = new World;
 
-var one = new Player({
-		x : 100,
-		y : -200,
-		vy : 0,
-		vx : 0,
-		walkVelocity : 150,
-		type : 0,
-		main : true,
-		mod : { reloadBarMod : {} }
-	});
+var one = false;
+
+function parseMap( world, map ){
+	for( var i = 0; i < map.platforms.length; ++ i ){
+		world.add( new Platform( map.platforms[i] ) );
+	}
+
+	for( var i = 0; i < map.players.length; ++ i ){
+		var p = new Player( map.players[i] );
+		
+		if( map.players[i].main ) {
+			one = p;
+		}
+		
+		world.add(p);
+	}
 	
-for( var i = 0; i < 10; ++ i ){
-	world.add( new Player({
-		x : Math.random() * 3000 - 1000,
-		y : 0,
-		type : 1
-	}));
+	for( var i = 0; i < map.lights.length; ++ i ){
+		world.add( new Light( map.lights[i] ) );
+	}
 }
+
+var map = {"platforms":[{"x":100,"y":-600,"width":300},{"x":460,"y":-610,"width":100},{"x":-600,"y":-800,"width":150},{"x":-800,"y":-100,"width":150},{"x":610,"y":-620,"width":100},{"x":-400,"y":-700,"width":150},{"x":-600,"y":-200,"width":150},{"x":760,"y":-630,"width":100},{"x":-200,"y":-600,"width":150},{"x":-400,"y":-300,"width":150},{"x":910,"y":-640,"width":100},{"x":0,"y":-500,"width":150},{"x":-200,"y":-400,"width":150},{"x":-555.6004676036537,"y":-158.28863084316254,"width":100},{"x":872.3836676217616,"y":-281.16549593396485,"width":100},{"x":-203.38383596390486,"y":-225.23616773542017,"width":100},{"x":-388.02086375653744,"y":-151.79598722606897,"width":100},{"x":-522.6957546547055,"y":143.85282357688993,"width":100},{"x":845.9770348854363,"y":72.35160719137639,"width":100},{"x":953.2874398864806,"y":-135.8444186160341,"width":100},{"x":-107.34839644283056,"y":44.61251285392791,"width":100},{"x":-361.9330623187125,"y":120.64548411872238,"width":100},{"x":526.4587854035199,"y":62.4206124804914,"width":100},{"x":-1000,"y":-1000,"width":3000,"penetrable":false}],"players":[{"x":100,"y":-200,"vy":0,"vx":0,"walkVelocity":150,"type":0,"main":true,"mod":{"reloadBarMod":{}}},{"x":-258,"y":0,"type":1},{"x":-705,"y":0,"type":1},{"x":-752,"y":0,"type":1},{"x":-52,"y":0,"type":1},{"x":505,"y":0,"type":1},{"x":901,"y":0,"type":1},{"x":889,"y":0,"type":1},{"x":1376,"y":0,"type":1},{"x":1433,"y":0,"type":1},{"x":1410,"y":0,"type":1}],"lights":[{"x":250,"y":-640,"color":"white","opacity":1,"rayCount":400,"width":0.7853981633974483,"maxRange":1000,"mod":{"LightSwingingMod":{"speed":0.2}}},{"x":0,"y":1500,"color":"white","opacity":0.5,"rayCount":8000,"maxRange":4000,"direction":3.141592653589793,"width":3.141592653589793,"mod":{"SunFxMod":{"dayTime":3,"nightTime":3}}},{"x":-250,"y":1500,"color":"white","opacity":0.5,"rayCount":8000,"maxRange":4000,"direction":3.141592653589793,"width":3.141592653589793,"mod":{"SunFxMod":{"dayTime":3,"nightTime":3}}},{"x":250,"y":1500,"color":"white","opacity":0.5,"rayCount":8000,"maxRange":4000,"direction":3.141592653589793,"width":3.141592653589793,"mod":{"SunFxMod":{"dayTime":3,"nightTime":3}}},{"x":500,"y":1500,"color":"white","opacity":0.5,"rayCount":8000,"maxRange":4000,"direction":3.141592653589793,"width":3.141592653589793,"mod":{"SunFxMod":{"dayTime":3,"nightTime":3}}}]};
 
 function focusCamera(){
 	world.camera_x = -one.x + window.innerWidth/2 - one.width/2;
 	world.camera_y = one.y + window.innerHeight/2 - one.height/2;
 }
 
-var p = new Platform({ x : 100, y : -600, width : 300 });
-
-world.add(one);
-world.add(p);
-
-for( var i = 0; i < 4; ++ i ){
-	world.add( new Platform({ 
-			x : 460 + 150*i, 
-			y : -610 - i*10, 
-			width : 100 
-		})
-	);
-	
-	world.add( new Platform({ 
-			x : -600 + 200*i, 
-			y : -800 + i*100, 
-			width : 150 
-		})
-	);
-
-	world.add( new Platform({ 
-			x : -800 + 200*i, 
-			y : -100 - i*100, 
-			width : 150 
-		})
-	);
-}
-
-for( var i = 10; i -- ; ){
-	world.add( new Platform({
-		x : Math.random() * 2000 - 1000,
-		y : Math.random()* 500 + -300,
-		width : 100
-	}));
-}
-
-world.add( new Platform({ x : -1000, y : -1000, width : 3000, penetrable : false }) );
-
-var light2 = new Light({x : 250, y : -640, color : "white", opacity : 1, rayCount : 400, width : Math.PI/4, maxRange : 1000 });
-
-setInterval( function(){
-	console.log( one.getAllProperties() );
-}, 1000 );
-
-var light = new Light({ x : 0, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
-var light3 = new Light({ x : -250, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
-var light4 = new Light({ x : 250, y : 1500, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
-var light5 = new Light({ x : 500, y : 1000, color : "white", opacity : 0.5, rayCount : 8000, maxRange : 4000, direction : Math.PI, width : Math.PI });
-
-light.addMod( SunFxMod({dayTime : 3, nightTime : 3 }) );
-light3.addMod( SunFxMod({dayTime : 3, nightTime : 3 }) );
-light4.addMod( SunFxMod({dayTime : 3, nightTime : 3}) );
-light5.addMod( SunFxMod({dayTime : 3, nightTime : 3}) );
-
-light2.addMod( LightSwingingMod({ speed : 0.2 }) );
-//light2.addMod( LightFlickeringMod() );
-
-world.add(light);
-world.add(light2);
-world.add(light5);
-world.add(light3);
-world.add(light4);
+parseMap( world, map );
 
 
 var timer = new Time;
