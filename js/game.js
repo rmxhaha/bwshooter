@@ -744,7 +744,7 @@ function SunFxMod(option){
 	return function( dt ){
 		time += dt;
 		
-		if( time > dayTime + switchTime + nightTime + switchTime ){
+		while( time > dayTime + switchTime + nightTime + switchTime ){
 			time -= dayTime + switchTime + nightTime + switchTime;
 		}
 		
