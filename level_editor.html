@@ -1,0 +1,30 @@
+<html>
+<head>
+	<title>Bwshooter Prototype</title>
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<style>
+	.tools {
+		z-index : 0;
+		position : fixed;
+		top : 10px;
+		left : 10px;
+		color : red;
+	};
+	</style>
+</head>
+<body>
+
+<div class=tools>
+	<input type='radio' name='selected_tool' id=selected_tool value='addPlatform' />Add Platform
+	<input type='radio' name='selected_tool' id=selected_tool value='removePlatform' />Remove Platform
+	<input type='radio' name='selected_tool' id=selected_tool value='movePlatform' />Move Platform
+	<input type='radio' name='selected_tool' id=selected_tool value='addLight' />Add Light
+	<button id=compile>Compile</button>
+</div>
+
+<canvas id=canvas></canvas>
+<script src="js/game.js"></script>
+<script src="js/levelEditor.js"></script>
+
+</body>
+</html>
