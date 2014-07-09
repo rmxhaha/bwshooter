@@ -16,6 +16,15 @@
  *  		privateVariable : .. ,
  *  		method : ...
  *  	}
+ *  
+ *  Mod 
+ *  	{
+ *  		update : function
+ *  		draw : function
+ *  		getAllProperties : function
+ *  		setProperties : function
+ *  		object : {}  # pointer to the object that runs this mod
+ *  	}
  */
 
  var global = ( global ? global : window );
@@ -32,6 +41,76 @@ function _extend(x, y) {
 	}
 
 	return x;
+}
+
+
+/**
+ *  @example
+ *  var Tank = Class(
+ *  	_default : {
+ *  		x : 0,
+ *  		y : 0,
+ *  		size : 50
+ *  	},
+ *  	_private : {
+ *  		goForward : function(){ ... },
+ *  		staticVar : 500
+ *  	}
+ *  );
+ */
+var Class = function(setup){
+	var s = _extend( { _default : [], _private : [], _constructor : function(){} }, setup );
+	
+	var c = function(option){
+		_extend( this, option );
+		s._constructor.bind( this )();
+	};
+	
+	function copy( arr ){
+		if( typeof arr !== 'object' ) return arr;
+		if( arr.getAllProperties ){
+			return arr.getAllProperties();
+		}
+		
+		var all = [];
+		for( var i in arr ){
+			all[i] = copy( arr[i] );
+		}
+		
+		return all;
+	}
+	
+	_extend( c.prototype, s._private );
+	_extend( c.prototype, s._default );
+	_extend( c, {
+		// only extends private
+		extend : function( _private ){
+			_extend( this.prototype, _private );
+		}
+	});
+
+	var paramList = [];
+	for( var index in s._default ){
+		paramList.push( index );
+	}
+	
+	_extend( c.prototype, {
+		setProperties : function( prop ){
+			_extend( this, prop );
+		},
+		getAllProperties : function(){
+			var all = [];
+			
+			for( var i in paramList ){
+				all[ paramList[i] ] = copy( this[ paramList[i] ] );
+			}
+			
+			return all;
+		}
+
+	});
+	
+	return c;
 }
 
 /**
@@ -98,40 +177,22 @@ var ModPrototype = {
 		if( this.modInitialized ) return;
 		this.modInitialized = true;
 		
-		var modSetup = this.mod;
 		this.mod = [];
-
-		if( modSetup ){
-			for( var modName in modSetup )
-			{
-				this.addMod( global[ modName ]( modSetup[modName] ) );
-			}
-		}
 	},
 	addMod : function( mod ){
 		this.initMod();
 
-		if( typeof mod === 'function' ){
-			// update only mod
-			this.mod.push({ update : mod.bind(this) });
-		}
-		else if( typeof mod === 'object' ){
-			if( !mod.update && !mod.draw ) throw new Error('Mod is missing update or draw function');
-			if( mod.update )
-				mod.update = mod.update.bind( this );
-			if( mod.draw )
-				mod.draw = mod.draw.bind( this );
-			
-			this.mod.push( mod );
-		}
+		mod.object = this;
+		
+		this.mod.push( mod );		
 	},
 	updateMod : function( dt ){
 		if( !this.modInitialized ) return;
-		
+
 		for( var i = 0; i < this.mod.length; ++ i ){
 			if( !this.mod[i].update ) continue;
 
-			this.mod[i].update.bind(this)( dt );
+			this.mod[i].update( dt );
 		}
 	},
 	drawMod : function(ctx){
@@ -245,9 +306,6 @@ World.prototype = {
 	updateEntities : function(dt){
 		for( var i = 0; i < this.players.length; ++ i ){
 			this.players[i].update(dt);
-		}
-		for( var i = 0; i < this.bullets.length; ++ i ){
-			this.bullets[i].update(dt);
 		}
 		
 	},
@@ -407,446 +465,441 @@ World.prototype = {
 	}
 };
 
-function Platform(setup){
-	_extend(this, setup);
-}
-
-Platform.prototype = {
-	x : 0,
-	y : 0,
-	width : 100,
-	/**
-	 *  @param penetrable
-	 *  	penetrable from above, when player request to fall 
-	 *  	if the current platform is penetrable he can fall
-	 */
-	penetrable : true,
-
-	draw : function(ctx){
-		ctx.save();
-		ctx.fillStyle = "#888888";
-		ctx.fillRect( this.x, -this.y, this.width, this.height );
-		ctx.restore();
+var Platform = Class({
+	_default : {
+		x : 0,
+		y : 0,
+		width : 100,
+		/**
+		 *  @param penetrable
+		 *  	penetrable from above, when player request to fall 
+		 *  	if the current platform is penetrable he can fall
+		 */
+		penetrable : true
 	},
-	height : 30
-};
-
-function Player(setup) {
-	_extend(this, setup);
-	this.initMod();
-}
-
-Player.prototype = {
-	/** default parameter */
-	x : 0,
-	y : 0,
-	vy : 0,
-	vx : 0,
-	/**
-	 *  Player class	
-	 *   @param type 
-	 *  	0 for black 
-	 *  	1 for white
-	 *  	2 for dead
-	 */
-	type : 0, 
-	/**
-	 *   @param main
-	 *  	state whether this player is being played the user
-	 */
-	main : false,
-	
-	
-	/** public method */
-	
-	getAllProperties : function(){
-		var all = [];
-
-		var p = ['x','y','vy','vx','type'];
-		for( var i in p ){
-			all[ p[i] ] = this[ p[i] ];
-		}
-		
-		return all;
-	},
-	
-	applyProperties : function( prop ){
-		_extend( this, prop );
-	},
-	
-	walkVelocity : 150,
-	/** a time duration before the body is removed from the world*/
-	rotDuration : 2,
-	hasRotten : function(){
-		return this.isDead() && this.hasBeenDeadFor() >= this.rotDuration;
-	},
-	draw : (function () {
-		var fadeOutDuration = 0.5; 
-		return function (ctx) {
+	_private : {
+		draw : function(ctx){
 			ctx.save();
+			ctx.fillStyle = "#888888";
+			ctx.fillRect( this.x, -this.y, this.width, this.height );
+			ctx.restore();
+		},
+		height : 30
+		
+	}
+});
 
-			// drawing hero manually 
-			
-			switch( this.type ){
-			case 0:
-				ctx.fillStyle = "black";
-				break;
-			case 1:
-				ctx.fillStyle = "white";
-				break;
-			case 2:
-				var duration = this.hasBeenDeadFor();
 
-				if( duration < this.rotDuration - fadeOutDuration ){
-					ctx.fillStyle = "red";
-					ctx.globalAlpha = 1;
+var Player = Class({
+	_constructor : function(){
+		this.initMod();
+	},
+	_default : {
+		/** default parameter */
+		x : 0,
+		y : 0,
+		vy : 0,
+		vx : 0,
+		/**
+		 *  Player class	
+		 *   @param type 
+		 *  	0 for black 
+		 *  	1 for white
+		 *  	2 for dead
+		 */
+		type : 0, 
+		/**
+		 *   @param main
+		 *  	state whether this player is being played the user
+		 */
+	},
+	_private : {
+		main : false,
+		walkVelocity : 150,
+		/** a time duration before the body is removed from the world*/
+		rotDuration : 2,
+		hasRotten : function(){
+			return this.isDead() && this.hasBeenDeadFor() >= this.rotDuration;
+		},
+		draw : (function () {
+			var fadeOutDuration = 0.5; 
+			return function (ctx) {
+				ctx.save();
+
+				// drawing hero manually 
+				
+				switch( this.type ){
+				case 0:
+					ctx.fillStyle = "black";
+					break;
+				case 1:
+					ctx.fillStyle = "white";
+					break;
+				case 2:
+					var duration = this.hasBeenDeadFor();
+
+					if( duration < this.rotDuration - fadeOutDuration ){
+						ctx.fillStyle = "red";
+						ctx.globalAlpha = 1;
+					}
+					else if( duration < this.rotDuration ){
+						ctx.fillStyle = "red";
+						ctx.globalAlpha = 1 - (duration - this.rotDuration + fadeOutDuration) / fadeOutDuration;
+					}
+					else {
+						ctx.globalAlpha = 0;
+					}
 				}
-				else if( duration < this.rotDuration ){
-					ctx.fillStyle = "red";
-					ctx.globalAlpha = 1 - (duration - this.rotDuration + fadeOutDuration) / fadeOutDuration;
+
+				if( !this.isDead() && this.main ){
+					// apply highlighting
+					ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
+					ctx.lineWidth = 3;
+				}
+				
+				var applyToScreen;
+				if( this.main ){
+					applyToScreen = function(){
+						ctx.fill();
+						ctx.globalAlpha = 0.2;
+						ctx.stroke();
+						ctx.globalAlpha = 1;
+					}
 				}
 				else {
-					ctx.globalAlpha = 0;
+					applyToScreen = function(){
+						ctx.fill();
+					}
 				}
+							
+				ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
+							
+				// draw body
+				ctx.beginPath();
+				ctx.moveTo( 45, 50 );
+				ctx.lineTo( 0, this.height );
+				ctx.lineTo( this.width, this.height );			
+				ctx.closePath();
+				applyToScreen();
+				
+				// draw head
+				ctx.beginPath();
+				ctx.arc( 45, 50,50,Math.PI*116.5/180,2.353*Math.PI);
+				applyToScreen();
+				
+
+				// draw gun
+				if( !this.sideRight ){
+					// mirror the drawing if siding left
+					ctx.scale(-1, 1);
+					ctx.translate( -this.width, 0 );
+				}
+
+				ctx.beginPath();
+
+				ctx.moveTo( 80, 111 );
+				ctx.lineTo( 83, 93 );
+				ctx.lineTo( 111, 93 );
+				ctx.lineTo( 105, 102 );
+				ctx.lineTo( 92, 102 );
+				ctx.lineTo( 87, 112 );
+				ctx.closePath();
+				applyToScreen();
+
+				ctx.restore();
+			}
+		})(),
+		sideRight : true, 
+		topPlatform : false,
+		width : 90,
+		height : 140,
+		update : function( dt ){
+			if( this.isDead() ){
+				return;
 			}
 
-			if( !this.isDead() && this.main ){
-				// apply highlighting
-				ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
-				ctx.lineWidth = 3;
-			}
+			this.vy -= this.world.gravity * dt;
+			this.x += this.vx * dt;
+			this.y += this.vy * dt;
 			
-			var applyToScreen;
-			if( this.main ){
-				applyToScreen = function(){
-					ctx.fill();
-					ctx.globalAlpha = 0.2;
-					ctx.stroke();
-					ctx.globalAlpha = 1;
-				}
+		},
+		jump : function(){
+			if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
+				this.vy = 600;
+			}
+		},
+		goLeft : function(){
+			if ( this.isDead() ) return;
+			this.vx = -this.walkVelocity;
+			this.sideRight = false;
+		},
+		goRight : function(){
+			if ( this.isDead() ) return;
+			this.vx = this.walkVelocity;
+			this.sideRight = true;		
+		},
+		fall : function(){
+			if( !this.topPlatform.penetrable ) return;
+			
+			this.topPlatform = false;
+		},
+		dieTime : 0,
+		die : function(){
+			this.dieTime = new Date();
+			this.type = 2;
+		},
+		isDead : function(){
+			return this.type == 2;
+		},
+		hasBeenDeadFor : function(){
+			return (new Date() - this.dieTime) / 1000;
+		},
+		getGunCoordinate : function(){
+			if( this.sideRight ){
+				return { x : this.x + this.width + 10, y : this.y - 100 };
 			}
 			else {
-				applyToScreen = function(){
-					ctx.fill();
-				}
+				return { x : this.x - 10, y : this.y - 100 };
 			}
-						
-			ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
-						
-			// draw body
-			ctx.beginPath();
-			ctx.moveTo( 45, 50 );
-			ctx.lineTo( 0, this.height );
-			ctx.lineTo( this.width, this.height );			
-			ctx.closePath();
-			applyToScreen();
-			
-			// draw head
-			ctx.beginPath();
-			ctx.arc( 45, 50,50,Math.PI*116.5/180,2.353*Math.PI);
-			applyToScreen();
-			
-
-			// draw gun
-			if( !this.sideRight ){
-				// mirror the drawing if siding left
-				ctx.scale(-1, 1);
-				ctx.translate( -this.width, 0 );
+		},
+		lastShoot : 0,
+		reloadSpeed : 3,
+		shoot : function(){
+			if( !this.isReloading() ){
+				this.lastShoot = new Date();
+				var option = {};
+				
+				_extend( option, this.getGunCoordinate() );
+				option.direction = ( this.sideRight ? "right" : "left" );
+				
+				this.world.add( new Bullet( option ) );
 			}
+		},
+		isReloading : function(){
+			return new Date() - this.lastShoot < this.reloadSpeed * 1000
+		}
+	}
+});
 
+Player.extend( ModPrototype )
+
+var Light = Class({
+	_constructor : function(){
+		this.initMod();
+	},
+	_default : {
+		x : 0,
+		y : 0,
+		maxRange : 400,
+		rayCount : 100,
+		color : "red",
+		opacity : 1,
+		direction : 0, // in radian
+		width : Math.PI*2, // in radian
+		state : true // true for on and false of off
+	},
+	_private : {
+		turnOn : function(){
+			this.state = true;
+		},
+		turnOff : function(){
+			this.state = false;
+		},
+		draw : function( ctx ){
+			if( !this.state ) return;
+			
+			var ddeg = Math.PI * 2 / this.rayCount;
+			var x = [this.x];
+			var y = [this.y];
+			
+			var mRange = this.maxRange;
+			
+			var deg = this.direction - this.width/2;
+			var limit = this.direction + this.width/2;
+			
+			for( ; deg < limit; deg += ddeg ){
+				var range = this.world.RayCast({ 
+					x : this.x, 
+					y : this.y, 
+					tx : this.x + Math.sin( deg ) * mRange,
+					ty : this.y + Math.cos( deg ) * mRange
+				});
+							
+				x.push( this.x + Math.sin( deg ) * range );
+				y.push( this.y + Math.cos( deg ) * range );
+			}
+			
+			x.push( this.x );
+			y.push( this.y );
+			
+			ctx.save();
+			ctx.fillStyle = this.color;
+			ctx.globalAlpha = this.opacity;
 			ctx.beginPath();
-
-			ctx.moveTo( 80, 111 );
-			ctx.lineTo( 83, 93 );
-			ctx.lineTo( 111, 93 );
-			ctx.lineTo( 105, 102 );
-			ctx.lineTo( 92, 102 );
-			ctx.lineTo( 87, 112 );
-			ctx.closePath();
-			applyToScreen();
-
+			
+			for( var i = 0; i < x.length; ++ i ){
+				ctx.lineTo( x[i], -y[i] );
+			}
+			
+			ctx.fill();
 			ctx.restore();
 		}
-	})(),
-	sideRight : true, 
-	topPlatform : false,
-	width : 90,
-	height : 140,
-	update : function( dt ){
-		if( this.isDead() ){
-			return;
-		}
-
-		this.vy -= this.world.gravity * dt;
-		this.x += this.vx * dt;
-		this.y += this.vy * dt;
-		
-	},
-	jump : function(){
-		if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
-			this.vy = 600;
-		}
-	},
-	goLeft : function(){
-		if ( this.isDead() ) return;
-		this.vx = -this.walkVelocity;
-		this.sideRight = false;
-	},
-	goRight : function(){
-		if ( this.isDead() ) return;
-		this.vx = this.walkVelocity;
-		this.sideRight = true;		
-	},
-	fall : function(){
-		if( !this.topPlatform.penetrable ) return;
-		
-		this.topPlatform = false;
-	},
-	dieTime : 0,
-	die : function(){
-		this.dieTime = new Date();
-		this.type = 2;
-	},
-	isDead : function(){
-		return this.type == 2;
-	},
-	hasBeenDeadFor : function(){
-		return (new Date() - this.dieTime) / 1000;
-	},
-	getGunCoordinate : function(){
-		if( this.sideRight ){
-			return { x : this.x + this.width + 10, y : this.y - 100 };
-		}
-		else {
-			return { x : this.x - 10, y : this.y - 100 };
-		}
-	},
-	lastShoot : 0,
-	reloadSpeed : 3,
-	shoot : function(){
-		if( !this.isReloading() ){
-			this.lastShoot = new Date();
-			var option = {};
-			
-			_extend( option, this.getGunCoordinate() );
-			option.direction = ( this.sideRight ? "right" : "left" );
-			
-			this.world.add( new Bullet( option ) );
-		}
-	},
-	isReloading : function(){
-		return new Date() - this.lastShoot < this.reloadSpeed * 1000
 	}
-};
+});
 
-function Light(setup){
-	_extend( this, setup );
-	this.initMod();
-}
+Light.extend( ModPrototype );
 
-Light.prototype = {
-	x : 0,
-	y : 0,
-	maxRange : 400,
-	rayCount : 100,
-	color : "red",
-	opacity : 1,
-	direction : 0, // in radian
-	width : Math.PI*2, // in radian
-	state : true, // true for on and false of off
-	turnOn : function(){
-		this.state = true;
-	},
-	turnOff : function(){
-		this.state = false;
-	},
-	draw : function( ctx ){
-		if( !this.state ) return;
-		
-		var ddeg = Math.PI * 2 / this.rayCount;
-		var x = [this.x];
-		var y = [this.y];
-		
-		var mRange = this.maxRange;
-		
-		var deg = this.direction - this.width/2;
-		var limit = this.direction + this.width/2;
-		
-		for( ; deg < limit; deg += ddeg ){
-			var range = this.world.RayCast({ 
-				x : this.x, 
-				y : this.y, 
-				tx : this.x + Math.sin( deg ) * mRange,
-				ty : this.y + Math.cos( deg ) * mRange
-			});
-						
-			x.push( this.x + Math.sin( deg ) * range );
-			y.push( this.y + Math.cos( deg ) * range );
-		}
-		
-		x.push( this.x );
-		y.push( this.y );
-		
-		ctx.save();
-		ctx.fillStyle = this.color;
-		ctx.globalAlpha = this.opacity;
-		ctx.beginPath();
-		
-		for( var i = 0; i < x.length; ++ i ){
-			ctx.lineTo( x[i], -y[i] );
-		}
-		
-		ctx.fill();
-		ctx.restore();
-	}
-};
-
-_extend( Light.prototype, ModPrototype );
-_extend( Player.prototype, ModPrototype );
-
-function LightFlickeringMod(option){
-	var setup = {
+var LightFlickeringMod = Class({
+	_default : {
 		offDuration : 1,
 		flickerDuration : 0.6,
 		flickerSpeed : 0.2
-	};
-	
-	_extend( setup, option );
-	
-	var time = 0;
-	return function( dt ){
-		time += dt;
-
-		if( time >= setup.flickerDuration + setup.offDuration ){
-			time -= setup.flickerDuration + setup.offDuration;
-		}
-		
-		if( time < setup.flickerDuration ){
-			if( Math.floor( time / setup.flickerSpeed ) % 2 == 0 ) 
-				this.turnOn();
-			else 
-				this.turnOff();
-		}
-		else { // time < flickerDuration + offDuration
-			this.turnOff();
+	},
+	_private : {
+		object : false,
+		time : 0,
+		update : function( dt ){
+			var light = this.object;
+			this.time += dt;
+			
+			// round it down
+			this.time %= this.flickerDuration + this.offDuration;
+			
+			if( this.time < this.flickerDuration ){
+				if( Math.floor( this.time / this.flickerSpeed ) % 2 == 0 ) 
+					light.turnOn();
+				else 
+					light.turnOff();
+			}
+			else { // time < flickerDuration + offDuration
+				light.turnOff();
+			}
+			
 		}
 	}
-}
+});
 
-function LightSwingingMod(option){
-	var setup = {
-		speed : 0.5, // in swing
+var LightSwingingMod = Class({
+	_default : {
+		speed : 0.5,
 		angleDeviation : Math.PI/10,
-		angleBase : Math.PI
-	};
-	
-	_extend( setup, option );
-	
-	setup.speed *= Math.PI*2; // change metrics to radian
-	
-	var deg = 0;
-	return function( dt ){
-		this.direction = setup.angleBase + Math.sin( deg ) * setup.angleDeviation;
-		deg += setup.speed * dt;
+		angleBase : Math.PI,
+		deg : 0
+	},
+	_private : {
+		object : false,
+		update : function(dt){
+			var light = this.object;
+			
+			light.direction = this.angleBase + Math.sin( this.deg ) * this.angleDeviation;
+			this.deg += this.speed*Math.PI*2 * dt;
+		}
 	}
-}
+});
 
-function SunFxMod(option){
-	if( typeof option !== "object" ) option = {};
-	// in seconds
-	var setup = {
+
+var SunFxMod = Class({
+	_default : {
 		dayTime : 30, 
 		nightTime : 30,
 		switchTime : 3,
-		maxOpacity : 1
-	};
-	
-	var dayTime = option.dayTime || setup.dayTime;
-	var nightTime = option.nightTime || setup.nightTime;
-	var switchTime = option.switchTime || setup.switchTime;
-	var maxOpacity = option.maxOpacity || setup.maxOpacity;
-	
-	var time = 0;
-	
-	return function( dt ){
-		time += dt;
-		
-		while( time > dayTime + switchTime + nightTime + switchTime ){
-			time -= dayTime + switchTime + nightTime + switchTime;
-		}
-		
-		if( time < dayTime ){
-			this.opacity = maxOpacity;
-		}
-		else if( time < dayTime + switchTime ){
-			this.opacity = Math.cos( (time-dayTime) / switchTime * Math.PI/2 ) * maxOpacity;
-		}
-		else if( time < dayTime + switchTime + nightTime ){
-			this.opacity = 0;
-		}
-		else {
-			this.opacity = Math.sin( (time-dayTime-switchTime-nightTime) / switchTime * Math.PI/2 );			
-		}
-		
-	}
-	
-}
+		maxOpacity : 1		
+	},
+	_private : {
+		time : 0,
+		update : function( dt ){
+			var sun = this.object;
+			
+			this.time += dt;
+						
+			this.time %= this.dayTime + this.switchTime + this.nightTime + this.switchTime;
+			
+			if( this.time < this.dayTime ){
+				sun.opacity = this.maxOpacity;
+			}
+			else if( this.time < this.dayTime + this.switchTime ){
+				// relative time
+				var rTime = this.time-this.dayTime;
 
-function reloadBarMod(option){
-	var UI = new CircularBarUI({
+				sun.opacity = Math.cos( rTime / this.switchTime * Math.PI/2 ) * this.maxOpacity;
+			}
+			else if( this.time < this.dayTime + this.switchTime + this.nightTime ){
+				sun.opacity = 0;
+			}
+			else {
+				var rTime = this.time-this.dayTime-this.switchTime-this.nightTime;
+
+				sun.opacity = Math.sin( rTime / this.switchTime * Math.PI/2 );			
+			}
+		}
+	}
+});
+
+var reloadBarMod = Class({
+	_constructor : function(){
+		this.UI = new CircularBarUI({
+			innerWidth : this.innerWidth,
+			outerWidth : this.outerWidth,
+			endAngle : this.endAngle
+		});
+		
+		
+	},
+	_private : {
 		innerWidth : 90,
 		outerWidth : 100,
-		endAngle : -Math.PI/4
-	});
-	UI.apply( option );
-	
-	return {
+		endAngle : -Math.PI / 4,
+		
 		draw : function( ctx ){
-			if( !this.isReloading() ) return;
+			var player = this.object;
+			var UI = this.UI;
+			
+			if( !player.isReloading() ) return;
 
-			var d = new Date() - this.lastShoot;
-			var frac = d / (this.reloadSpeed*1000);
+			var d = new Date() - player.lastShoot;
+			var frac = d / (player.reloadSpeed*1000);
 
 			UI.apply({
-				x : this.x + this.width/2,
-				y : this.y - this.height/2,
+				x : player.x + player.width/2,
+				y : player.y - player.height/2,
 				startAngle : frac*Math.PI*2 + UI.endAngle
 			});
 			
 			UI.draw( ctx );
 		}
-	};
-}
-
-function Bullet(setup){
-	_extend( this, setup );
-	if( setup.direction && setup.direction == "left" ){
-		// bullet is going left
-		this.x -= this.length;
 	}
-}
+});
 
-Bullet.prototype = {
-	x : 0,
-	y : 0,
-	length : 300,
-	time : 0,
-	animationDuration : 0.4, // in seconds
-	draw : function(ctx){
-		// animation Function
-		function Af(t){
-			return t*t*t*t;
-		}
-		var height = Math.max(0, (1 - Af( this.time / this.animationDuration)) * 10);
-		
-		ctx.save();
-		ctx.fillStyle = "yellow";
-		ctx.fillRect( this.x, -this.y - height/2, this.length, height );
-		ctx.restore();
+
+var Bullet = Class({
+	_default : {
+		x : 0,
+		y : 0
 	},
-	update : function(dt){
-		this.time += dt;
+	_private : {
+		length : 300,
+		timeFired : 0,
+		animationDuration : 0.4,
+		initHeight : 10,
+		draw : function(ctx){
+			// animation Function
+			function Af(t){ return 1 - t*t*t*t; }
+			
+			var height = Math.max(0, Af( ( new Date() - this.timeFired ) / 1000 / this.animationDuration) ) * this.initHeight;
+			
+			ctx.save();
+			ctx.fillStyle = "yellow";
+			ctx.fillRect( this.x, -this.y - height/2, this.length, height );
+			ctx.restore();
+		}
+	},
+	_constructor : function(){
+		if( this.direction && this.direction == "left" ){
+			// bullet is going left
+			this.x -= this.length;			
+		}
+		
+		this.timeFired = new Date();
 	}
-};
-
+});
 
