@@ -522,96 +522,94 @@ var Player = Class({
 		hasRotten : function(){
 			return this.isDead() && this.hasBeenDeadFor() >= this.rotDuration;
 		},
-		draw : (function () {
-			var fadeOutDuration = 0.5; 
-			return function (ctx) {
-				ctx.save();
+		fadeOutDuration : 0.5,
+		draw : function (ctx) {
+			ctx.save();
 
-				// drawing hero manually 
-				
-				switch( this.type ){
-				case 0:
-					ctx.fillStyle = "black";
-					break;
-				case 1:
-					ctx.fillStyle = "white";
-					break;
-				case 2:
-					var duration = this.hasBeenDeadFor();
+			// drawing hero manually 
+			
+			switch( this.type ){
+			case 0:
+				ctx.fillStyle = "black";
+				break;
+			case 1:
+				ctx.fillStyle = "white";
+				break;
+			case 2:
+				var duration = this.hasBeenDeadFor();
 
-					if( duration < this.rotDuration - fadeOutDuration ){
-						ctx.fillStyle = "red";
-						ctx.globalAlpha = 1;
-					}
-					else if( duration < this.rotDuration ){
-						ctx.fillStyle = "red";
-						ctx.globalAlpha = 1 - (duration - this.rotDuration + fadeOutDuration) / fadeOutDuration;
-					}
-					else {
-						ctx.globalAlpha = 0;
-					}
+				if( duration < this.rotDuration - this.fadeOutDuration ){
+					ctx.fillStyle = "red";
+					ctx.globalAlpha = 1;
 				}
-
-				if( !this.isDead() && this.main ){
-					// apply highlighting
-					ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
-					ctx.lineWidth = 3;
-				}
-				
-				var applyToScreen;
-				if( this.main ){
-					applyToScreen = function(){
-						ctx.fill();
-						
-						ctx.save();
-						ctx.globalAlpha = 0.2;
-						ctx.stroke();
-						ctx.restore();;
-					}
+				else if( duration < this.rotDuration ){
+					ctx.fillStyle = "red";
+					ctx.globalAlpha = 1 - (duration - this.rotDuration + this.fadeOutDuration) / this.fadeOutDuration;
 				}
 				else {
-					applyToScreen = function(){
-						ctx.fill();
-					}
+					ctx.globalAlpha = 0;
 				}
-							
-				ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
-							
-				ctx.beginPath();
-
-				// draw head
-				ctx.beginPath();
-				ctx.arc( 45, 50,50,Math.PI*116.5/180,2.353*Math.PI);
-
-				// draw body
-				ctx.lineTo( this.width, this.height );			
-				ctx.lineTo( 0, this.height );
-				ctx.closePath();
-				
-				applyToScreen();
-				
-
-				// draw gun
-				if( !this.sideRight ){
-					// mirror the drawing if siding left
-					ctx.scale(-1, 1);
-					ctx.translate( -this.width, 0 );
-				}
-
-				ctx.beginPath();
-
-				ctx.moveTo( 80, 111 );
-				ctx.lineTo( 83, 93 );
-				ctx.lineTo( 111, 93 );
-				ctx.lineTo( 105, 102 );
-				ctx.lineTo( 92, 102 );
-				ctx.lineTo( 87, 112 );
-				ctx.closePath();
-				applyToScreen();
-
-				ctx.restore();
 			}
-		})(),
+
+			if( !this.isDead() && this.main ){
+				// apply highlighting
+				ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
+				ctx.lineWidth = 3;
+			}
+			
+			var applyToScreen;
+			if( this.main ){
+				applyToScreen = function(){
+					ctx.fill();
+					
+					ctx.save();
+					ctx.globalAlpha = 0.2;
+					ctx.stroke();
+					ctx.restore();;
+				}
+			}
+			else {
+				applyToScreen = function(){
+					ctx.fill();
+				}
+			}
+						
+			ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
+						
+			ctx.beginPath();
+
+			// draw head
+			ctx.beginPath();
+			ctx.arc( 45, 50,50,Math.PI*116.5/180,2.353*Math.PI);
+
+			// draw body
+			ctx.lineTo( this.width, this.height );			
+			ctx.lineTo( 0, this.height );
+			ctx.closePath();
+			
+			applyToScreen();
+			
+
+			// draw gun
+			if( !this.sideRight ){
+				// mirror the drawing if siding left
+				ctx.scale(-1, 1);
+				ctx.translate( -this.width, 0 );
+			}
+
+			ctx.beginPath();
+
+			ctx.moveTo( 80, 111 );
+			ctx.lineTo( 83, 93 );
+			ctx.lineTo( 111, 93 );
+			ctx.lineTo( 105, 102 );
+			ctx.lineTo( 92, 102 );
+			ctx.lineTo( 87, 112 );
+			ctx.closePath();
+			applyToScreen();
+
+			ctx.restore();
+		},
 		sideRight : true, 
 		topPlatform : false,
 		width : 90,
