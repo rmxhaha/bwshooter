@@ -65,7 +65,7 @@ function copy( arr ){
 		return arr.getAllProperties();
 	}
 	
-	var all = [];
+	var all = ( arr instanceof Array ? [] : {});
 	for( var i in arr ){
 		all[i] = copy( arr[i] );
 	}
@@ -77,12 +77,12 @@ var Class = function(setup){
 	var s = _extend( { _default : [], _private : [], _constructor : function(){} }, setup );
 	
 	var c = function(option){
+		_extend( this, copy( s._default ) );
 		_extend( this, option );
 		s._constructor.bind( this )();
 	};
 	
 	_extend( c.prototype, s._private );
-	_extend( c.prototype, s._default );
 	_extend( c, {
 		// only extends private
 		extend : function( _private ){
@@ -100,7 +100,7 @@ var Class = function(setup){
 			_extend( this, prop );
 		},
 		getAllProperties : function(){
-			var all = [];
+			var all = {};
 			
 			for( var i in paramList ){
 				all[ paramList[i] ] = copy( this[ paramList[i] ] );
@@ -180,9 +180,10 @@ var ModPrototype = {
 		
 		this.mod = [];
 	},
-	addMod : function( mod ){
+	addMod : function( option ){
 		this.initMod();
-
+		
+		var mod = new global[option.name]( option );
 		mod.object = this;
 		
 		this.mod.push( mod );		
@@ -264,207 +265,206 @@ var RayCast = function( option ){
 	return { range : range, wall : wall };
 }
 
-function World(setup){	 
-	this.players = [];
-	this.platforms = [];
-	this.lights = [];
-	this.bullets = [];
-	
-	_extend( this, setup );
-};
 
-World.prototype = {
-	timestep : 0.05,
-	
-	camera_x : 0,
-	camera_y : 0,
+var World = Class({
+	_default : {
+		camera_x : 0,
+		camera_y : 0,
 
-	gravity : 800,
-
-	
-	add : function(item){
-		
-		// adding pointer to the world where they belong
-		item.world = this;
-		
-		if( item instanceof Platform ){
-			this.platforms.push( item );
-		}
-		else if( item instanceof Player ){
-			this.players.push( item );
-		}
-		else if( item instanceof Light ){
-			this.lights.push( item );
-		}
-		else if( item instanceof Bullet ){
-			this.applyBulletToPlayers( item );
-			this.bullets.push( item );
-		}
-		else {
-			throw new Error('Unknown Type Added' );
-		}
+		gravity : 800,
+		players : [],
+		platforms : [],
+		lights : [],
+		bullets : []
 	},
-	updateEntities : function(dt){
-		for( var i = 0; i < this.players.length; ++ i ){
-			this.players[i].update(dt);
-		}
+	_private : {
+		timestep : 0.05,
 		
-	},
-	updateMods : function(dt){
-		for( var i = 0; i < this.players.length; ++ i ){
-			this.players[i].updateMod( dt );
-		}
-		
-		for( var i = 0; i < this.lights.length; ++ i ){
-			this.lights[i].updateMod( dt );
-		}
-		
-	},
-	fixCoordinate : function(){
-		function isInBetween( bottom, data , top ){
-			return bottem < data && data < top;
-		}
-		
-		function isInPlatformArea( platform, minX, maxX ){
-			return( 
-				(platform.x < minX && minX < platform.x + platform.width) || 
-				(platform.x < maxX && maxX < platform.x + platform.width) );
-		}
-		
-		for( var i = 0; i < this.players.length; ++ i ){
-			var p = this.players[i];
+		add : function(item){
 			
-			// don't check if hero is moving up
-			if( p.vy > 0 ) continue;
-
-			// pre-calculation
-			var leftX = p.x;
-			var rightX = p.x + p.width;
+			// adding pointer to the world where they belong
+			item.world = this;
 			
-			var bottomY = p.y - p.height;
-			
-			// if previous data is still valid
-			if( p.topPlatform && isInPlatformArea( p.topPlatform, leftX, rightX ) ){
-				// coordinate need to be fixed
-				if( bottomY < p.topPlatform.y ){
-					// fix coordinate 
-					p.y = p.topPlatform.y + p.height;
-					p.vy = 0;
-
-					// previous data is still valid
-					continue;
-				}
+			if( item instanceof Platform ){
+				this.platforms.push( item );
 			}
-
-			// prepare data correction for next iteration			
-			var topPlatform = false;
+			else if( item instanceof Player ){
+				this.players.push( item );
+			}
+			else if( item instanceof Light ){
+				this.lights.push( item );
+			}
+			else if( item instanceof Bullet ){
+				this.applyBulletToPlayers( item );
+				this.bullets.push( item );
+			}
+			else {
+				throw new Error('Unknown Type Added' );
+			}
+		},
+		updateEntities : function(dt){
+			for( var i = 0; i < this.players.length; ++ i ){
+				this.players[i].update(dt);
+			}
 			
-			for( var k = 0; k < this.platforms.length; ++ k ){
-				var q = this.platforms[k];
-
-				if( q.y > bottomY ) continue;
+		},
+		updateMods : function(dt){
+			for( var i = 0; i < this.players.length; ++ i ){
+				this.players[i].updateMod( dt );
+			}
+			
+			for( var i = 0; i < this.lights.length; ++ i ){
+				this.lights[i].updateMod( dt );
+			}
+			
+		},
+		fixCoordinate : function(){
+			function isInBetween( bottom, data , top ){
+				return bottem < data && data < top;
+			}
+			
+			function isInPlatformArea( platform, minX, maxX ){
+				return( 
+					(platform.x < minX && minX < platform.x + platform.width) || 
+					(platform.x < maxX && maxX < platform.x + platform.width) );
+			}
+			
+			for( var i = 0; i < this.players.length; ++ i ){
+				var p = this.players[i];
 				
-				if( isInPlatformArea(q, leftX, rightX ) ){
-					if( !topPlatform || topPlatform.y < q.y ) 
-						topPlatform = q;
+				// don't check if hero is moving up
+				if( p.vy > 0 ) continue;
+
+				// pre-calculation
+				var leftX = p.x;
+				var rightX = p.x + p.width;
+				
+				var bottomY = p.y - p.height;
+				
+				// if previous data is still valid
+				if( p.topPlatform && isInPlatformArea( p.topPlatform, leftX, rightX ) ){
+					// coordinate need to be fixed
+					if( bottomY < p.topPlatform.y ){
+						// fix coordinate 
+						p.y = p.topPlatform.y + p.height;
+						p.vy = 0;
+
+						// previous data is still valid
+						continue;
+					}
+				}
+
+				// prepare data correction for next iteration			
+				var topPlatform = false;
+				
+				for( var k = 0; k < this.platforms.length; ++ k ){
+					var q = this.platforms[k];
+
+					if( q.y > bottomY ) continue;
+					
+					if( isInPlatformArea(q, leftX, rightX ) ){
+						if( !topPlatform || topPlatform.y < q.y ) 
+							topPlatform = q;
+					}
+				}
+				
+				if( topPlatform == false ){
+					throw new Error('bottemless pit is found');
+				}
+				
+				p.topPlatform = topPlatform;
+				
+			}
+		},
+
+		timebuffer : 0,
+		update : function( real_dt ){
+			this.timebuffer += real_dt;
+
+			/** fix time update for consistency */
+			var dt = this.timestep;
+			
+			while( this.timebuffer > dt ){
+				this.updateEntities(dt);
+				this.fixCoordinate();
+				this.timebuffer -= dt;
+			}
+			
+			/** update that doesn't concern physical coordination */
+			this.updateMods( real_dt );
+
+			// removing dead stuff
+			for( var i = this.players.length; i --; ){
+				
+				if( this.players[i].hasRotten() ){
+					this.players.splice( i, 1 );
 				}
 			}
+		},
+		draw : function(ctx){
+			ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+			ctx.save();
+			ctx.translate( this.camera_x, this.camera_y );
 			
-			if( topPlatform == false ){
-				throw new Error('bottemless pit is found');
+			for( var i = 0; i < this.lights.length; ++ i ){
+				this.lights[i].draw(ctx);
+			}
+			for( var i = 0; i < this.platforms.length; ++ i ){
+				this.platforms[i].draw(ctx);
+			}
+			for( var i = 0; i < this.bullets.length; ++ i ){
+				this.bullets[i].draw(ctx);
 			}
 			
-			p.topPlatform = topPlatform;
-			
-		}
-	},
-
-	timebuffer : 0,
-	update : function( real_dt ){
-		this.timebuffer += real_dt;
-
-		/** fix time update for consistency */
-		var dt = this.timestep;
-		
-		while( this.timebuffer > dt ){
-			this.updateEntities(dt);
-			this.fixCoordinate();
-			this.timebuffer -= dt;
-		}
-		
-		/** update that doesn't concern physical coordination */
-		this.updateMods( real_dt );
-
-		// removing dead stuff
-		for( var i = this.players.length; i --; ){
-			
-			if( this.players[i].hasRotten() ){
-				this.players.splice( i, 1 );
+			/* draw dead players on top of living players */
+			for( var i = 0; i < this.players.length; ++ i ){
+				if( !this.players[i].isDead() ) 
+					this.players[i].draw(ctx);
 			}
-		}
-	},
-	draw : function(ctx){
-		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-		ctx.save();
-		ctx.translate( this.camera_x, this.camera_y );
+			for( var i = 0; i < this.players.length; ++ i ){
+				if( this.players[i].isDead() ) 
+					this.players[i].draw(ctx);
+			}
+			
+			/** draw mods */
+			for( var i = 0; i < this.players.length; ++ i ){
+				this.players[i].drawMod( ctx );
+			}
+			
+			ctx.restore();
+		},
 		
-		for( var i = 0; i < this.lights.length; ++ i ){
-			this.lights[i].draw(ctx);
-		}
-		for( var i = 0; i < this.platforms.length; ++ i ){
-			this.platforms[i].draw(ctx);
-		}
-		for( var i = 0; i < this.bullets.length; ++ i ){
-			this.bullets[i].draw(ctx);
-		}
-		
-		/* draw dead players on top of living players */
-		for( var i = 0; i < this.players.length; ++ i ){
-			if( !this.players[i].isDead() ) 
-				this.players[i].draw(ctx);
-		}
-		for( var i = 0; i < this.players.length; ++ i ){
-			if( this.players[i].isDead() ) 
-				this.players[i].draw(ctx);
-		}
-		
-		/** draw mods */
-		for( var i = 0; i < this.players.length; ++ i ){
-			this.players[i].drawMod( ctx );
-		}
-		
-		ctx.restore();
-	},
-	
-	/** 
-	 *  Ray Cast only to platforms for lighting convenience
-	 */
-	RayCast : function(option){
-		_extend( option, { walls : this.platforms });
-		
-		return RayCast( option ).range;
-	},
-	applyBulletToPlayers : function( bullet ){
-		var livingPlayer = [];
-		
-		for( var i = 0; i < this.players.length; ++ i ){
-			if( this.players[i].isDead() ) continue;
+		/** 
+		 *  Ray Cast only to platforms for lighting convenience
+		 */
+		RayCast : function(option){
+			_extend( option, { walls : this.platforms });
+			
+			return RayCast( option ).range;
+		},
+		applyBulletToPlayers : function( bullet ){
+			var livingPlayer = [];
+			
+			for( var i = 0; i < this.players.length; ++ i ){
+				if( this.players[i].isDead() ) continue;
 
-			livingPlayer.push( this.players[i] );
+				livingPlayer.push( this.players[i] );
+			}
+			
+			var option = {
+				x : bullet.x,
+				y : bullet.y,
+				tx : bullet.x + bullet.length,
+				ty : bullet.y,
+				walls : livingPlayer
+			};
+
+			var killedPlayer = RayCast(option).wall;
+			if( killedPlayer ) killedPlayer.die();
 		}
 		
-		var option = {
-			x : bullet.x,
-			y : bullet.y,
-			tx : bullet.x + bullet.length,
-			ty : bullet.y,
-			walls : livingPlayer
-		};
-
-		var killedPlayer = RayCast(option).wall;
-		if( killedPlayer ) killedPlayer.die();
 	}
-};
+});
 
 var Platform = Class({
 	_default : {
@@ -697,7 +697,8 @@ var Light = Class({
 		opacity : 1,
 		direction : 0, // in radian
 		width : Math.PI*2, // in radian
-		state : true // true for on and false of off
+		state : true, // true for on and false of off
+		mod : []
 	},
 	_private : {
 		turnOn : function(){
@@ -752,6 +753,7 @@ Light.extend( ModPrototype );
 
 var LightFlickeringMod = Class({
 	_default : {
+		name : "LightFlickeringMod",
 		offDuration : 1,
 		flickerDuration : 0.6,
 		flickerSpeed : 0.2
@@ -782,6 +784,7 @@ var LightFlickeringMod = Class({
 
 var LightSwingingMod = Class({
 	_default : {
+		name : "LightSwingingMod",
 		speed : 0.5,
 		angleDeviation : Math.PI/10,
 		angleBase : Math.PI,
@@ -801,6 +804,7 @@ var LightSwingingMod = Class({
 
 var SunFxMod = Class({
 	_default : {
+		name : "SunFxMod",
 		dayTime : 30, 
 		nightTime : 30,
 		switchTime : 3,
@@ -837,6 +841,9 @@ var SunFxMod = Class({
 });
 
 var reloadBarMod = Class({
+	_default : {
+		name : "reloadBarMod"
+	},
 	_constructor : function(){
 		this.UI = new CircularBarUI({
 			innerWidth : this.innerWidth,
