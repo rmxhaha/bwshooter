@@ -83,3 +83,8 @@ function adjustCanvas() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
 }
+
+document.getElementById("compile").addEventListener("click" ,function(){
+	window.open().document.write( JSON.stringify( world.getAllProperties() ) );
+});
+
