@@ -58,6 +58,21 @@ function _extend(x, y) {
  *  	}
  *  );
  */
+ 
+function copy( arr ){
+	if( typeof arr !== 'object' ) return arr;
+	if( arr.getAllProperties ){
+		return arr.getAllProperties();
+	}
+	
+	var all = [];
+	for( var i in arr ){
+		all[i] = copy( arr[i] );
+	}
+	
+	return all;
+}
+
 var Class = function(setup){
 	var s = _extend( { _default : [], _private : [], _constructor : function(){} }, setup );
 	
@@ -65,20 +80,6 @@ var Class = function(setup){
 		_extend( this, option );
 		s._constructor.bind( this )();
 	};
-	
-	function copy( arr ){
-		if( typeof arr !== 'object' ) return arr;
-		if( arr.getAllProperties ){
-			return arr.getAllProperties();
-		}
-		
-		var all = [];
-		for( var i in arr ){
-			all[i] = copy( arr[i] );
-		}
-		
-		return all;
-	}
 	
 	_extend( c.prototype, s._private );
 	_extend( c.prototype, s._default );
