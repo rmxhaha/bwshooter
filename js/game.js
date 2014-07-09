@@ -562,9 +562,11 @@ var Player = Class({
 				if( this.main ){
 					applyToScreen = function(){
 						ctx.fill();
+						
+						ctx.save();
 						ctx.globalAlpha = 0.2;
 						ctx.stroke();
-						ctx.globalAlpha = 1;
+						ctx.restore();;
 					}
 				}
 				else {
@@ -575,17 +577,17 @@ var Player = Class({
 							
 				ctx.translate( Math.floor( this.x ), -Math.floor( this.y ) );
 							
-				// draw body
 				ctx.beginPath();
-				ctx.moveTo( 45, 50 );
-				ctx.lineTo( 0, this.height );
-				ctx.lineTo( this.width, this.height );			
-				ctx.closePath();
-				applyToScreen();
-				
+
 				// draw head
 				ctx.beginPath();
 				ctx.arc( 45, 50,50,Math.PI*116.5/180,2.353*Math.PI);
+
+				// draw body
+				ctx.lineTo( this.width, this.height );			
+				ctx.lineTo( 0, this.height );
+				ctx.closePath();
+				
 				applyToScreen();
 				
 
