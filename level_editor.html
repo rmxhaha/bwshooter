@@ -9,10 +9,28 @@
 		top : 10px;
 		left : 10px;
 		color : red;
-	};
+	}
+	
+	#wrapper {
+		position : fixed;
+		z-index : 100;
+		top : 0;
+		left : 0;
+		display : none;
+	}
+	
+	#map {
+		margin : 0 auto;
+		width : 500px;
+		height : 300px;
+	}
 	</style>
 </head>
 <body>
+
+<div id=wrapper>
+	<textarea id=map></textarea>
+</div>
 
 <div class=tools>
 	<input type='radio' name='selected_tool' id=selected_tool value='addPlatform' checked />Add Platform
@@ -21,6 +39,7 @@
 	<input type='radio' name='selected_tool' id=selected_tool value='AddWhite' />Add White Spawn Point
 	<input type='radio' name='selected_tool' id=selected_tool value='Move' />Move
 	<input type='radio' name='selected_tool' id=selected_tool value='Remove' />Remove 
+	<button id=parse>Parse</button>
 	<button id=compile>Compile</button>
 </div>
 

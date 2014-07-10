@@ -59,6 +59,11 @@ world.camera_y = -800;
 document.getElementById("canvas").addEventListener( 'click', function(e){
 	mx = e.clientX;
 	my = e.clientY;
+	
+	// hide paste map textarea if click
+	document.getElementById("wrapper").style.display = "none";
+
+
 	var radios = document.getElementsByName('selected_tool');
 
 	var value = false;
@@ -74,11 +79,14 @@ document.getElementById("canvas").addEventListener( 'click', function(e){
 	case "addPlatform":
 		var option = {};
 		
-		option.width = parseInt( prompt("Width", '100' ) );
-		option.penetrable = ( prompt("penetrable", "true" ) == "true" ? 1 : 0 );
-		
+		// mouse related data must be stored before any prompt command
 		option.x = mx - world.camera_x;
 		option.y = -my + world.camera_y;
+
+		option.width = parseInt( prompt("Width", '300' ) );
+		option.penetrable = ( prompt("penetrable", "true" ) == "true" ? 1 : 0 );
+		
+		
 		
 		console.log( option );
 		
@@ -140,3 +148,21 @@ function adjustCanvas() {
 document.getElementById("compile").addEventListener("click" ,function(){
 	window.open().document.write( JSON.stringify( world.getAllProperties() ) );
 });
+
+document.getElementById("parse").addEventListener("click" ,function(){
+	document.getElementById("wrapper").style.display = "block";
+});
+
+document.getElementById("map").onpaste = function(){
+	// setTimeout hack to let the pasted data in first
+	
+	setTimeout( function(){
+		world = new World;
+		map = JSON.parse( document.getElementById("map").value );
+		parseMap( world, map );
+
+		document.getElementById("wrapper").style.display = "none";	
+	}, 0 );
+};
+
+
