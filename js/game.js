@@ -270,7 +270,7 @@ var World = Class({
 	_default : {
 		camera_x : 0,
 		camera_y : 0,
-		gravity : 800,
+		gravity : 1000,
 		players : [],
 		platforms : [],
 		lights : [],
@@ -634,7 +634,7 @@ var Player = Class({
 		},
 		jump : function(){
 			if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
-				this.vy = 600;
+				this.vy = 800;
 			}
 		},
 		goLeft : function(){
@@ -762,7 +762,7 @@ Light.extend( ModPrototype );
 var LightFlickeringMod = Class({
 	_default : {
 		name : "LightFlickeringMod",
-		offDuration : 1,
+		onDuration : 1,
 		flickerDuration : 0.6,
 		flickerSpeed : 0.2
 	},
@@ -774,7 +774,7 @@ var LightFlickeringMod = Class({
 			this.time += dt;
 			
 			// round it down
-			this.time %= this.flickerDuration + this.offDuration;
+			this.time %= this.flickerDuration + this.onDuration;
 			
 			if( this.time < this.flickerDuration ){
 				if( Math.floor( this.time / this.flickerSpeed ) % 2 == 0 ) 
@@ -782,8 +782,8 @@ var LightFlickeringMod = Class({
 				else 
 					light.turnOff();
 			}
-			else { // time < flickerDuration + offDuration
-				light.turnOff();
+			else { // time < flickerDuration + onDuration
+				light.turnOn();
 			}
 			
 		}
