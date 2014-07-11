@@ -270,7 +270,6 @@ var World = Class({
 	_default : {
 		camera_x : 0,
 		camera_y : 0,
-
 		gravity : 800,
 		players : [],
 		platforms : [],
@@ -377,19 +376,28 @@ var World = Class({
 			}
 		},
 
+		physicOn : true,
+		turnOffPhysic : function(){
+			physicOn = false;
+		},
+		turnOnPhysic : function(){
+			physicOn = true;
+		},
 		timebuffer : 0,
 		update : function( real_dt ){
 			this.timebuffer += real_dt;
-
+			
 			/** fix time update for consistency */
 			var dt = this.timestep;
 			
-			while( this.timebuffer > dt ){
-				this.updateEntities(dt);
-				this.fixCoordinate();
-				this.timebuffer -= dt;
+			if( this.physicOn ){
+				while( this.timebuffer > dt ){
+					this.updateEntities(dt);
+					this.fixCoordinate();
+					this.timebuffer -= dt;
+				}
 			}
-			
+				
 			/** update that doesn't concern physical coordination */
 			this.updateMods( real_dt );
 
