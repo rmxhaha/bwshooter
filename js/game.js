@@ -510,7 +510,6 @@ var Player = Class({
 		vy : 0,
 		vx : 0,
 		/**
-		 *  Player class	
 		 *   @param type 
 		 *  	0 for black 
 		 *  	1 for white
@@ -518,13 +517,25 @@ var Player = Class({
 		 */
 		type : 0, 
 		/**
+		 * @param state  
+		 * 		0 for standing still
+		 *		1 for walking
+		 *		2 for sprinting
+		 */
+		state : 0 ,
+		sideRight : true
+
+	},
+	_private : {
+		/**
 		 *   @param main
 		 *  	state whether this player is being played the user
 		 */
-	},
-	_private : {
 		main : false,
-		walkVelocity : 150,
+
+		walkVelocity : 300,
+		sprintVelocity : 450,
+
 		/** a time duration before the body is removed from the world*/
 		rotDuration : 2,
 		hasRotten : function(){
@@ -618,7 +629,6 @@ var Player = Class({
 
 			ctx.restore();
 		},
-		sideRight : true, 
 		topPlatform : false,
 		width : 90,
 		height : 140,
@@ -626,8 +636,23 @@ var Player = Class({
 			if( this.isDead() ){
 				return;
 			}
+			
+			var movementDirection = ( this.sideRight ? 1 : -1 );
+			
+			switch( this.state ){
+			case 0:
+				this.vx = 0;
+				break;
+			case 1:
+				this.vx = movementDirection * this.walkVelocity;
+				break;
+			case 2:
+				this.vx =  movementDirection * this.sprintVelocity;
+				break;
+			}
 
 			this.vy -= this.world.gravity * dt;
+
 			this.x += this.vx * dt;
 			this.y += this.vy * dt;
 			
@@ -639,14 +664,26 @@ var Player = Class({
 		},
 		goLeft : function(){
 			if ( this.isDead() ) return;
-			this.vx = -this.walkVelocity;
+			this.walk();
 			this.sideRight = false;
 		},
 		goRight : function(){
 			if ( this.isDead() ) return;
-			this.vx = this.walkVelocity;
+			this.walk();
 			this.sideRight = true;		
 		},
+		standStill : function(){
+			this.state = 0;
+		},
+		walk : function(){
+			this.state = 1;
+		},
+		sprint : function(){
+			this.state = 2;
+		},
+		isWalking : function(){ return this.state == 1; },
+		isSprinting : function(){ return this.state == 2; },
+		isStandingStill : function(){ return this.state == 0; },
 		fall : function(){
 			if( !this.topPlatform.penetrable ) return;
 			

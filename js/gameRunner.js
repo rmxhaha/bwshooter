@@ -106,6 +106,9 @@ var keyDownPressed = false;
 
 window.addEventListener("keydown", function(event){
 	switch( event.keyCode ){
+	case 16:
+		if( one.isWalking() ) one.sprint();
+		break;
 	case 17: // ctrl
 	case 88: // X
 		one.shoot();
@@ -136,8 +139,10 @@ window.addEventListener("keyup", function(event){
 	switch( event.keyCode ){
 	case 37: // left
 	case 39: // right
-		one.vx = 0;
+		one.standStill();
 		break;
+	case 16:
+		if( one.isSprinting() ) one.walk();
 	case 40:
 		keyDownPressed = false;
 	}
