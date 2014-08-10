@@ -72,7 +72,7 @@ var map = {
 	players : [
 		{ x : -200, y : 500, type : 1 },
 		{ x : 400, y : 500, type : 0 },
-		{ x : 0, y : 500, type : 1, main : true, mod : [ { name : "reloadBarMod" } ] }
+		{ x : 0, y : 500, type : 1, main : true, mod : [ { name : "reloadBarMod" }, { name : "BulletPredictionLineMod" } ] }
 	],
 	lights : [
 		{ x :  400, y : 160, 	rayCount : 800, maxRange : 1000, width : 1, color : "white", mod : [ {name : "LightSwingingMod", speed : 0.2 }, { name : "SunFxMod", dayTime : 10, nightTime : 10} ] },

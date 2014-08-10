@@ -157,6 +157,8 @@ CircularBarUI.prototype = {
 	}
 };
 
+
+
 var Time = function () {
 	this.time = new Date();
 	this.reset = function () {
@@ -625,8 +627,9 @@ var Player = Class({
 			ctx.lineTo( 92, 102 );
 			ctx.lineTo( 87, 112 );
 			ctx.closePath();
+			
 			applyToScreen();
-
+						
 			ctx.restore();
 		},
 		topPlatform : false,
@@ -923,7 +926,6 @@ var reloadBarMod = Class({
 	}
 });
 
-
 var Bullet = Class({
 	_default : {
 		x : 0,
@@ -955,4 +957,35 @@ var Bullet = Class({
 		this.timeFired = new Date();
 	}
 });
+
+var BulletPredictionLineMod = Class({
+	_default : {
+		name : "BulletPredictionLineMod",
+		bulletRange : Bullet.prototype.length,
+		bulletHeight : Bullet.prototype.initHeight/2
+	},
+	_private : {
+		draw : function( ctx ){
+			// drawing prediction bullet line
+			var bulletRange = this.bulletRange;
+			var bulletHeight = this.bulletHeight;
+			var bulletCoordinate = this.object.getGunCoordinate();
+
+			console.log( bulletHeight );
+			
+			if( !this.object.sideRight ){
+				bulletCoordinate.x -= bulletRange;
+			}
+			
+			ctx.globalAlpha = 0.3;
+			ctx.fillStyle = "red";
+			
+			ctx.save();
+			ctx.translate( bulletCoordinate.x, - bulletCoordinate.y );
+			ctx.fillRect( 0, - bulletHeight/2, bulletRange, bulletHeight );
+			ctx.restore();
+		}
+	}
+});
+
 
