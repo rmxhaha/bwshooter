@@ -7,5 +7,5 @@ Arrow Right -----------> Move right
 Space / Arrow Up / C --> Jump
 Arrow Down + Space ----> Fall
 Ctrl / X --------------> Shoot
-
+Shift    --------------> Sprint
 Enjoy !
