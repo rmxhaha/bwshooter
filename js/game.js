@@ -25,6 +25,11 @@
  *  		setProperties : function
  *  		object : {}  # pointer to the object that runs this mod
  *  	}
+ *	Data to fetch
+ *		- death flag
+ *		- Bullet, Hero spawn
+ *		- map data
+ *		- change light flag
  */
 
  var global = ( global ? global : window );
@@ -380,10 +385,10 @@ var World = Class({
 
 		physicOn : true,
 		turnOffPhysic : function(){
-			physicOn = false;
+			this.physicOn = false;
 		},
 		turnOnPhysic : function(){
-			physicOn = true;
+			this.physicOn = true;
 		},
 		timebuffer : 0,
 		update : function( real_dt ){
