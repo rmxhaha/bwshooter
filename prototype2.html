@@ -1,0 +1,162 @@
+<html>
+<head>
+	<title>Bwshooter Prototype</title>
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+
+<canvas id=canvas></canvas>
+<script src="js/game3.js"></script>
+<script>
+var context = document.getElementById("canvas").getContext("2d");
+var world = new World;
+
+function parseMap( world, map ){
+	for( var i in map.platforms ){
+		world.add( new Platform( map.platforms[i] ) );
+	}
+
+	for( var i in map.players ){
+		var modSetup = map.players[i].mod;
+		var p = new Player( map.players[i] );
+		
+		
+		if( p.main ) {
+			one = p;
+		}
+		
+		// don't worry; it won't give an error even is modSetup is undefined or a number
+		for( var x in modSetup ){			
+			modSetup[x].object = p; // set pointer to current object
+			world.mods.addMod( modSetup[x] );
+		}
+		
+		world.add(p);
+	}
+	
+	for( var i in map.lights ){
+		var modSetup = map.lights[i].mod;
+		var L = new Light( map.lights[i] );
+		
+		// don't worry; it won't give an error even is modSetup is undefined or a number
+		for( var x in modSetup ){
+			modSetup[x].object = L;
+			world.mods.addMod( modSetup[x] );
+		}
+		
+		world.add( L );
+	}
+}
+
+var one = false;
+function focusCamera(){
+	world.camera_x = -one.x + window.innerWidth/2 - one.width/2;
+	world.camera_y = one.y + window.innerHeight/2 - one.height/2;
+}
+
+var map = {
+	platforms : [
+		{ x : -5000, y : -250, width : 10000 },
+
+		{ x : -800, y : 0, width : 300 },
+		{ x : -550, y : 200, width : 300 },
+
+		{ x : -200, y : -50, width : 400 },
+
+		{ x : 500, y : 0, width : 300 },
+		{ x : 250, y : 200, width : 300 }
+	],
+	players : [
+		{ x : -200, y : 500, type : 1 },
+		{ x : 400, y : 500, type : 0 },
+		{ x : 0, y : 500, type : 1, main : true, mod : [ { name : "reloadBarMod" }, { name : "BulletPredictionLineMod" } ] }
+	],
+	lights : [
+		{ x :  400, y : 160, 	rayCount : 800, maxRange : 1000, width : 1, color : "white", mod : [ {name : "LightSwingingMod", speed : 0.2 }, { name : "SunFxMod", dayTime : 10, nightTime : 10} ] },
+		{ x : -400, y : 160, 	rayCount : 800, maxRange : 1000, width : 1, color : "white", mod : [ {name : "LightSwingingMod", speed : 0.3 }, { name : "SunFxMod", dayTime : 10, nightTime : 10} ] },
+		{ x : 0, 	y : 3000, 	rayCount : 4000, maxRange : 5000, color : "white", mod : [{ name : "SunFxMod", dayTime : 10, nightTime : 10, time : 13 }] },
+		{ x : -240, y : 185, 	rayCount : 400, maxRange : 1000, width : 0.8, direction : 2.5, color : "white", mod : [{ name : "SunFxMod", dayTime : 10, nightTime : 10, time : 0 }, {name :"LightFlickeringMod", onDuration : 3, flickerDuration : 0.7, flickerSpeed : 0.1 }] },
+		{ x : 240, y : 185, 	rayCount : 400, maxRange : 1000, width : 0.8, direction : 3.8, color : "white", mod : [{ name : "SunFxMod", dayTime : 10, nightTime : 10, time : 0 }, {name :"LightFlickeringMod", onDuration : 3, flickerDuration : 0.7, flickerSpeed : 0.1, time : 1 }] }
+	]
+}
+parseMap( world, map );
+
+
+var timer = new Time;
+function loop() {
+	var dt = timer.reset() / 1000;
+
+	world.update(dt);
+	focusCamera();
+	world.draw(context);
+	
+	requestAnimationFrame(loop);
+}
+
+var keyDownPressed = false;
+
+window.addEventListener("keydown", function(event){
+	switch( event.keyCode ){
+	case 16:
+		if( one.isWalking() ) one.sprint();
+		break;
+	case 17: // ctrl
+	case 88: // X
+		one.shoot();
+		break;
+	case 37: // left
+		one.goLeft();
+		break;
+	case 39: // right
+		one.goRight();
+		break;
+	case 38: // up
+	case 32: // spacebar
+	case 67: // C
+		if( !keyDownPressed ){
+			one.jump();
+		}
+		else {
+			one.fall();
+		}
+		break;
+	case 40: // down
+		keyDownPressed = true;
+		break;
+	}
+});
+
+window.addEventListener("keyup", function(event){
+	switch( event.keyCode ){
+	case 37: // left
+	case 39: // right
+		one.standStill();
+		break;
+	case 16:
+		if( one.isSprinting() ) one.walk();
+	case 40:
+		keyDownPressed = false;
+	}
+});
+
+window.addEventListener("load", function () {
+//	console.log( JSON.stringify( world.getAllProperties() ) );
+	
+	adjustCanvas();
+	loop();
+});
+
+window.addEventListener("resize", function () {
+	adjustCanvas();
+});
+
+function adjustCanvas() {
+	var canvas = document.getElementById("canvas");
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+}
+
+</script>
+
+</body>
+</html>
