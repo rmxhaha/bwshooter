@@ -1,4 +1,24 @@
+/********************************
+* Revival Version of Black White Shooter project 
+* 	Rewriting the code to use backbone MVC
+*	All logic will be maintained
+*	
+* Author 			: rmxhaha 
+*********************************/
+
 (function(global){
+	/********************************
+	* KeyboardPlayerController
+	* Control Player By Keyboard using this class
+	*
+	* Example
+	
+	var Player = new Player( ... );
+	var KeyController = new KeyboardPlayerController( player );
+	
+	* Author 	: rmxhaha 
+	* Date  	: 24 May 2015
+	*********************************/
 	var KeyboardPlayerController = (function(){
 		var KeyboardPlayerController = function( Player ){
 			this.model = player;
@@ -61,7 +81,19 @@
 	})();
 
 
-	// for multiplayer 
+	/********************************
+	* KeyboardPlayerController
+	* Control Player from server data from other player for multiplayer purpose
+	*
+	* Example
+	
+	var Player = new Player( ... );
+	var RemoteController = new RemotePlayerController( player );
+	RemoteController.update( *dataFromServer* );
+	
+	* Author 	: rmxhaha 
+	* Date  	: 24 May 2015
+	*********************************/
 	var RemotePlayerController = (function(){
 		var RemotePlayerController = function( player ){
 			this.model = player;
@@ -77,7 +109,7 @@
 			for( var i = 0; i < logs.length; ++ i ){
 				var cmd = logs[i];
 				
-				if( cmd[0] == 'M' )
+				if( cmd[0] == 'm' )
 			}
 		}
 		
