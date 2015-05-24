@@ -58,3 +58,27 @@ var KeyboardPlayerController = (function(){
 	
 	return KeyboardPlayerController;
 })();
+
+
+// for multiplayer 
+var RemotePlayerController = (function(){
+	var RemotePlayerController = function( player ){
+		this.model = player;
+		this.lastCommandTime = new Date();
+		this.init();
+	}
+	
+	RemotePlayerController.prototype.init = function(){
+		var player = this.model;
+	}
+	
+	RemotePlayerController.prototype.update = function( logs ){
+		for( var i = 0; i < logs.length; ++ i ){
+			var cmd = logs[i];
+			
+			if( cmd[0] == 'M' )
+		}
+	}
+	
+	return RemotePlayerController;
+})();
