@@ -57,12 +57,12 @@
 		return arr;
 	}
 	
-	var Bool7ToChar = function(){
-		var L = Math.min( arguments.length, 7 );
+	var Bool7ToChar = function( arr ){
+		var L = Math.min( arr.length, 7 );
 		var bin = 0;
 		
 		for( var i = 0; i < L; ++ i ){
-			var b = arguments[i];
+			var b = arr[i];
 			bin += b << i;
 		}
 		
@@ -74,12 +74,131 @@
 		
 		console.log(
 			CharToBool7(
-				Bool7ToChar( true, true, true, true, true, false, true )
+				Bool7ToChar( [true, true, true, true, true, false, true] )
 			)
 		);
 	*/
 	
+	function copy( arr ){
+		if( typeof arr !== 'object' ) return arr;
+		var all = ( arr instanceof Array ? [] : {});
+		for( var i in arr ){
+			all[i] = copy( arr[i] );
+		}
+		
+		return all;
+	}
 
+	// binary <-> class converter
+	var BCConverter = (function(){
+		var BCConverter = function( dataOrder ){
+			var corder = copy( dataOrder ); 
+
+			var getName = function(y){ return y.name };
+			
+			this.boolArr = corder.filter(function(x){ return x.type == BCConverter.type.BOOLEAN }).map(getName).sort();
+			this.numArr = corder.filter(function(x){ return x.type == BCConverter.type.NUMBER }).map(getName).sort();
+			this.strArr = corder.filter(function(x){ return x.type == BCConverter.type.STRING }).map(getName).sort();
+
+			/**
+				Example : 
+				[
+					{ name : 'str', type : enum type },
+					{ name : 'str2', type : enum type }
+				]
+			*/
+		}
+
+		BCConverter.type = {
+			NUMBER : 0,
+			STRING : 1,
+			BOOLEAN : 2
+		};
+		
+		BCConverter.prototype.convertToBin = function( obj ){
+			if( typeof obj !== 'object' ) return false;
+			
+			function checkType( paramNames, obj, type ){
+				for( var i = 0; i < paramNames.length; ++ i ){
+					var name = paramNames[i];
+					if( typeof obj[ name ] !== type ){
+						throw new Error('parameter ' + name + ' is not a ' + type + ' as stated');
+					}
+				}
+			}
+			
+			// check if all the names that will be copied is with the right type
+			checkType( this.boolArr, obj, 'boolean' );
+			checkType( this.strArr, obj, 'string' );
+			checkType( this.numArr, obj, 'number' );
+			
+			/**
+				write order 
+				1. boolean
+				2. number 
+				3. string
+			*/
+			var binOut = "";
+			
+			var p = 0;
+			var i = 0;
+			while( p < this.boolArr.length ){
+				var arr = [];
+
+				var k = 0;
+				for( ; k < 7 && p < this.boolArr.length; ++ k, ++ p )
+				{
+					arr[k] = obj[ this.boolArr[i*7+k] ]
+				}
+				// to fill excess bool7 space with false
+				for( ; k < 7; ++ k ){
+					arr[k] = false;
+				}
+				
+				++ i;
+				binOut += Bool7ToChar( arr );
+			}
+			
+			return binOut;
+		}
+		
+		/**
+		Boolean test
+
+		var cvt = new BCConverter([
+			{name : 'a', type : BCConverter.type.BOOLEAN },
+			{name : 'b', type : BCConverter.type.BOOLEAN },
+			{name : 'c', type : BCConverter.type.BOOLEAN },
+			{name : 'd', type : BCConverter.type.BOOLEAN },
+			{name : 'e', type : BCConverter.type.BOOLEAN },
+			{name : 'f', type : BCConverter.type.BOOLEAN },
+			{name : 'g', type : BCConverter.type.BOOLEAN },
+			{name : 'h', type : BCConverter.type.BOOLEAN },
+			{name : 'i', type : BCConverter.type.BOOLEAN },
+			{name : 'j', type : BCConverter.type.BOOLEAN }
+		]);
+		
+		console.log( 
+			CharToBool7(cvt.convertToBin(
+				{
+					a : false,
+					b : true,
+					c : true,
+					d : true,
+					e : false,
+					f : true,
+					g : true,
+					h : true,
+					i : true,
+					j : true
+				}
+			)[1] )
+		);
+		*/
+		
+		return BCConverter;
+	})();
+	
 })( this );
 
 
