@@ -169,7 +169,7 @@
 			
 			// string
 			for( var i = 0; i < this.strArr.length; ++ i ){
-				var str = this.strArr[i];
+				var str = obj[ this.strArr[i] ];
 				binOut += IntToBin( str.length );
 				binOut += str;
 			}
@@ -212,6 +212,7 @@
 		);
 		*/
 		
+		/**
 		//Integer Test
 		var cvt = new BCConverter([
 			{ name : 'a', type : BCConverter.type.NUMBER },
@@ -222,11 +223,25 @@
 			BinToInt( 
 				cvt.convertToBin(
 					{a : 32320, b : 434093 }
-				), 0
+				), 4
 			)
 		);
+		*/
 		
 		/**
+		//string test
+		var cvt = new BCConverter([
+			{name : 'a', type : BCConverter.type.STRING },
+			{name : 'b', type : BCConverter.type.STRING }
+		]);
+		
+		
+		console.log(
+			cvt.convertToBin({
+				a : 'asdfg',
+				b : 'fsda'
+			})[4]
+		);
 		*/
 		
 		return BCConverter;
