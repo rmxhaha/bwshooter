@@ -21,7 +21,7 @@
 			limit + (num / range) % range,
 			limit + (num / range / range) % range,
 			limit + (num / range / range / range) % range,
-			limit + (num / range / range / range / range) % range,
+			limit + (num / range / range / range / range) % range
 		);
 	}
 
@@ -48,17 +48,18 @@
 	global.BinToInt = BinToInt;
 	global.IntToBin = IntToBin;
 	
-	/**
 	
-	Test Code for bin to int
+	/**
+	//Test Code for bin to int
 
 	for( var i = 2000000; i--; ){
-		var pick = Math.floor( Math.random() * 224 * 224 * 224 * 224 );
+		var pick = Math.floor( Math.random() * 224 * 224 * 224 * 224 * 224 - 224 * 224 * 224 * 224 * 224/2 );
 		if( BinToInt( IntToBin( pick )) !== pick ){
 			console.log( pick );
 		}
 	}
-
+	
+	console.log('R');
 	*/
 
 	var CharToBool7 = function( c ){
@@ -219,7 +220,7 @@
 				}
 			}
 			
-			var n = this.numArr.length * 4;
+			var n = this.numArr.length * 5;
 			
 			if( bin.length < ptr + n ){ // the amount of data given is not correct
 				throw new Error('Data is corrupted');
@@ -228,7 +229,7 @@
 			for( var i = 0; i < this.numArr.length; ++ i ){
 				var name = this.numArr[i];
 				obj[name] = BinToInt( bin, ptr );
-				ptr += 4;
+				ptr += 5;
 			}
 			
 			
@@ -236,7 +237,7 @@
 			for( var i = 0; i < this.strArr.length; ++ i ){				
 				var name = this.strArr[i];
 				var length = BinToInt( bin, ptr );
-				ptr += 4;
+				ptr += 5;
 
 				obj[name] = bin.substr( ptr, length );
 				ptr += length;
@@ -312,29 +313,29 @@
 		*/
 		
 		
-		var cvt = new BCConverter([
-			{ name : 'name', type : BCConverter.type.STRING },
-			{ name : 'age', type : BCConverter.type.NUMBER },
-			{ name : 'ismarried', type :BCConverter.type.BOOLEAN },
-			{ name : 'lol', type : BCConverter.type.STRING }
-		]);
-		
-		console.log( 
-			cvt.convertToClass(
-			cvt.convertToBin(
-				{ name : 'Rmxhaha', age : 21, ismarried : false, lol : 'boset' }
-			)
-			)
-		);
-		console.log(
-			cvt.convertToBin(
-				{ name : 'Rmxhaha', age : 21, ismarried : false, lol : 'boset' }
-			).length
-		);
-			
 		
 		return BCConverter;
 	})();
+
+	var cvt = new BCConverter([
+		{ name : 'name', type : BCConverter.type.STRING },
+		{ name : 'age', type : BCConverter.type.NUMBER },
+		{ name : 'ismarried', type :BCConverter.type.BOOLEAN },
+		{ name : 'lol', type : BCConverter.type.STRING }
+	]);
+
+	console.log( 
+		cvt.convertToClass(
+		cvt.convertToBin(
+			{ name : 'Rmxhaha', age : 320, ismarried : false, lol : 'boset' }
+		)
+		)
+	);
+	console.log(
+		cvt.convertToBin(
+			{ name : 'Rmxhaha', age : 21, ismarried : false, lol : '' }
+		).length
+	);
 	
 })( this );
 
