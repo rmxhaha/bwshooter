@@ -25,16 +25,16 @@
 			(binarr[s+1].charCodeAt(0) - limit) * range +
 			(binarr[s+2].charCodeAt(0) - limit) * range * range +
 			(binarr[s+3].charCodeAt(0) - limit) * range * range * range;
-
+	
 		return number;
 	}
 	
 	global.BinToInt = BinToInt;
 	global.IntToBin = IntToBin;
-
+	
 	/**
 	
-	Test Code 
+	Test Code for bin to int
 
 	for( var i = 2000000; i--; ){
 		var pick = Math.floor( Math.random() * 224 * 224 * 224 * 224 );
@@ -44,6 +44,42 @@
 	}
 
 	*/
+
+	var CharToBool7 = function( c ){
+		var arr = [];
+		arr.length = 7;
+
+		c = c.charCodeAt(0) - 32;
+		for( var i = 0; i < 7; ++ i ){
+			arr[i] = (c >> i) & 1;
+		}
+		
+		return arr;
+	}
+	
+	var Bool7ToChar = function(){
+		var L = Math.min( arguments.length, 7 );
+		var bin = 0;
+		
+		for( var i = 0; i < L; ++ i ){
+			var b = arguments[i];
+			bin += b << i;
+		}
+		
+		return String.fromCharCode( bin + 32 );
+	}
+	
+	/**
+		Test char to 7 boolean
+		
+		console.log(
+			CharToBool7(
+				Bool7ToChar( true, true, true, true, true, false, true )
+			)
+		);
+	*/
+	
+
 })( this );
 
 
