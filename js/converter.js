@@ -178,6 +178,57 @@
 			return binOut;
 		}
 		
+		BCConverter.prototype.convertToClass = function( bin ){
+			if( typeof bin !== 'string' ) 
+				throw new Error('binary data is not in the form of string');
+
+			var obj = {};
+			
+			var ptr = 0;
+			
+			var n = Math.ceil( this.boolArr.length / 7 );
+
+			if( bin.length < ptr + n ){ // the amount of data given is not correct
+				throw new Error('Data is corrupted');
+			}
+
+			var p = 0;
+			for( var c = 0; c < n; ++ c )
+			{
+				var arr = CharToBool7( bin[ptr ++ ] );
+				for( var i = 0; p < this.boolArr.length && i < 7; ++ p, ++i )
+				{
+					var name = this.boolArr[p];
+					obj[name] = arr[i];
+				}
+			}
+			
+			var n = this.numArr.length * 4;
+			
+			if( bin.length < ptr + n ){ // the amount of data given is not correct
+				throw new Error('Data is corrupted');
+			}
+			
+			for( var i = 0; i < this.numArr.length; ++ i ){
+				var name = this.numArr[i];
+				obj[name] = BinToInt( bin, ptr );
+				ptr += 4;
+			}
+			
+			
+			// error message not coded yet
+			for( var i = 0; i < this.strArr.length; ++ i ){				
+				var name = this.strArr[i];
+				var length = BinToInt( bin, ptr );
+				ptr += 4;
+
+				obj[name] = bin.substr( ptr, length );
+				ptr += length;
+			}
+			
+			return obj;
+		}
+
 		/**
 		Boolean test
 
@@ -243,6 +294,28 @@
 			})[4]
 		);
 		*/
+		
+		
+		var cvt = new BCConverter([
+			{ name : 'name', type : BCConverter.type.STRING },
+			{ name : 'age', type : BCConverter.type.NUMBER },
+			{ name : 'ismarried', type :BCConverter.type.BOOLEAN },
+			{ name : 'lol', type : BCConverter.type.STRING }
+		]);
+		
+		console.log( 
+			cvt.convertToClass(
+			cvt.convertToBin(
+				{ name : 'Rmxhaha', age : 21, ismarried : false, lol : 'boset' }
+			)
+			)
+		);
+		console.log(
+			cvt.convertToBin(
+				{ name : 'Rmxhaha', age : 21, ismarried : false, lol : 'boset' }
+			).length
+		);
+			
 		
 		return BCConverter;
 	})();
