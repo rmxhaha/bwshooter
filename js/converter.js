@@ -138,8 +138,10 @@
 				2. number 
 				3. string
 			*/
+			
 			var binOut = "";
 			
+			// boolean
 			var p = 0;
 			var i = 0;
 			while( p < this.boolArr.length ){
@@ -158,6 +160,20 @@
 				++ i;
 				binOut += Bool7ToChar( arr );
 			}
+			
+			// integer 
+			for( var i = 0; i < this.numArr.length; ++ i ){
+				var num = obj[ this.numArr[i] ];
+				binOut += IntToBin( num );
+			}
+			
+			// string
+			for( var i = 0; i < this.strArr.length; ++ i ){
+				var str = this.strArr[i];
+				binOut += IntToBin( str.length );
+				binOut += str;
+			}
+			
 			
 			return binOut;
 		}
@@ -194,6 +210,23 @@
 				}
 			)[1] )
 		);
+		*/
+		
+		//Integer Test
+		var cvt = new BCConverter([
+			{ name : 'a', type : BCConverter.type.NUMBER },
+			{ name : 'b', type : BCConverter.type.NUMBER }
+		]);
+		
+		console.log( 
+			BinToInt( 
+				cvt.convertToBin(
+					{a : 32320, b : 434093 }
+				), 0
+			)
+		);
+		
+		/**
 		*/
 		
 		return BCConverter;
