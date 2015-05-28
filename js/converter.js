@@ -3,12 +3,25 @@
 		var q = 256;
 		var limit = 32; // below 32 then it's not converting into 1 character 
 		var range = q - limit;
+		var maxVal = range * range * range * range * range / 2;
+
+		if( num > maxVal ){
+			throw new Error('number exceed limitation');
+		}
+		else if( num < -maxVal ){
+			throw new Error('number exceed limitation');
+		}
+		else {
+			num += maxVal;
+		}
+		
 
 		return String.fromCharCode(
 			limit + num % range,
 			limit + (num / range) % range,
 			limit + (num / range / range) % range,
-			limit + (num / range / range / range) % range
+			limit + (num / range / range / range) % range,
+			limit + (num / range / range / range / range) % range,
 		);
 	}
 
@@ -19,12 +32,15 @@
 		var q = 256;
 		var limit = 32;  
 		var range = q - limit;
+		var maxVal = range * range * range * range * range / 2;
 
 		var number = 
 			(binarr[s+0].charCodeAt(0) - limit) + 
 			(binarr[s+1].charCodeAt(0) - limit) * range +
 			(binarr[s+2].charCodeAt(0) - limit) * range * range +
-			(binarr[s+3].charCodeAt(0) - limit) * range * range * range;
+			(binarr[s+3].charCodeAt(0) - limit) * range * range * range +
+			(binarr[s+4].charCodeAt(0) - limit) * range * range * range * range 
+			- maxVal;
 	
 		return number;
 	}
