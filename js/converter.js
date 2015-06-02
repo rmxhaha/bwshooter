@@ -1,3 +1,5 @@
+var Backbone = require('Backbone');
+
 (function(global){
 	var IntToBin = function( num ){
 		var q = 256;
@@ -60,8 +62,7 @@
 	}
 	
 	console.log('R');
-	*/
-
+*/
 	var CharToBool7 = function( c ){
 		var arr = [];
 		arr.length = 7;
@@ -134,11 +135,18 @@
 		
 		BCConverter.prototype.convertToBin = function( obj ){
 			if( typeof obj !== 'object' ) return false;
+
+			function get( obh, index ){
+				if( typeof Backbone !== 'undefined' && obj instanceof Backbone.Model )
+					return obj.get( index );
+				else 
+					return obj[ index ];
+			}
 			
 			function checkType( paramNames, obj, type ){
 				for( var i = 0; i < paramNames.length; ++ i ){
 					var name = paramNames[i];
-					if( typeof obj[ name ] !== type ){
+					if( typeof get( obj, name ) !== type ){
 						throw new Error('parameter ' + name + ' is not a ' + type + ' as stated');
 					}
 				}
@@ -167,7 +175,7 @@
 				var k = 0;
 				for( ; k < 7 && p < this.boolArr.length; ++ k, ++ p )
 				{
-					arr[k] = obj[ this.boolArr[i*7+k] ]
+					arr[k] = get( obj, this.boolArr[i*7+k] );
 				}
 				// to fill excess bool7 space with false
 				for( ; k < 7; ++ k ){
@@ -180,13 +188,13 @@
 			
 			// integer 
 			for( var i = 0; i < this.numArr.length; ++ i ){
-				var num = obj[ this.numArr[i] ];
+				var num = get( obj, this.numArr[i] );
 				binOut += IntToBin( num );
 			}
 			
 			// string
 			for( var i = 0; i < this.strArr.length; ++ i ){
-				var str = obj[ this.strArr[i] ];
+				var str = get( obj, this.strArr[i] );
 				binOut += IntToBin( str.length );
 				binOut += str;
 			}
@@ -246,6 +254,7 @@
 			return obj;
 		}
 
+		
 		/**
 		Boolean test
 
@@ -317,6 +326,7 @@
 		return BCConverter;
 	})();
 
+	
 	var cvt = new BCConverter([
 		{ name : 'name', type : BCConverter.type.STRING },
 		{ name : 'age', type : BCConverter.type.NUMBER },
@@ -324,6 +334,16 @@
 		{ name : 'lol', type : BCConverter.type.STRING }
 	]);
 
+	
+	var User = Backbone.Model.extend({
+		defaults : {
+			name : 'rmxhaha',
+			age : 15,
+			ismarried : false,
+			lol : 'asdf'
+		}
+	});
+	
 	console.log( 
 		cvt.convertToClass(
 		cvt.convertToBin(
@@ -331,11 +351,16 @@
 		)
 		)
 	);
+	
 	console.log(
-		cvt.convertToBin(
-			{ name : 'Rmxhaha', age : 21, ismarried : false, lol : '' }
-		).length
+		cvt.convertToClass(
+			cvt.convertToBin(
+				new User
+			)
+		)
 	);
+	
+	
 	
 })( this );
 
