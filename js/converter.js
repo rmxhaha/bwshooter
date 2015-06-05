@@ -1,48 +1,26 @@
 var Backbone = require('Backbone');
-
+var lz_string = require('./lz-string.js');
 (function(global){
 	var IntToBin = function( num ){
-		var q = 256;
-		var limit = 32; // below 32 then it's not converting into 1 character 
-		var range = q - limit;
-		var maxVal = range * range * range * range * range / 2;
-
-		if( num > maxVal ){
-			throw new Error('number exceed limitation');
-		}
-		else if( num < -maxVal ){
-			throw new Error('number exceed limitation');
-		}
-		else {
-			num += maxVal;
-		}
-		
+		var range = 256;
 
 		return String.fromCharCode(
-			limit + num % range,
-			limit + (num / range) % range,
-			limit + (num / range / range) % range,
-			limit + (num / range / range / range) % range,
-			limit + (num / range / range / range / range) % range
+			num & 0xff,
+			(num >> 8) & 0xff,
+			(num >> 16) & 0xff,
+			(num >> 24) & 0xff
 		);
 	}
 
 	var BinToInt = function( binarr, s ){
-		if( typeof s !== 'number' ) 
-			s = 0;
-		
-		var q = 256;
-		var limit = 32;  
-		var range = q - limit;
-		var maxVal = range * range * range * range * range / 2;
+		var range = 256;
+		var maxVal = range * range * range * range / 2;
 
 		var number = 
-			(binarr[s+0].charCodeAt(0) - limit) + 
-			(binarr[s+1].charCodeAt(0) - limit) * range +
-			(binarr[s+2].charCodeAt(0) - limit) * range * range +
-			(binarr[s+3].charCodeAt(0) - limit) * range * range * range +
-			(binarr[s+4].charCodeAt(0) - limit) * range * range * range * range 
-			- maxVal;
+			(binarr[s+0].charCodeAt(0) << 0)+
+			(binarr[s+1].charCodeAt(0) << 8)+
+			(binarr[s+2].charCodeAt(0) << 16)+
+			(binarr[s+3].charCodeAt(0) << 24)
 	
 		return number;
 	}
@@ -200,12 +178,13 @@ var Backbone = require('Backbone');
 			}
 			
 			
-			return binOut;
+			return lz_string.compress( binOut );
 		}
 		
 		BCConverter.prototype.convertToClass = function( bin ){
 			if( typeof bin !== 'string' ) 
 				throw new Error('binary data is not in the form of string');
+			bin = lz_string.decompress( bin );
 
 			var obj = {};
 			
@@ -228,7 +207,7 @@ var Backbone = require('Backbone');
 				}
 			}
 			
-			var n = this.numArr.length * 5;
+			var n = this.numArr.length * 4;
 			
 			if( bin.length < ptr + n ){ // the amount of data given is not correct
 				throw new Error('Data is corrupted');
@@ -237,7 +216,7 @@ var Backbone = require('Backbone');
 			for( var i = 0; i < this.numArr.length; ++ i ){
 				var name = this.numArr[i];
 				obj[name] = BinToInt( bin, ptr );
-				ptr += 5;
+				ptr += 4;
 			}
 			
 			
@@ -245,7 +224,7 @@ var Backbone = require('Backbone');
 			for( var i = 0; i < this.strArr.length; ++ i ){				
 				var name = this.strArr[i];
 				var length = BinToInt( bin, ptr );
-				ptr += 5;
+				ptr += 4;
 
 				obj[name] = bin.substr( ptr, length );
 				ptr += length;
@@ -334,32 +313,39 @@ var Backbone = require('Backbone');
 		{ name : 'lol', type : BCConverter.type.STRING }
 	]);
 
-	
+
 	var User = Backbone.Model.extend({
 		defaults : {
 			name : 'rmxhaha',
-			age : 15,
+			age : -15,
 			ismarried : false,
 			lol : 'asdf'
+		},
+		toBin : function(){
+			return cvt.convertToBin( this );
+		},
+		parse : function( model ){
+			
 		}
 	});
 	
 	console.log( 
 		cvt.convertToClass(
-		cvt.convertToBin(
-			{ name : 'Rmxhaha', age : 320, ismarried : false, lol : 'boset' }
-		)
-		)
-	);
-	
-	console.log(
-		cvt.convertToClass(
 			cvt.convertToBin(
-				new User
+				{ name : 'Rmxhaha', age : 320, ismarried : false, lol : 'boset' }
 			)
 		)
 	);
 	
+	console.log(
+		new User( cvt.convertToClass(
+			(new User).toBin()
+		))
+	);
+	
+	console.log(
+		(new User).toBin()
+	);
 	
 	
 })( this );
