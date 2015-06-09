@@ -69,7 +69,7 @@ if( typeof require === 'function'){
 	}
 	
 	/**
-		//Test char to 7 boolean
+		//Test char to 8 boolean
 		
 		console.log(
 			CharToBool8(
@@ -179,16 +179,16 @@ if( typeof require === 'function'){
 				binOut += IntToBin( str.length );
 				binOut += str;
 			}
-			
-			
+
 			return LZString.compress( binOut );
 		}
 		
 		BCConverter.prototype.convertToClass = function( bin ){
 			if( typeof bin !== 'string' ) 
 				throw new Error('binary data is not in the form of string');
+			
 			bin = LZString.decompress( bin );
-
+			
 			var obj = {};
 			
 			var ptr = 0;
@@ -236,25 +236,28 @@ if( typeof require === 'function'){
 			return obj;
 		}
 
-		
-		/**
-		Boolean test
+		return BCConverter;
+	})();
 
-		var cvt = new BCConverter([
-			{name : 'a', type : BCConverter.type.BOOLEAN },
-			{name : 'b', type : BCConverter.type.BOOLEAN },
-			{name : 'c', type : BCConverter.type.BOOLEAN },
-			{name : 'd', type : BCConverter.type.BOOLEAN },
-			{name : 'e', type : BCConverter.type.BOOLEAN },
-			{name : 'f', type : BCConverter.type.BOOLEAN },
-			{name : 'g', type : BCConverter.type.BOOLEAN },
-			{name : 'h', type : BCConverter.type.BOOLEAN },
-			{name : 'i', type : BCConverter.type.BOOLEAN },
-			{name : 'j', type : BCConverter.type.BOOLEAN }
-		]);
-		
-		console.log( 
-			CharToBool8(cvt.convertToBin(
+	/**
+	//Boolean test
+
+	var cvt = new BCConverter([
+		{name : 'a', type : BCConverter.type.BOOLEAN },
+		{name : 'b', type : BCConverter.type.BOOLEAN },
+		{name : 'c', type : BCConverter.type.BOOLEAN },
+		{name : 'd', type : BCConverter.type.BOOLEAN },
+		{name : 'e', type : BCConverter.type.BOOLEAN },
+		{name : 'f', type : BCConverter.type.BOOLEAN },
+		{name : 'g', type : BCConverter.type.BOOLEAN },
+		{name : 'h', type : BCConverter.type.BOOLEAN },
+		{name : 'i', type : BCConverter.type.BOOLEAN },
+		{name : 'j', type : BCConverter.type.BOOLEAN }
+	]);
+	
+	console.log( 
+		cvt.convertToClass(
+			cvt.convertToBin(
 				{
 					a : false,
 					b : true,
@@ -267,47 +270,42 @@ if( typeof require === 'function'){
 					i : true,
 					j : true
 				}
-			)[1] )
-		);
-		*/
-		
-		/**
-		//Integer Test
-		var cvt = new BCConverter([
-			{ name : 'a', type : BCConverter.type.NUMBER },
-			{ name : 'b', type : BCConverter.type.NUMBER }
-		]);
-		
-		console.log( 
-			BinToInt( 
-				cvt.convertToBin(
-					{a : 32320, b : 434093 }
-				), 4
 			)
-		);
-		*/
-		
-		/**
-		//string test
-		var cvt = new BCConverter([
-			{name : 'a', type : BCConverter.type.STRING },
-			{name : 'b', type : BCConverter.type.STRING }
-		]);
-		
-		
-		console.log(
-			cvt.convertToBin({
-				a : 'asdfg',
-				b : 'fsda'
-			})[4]
-		);
-		*/
-		
-		
-		
-		return BCConverter;
-	})();
-
+		)
+	);
+	*/
+	
+	/**
+	//Integer Test
+	var cvt = new BCConverter([
+		{ name : 'a', type : BCConverter.type.NUMBER },
+		{ name : 'b', type : BCConverter.type.NUMBER }
+	]);
+	
+	console.log( 
+		BinToInt( 
+			cvt.convertToBin(
+				{a : 32320, b : 434093 }
+			), 4
+		)
+	);
+	*/
+	
+	/**
+	//string test
+	var cvt = new BCConverter([
+		{name : 'a', type : BCConverter.type.STRING },
+		{name : 'b', type : BCConverter.type.STRING }
+	]);
+	
+	
+	console.log(
+		cvt.convertToBin({
+			a : 'asdfg',
+			b : 'fsda'
+		})[4]
+	);
+	*/
 	
 	global.CharToBool8 = CharToBool8;
 	global.Bool8ToChar = Bool8ToChar;
