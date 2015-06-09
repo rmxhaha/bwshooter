@@ -44,20 +44,20 @@ if( typeof require === 'function'){
 	
 	console.log('R');
 */
-	var CharToBool7 = function( c ){
+	var CharToBool8 = function( c ){
 		var arr = [];
-		arr.length = 7;
+		arr.length = 8;
 
-		c = c.charCodeAt(0) - 32;
-		for( var i = 0; i < 7; ++ i ){
+		c = c.charCodeAt(0);
+		for( var i = 0; i < 8; ++ i ){
 			arr[i] = (c >> i) & 1;
 		}
 		
 		return arr;
 	}
 	
-	var Bool7ToChar = function( arr ){
-		var L = Math.min( arr.length, 7 );
+	var Bool8ToChar = function( arr ){
+		var L = Math.min( arr.length, 8 );
 		var bin = 0;
 		
 		for( var i = 0; i < L; ++ i ){
@@ -65,15 +65,15 @@ if( typeof require === 'function'){
 			bin += b << i;
 		}
 		
-		return String.fromCharCode( bin + 32 );
+		return String.fromCharCode( bin );
 	}
 	
 	/**
-		Test char to 7 boolean
+		//Test char to 7 boolean
 		
 		console.log(
-			CharToBool7(
-				Bool7ToChar( [true, true, true, true, true, false, true] )
+			CharToBool8(
+				Bool8ToChar( [false, true, true, true, true, false, true, false] )
 			)
 		);
 	*/
@@ -154,17 +154,17 @@ if( typeof require === 'function'){
 				var arr = [];
 
 				var k = 0;
-				for( ; k < 7 && p < this.boolArr.length; ++ k, ++ p )
+				for( ; k < 8 && p < this.boolArr.length; ++ k, ++ p )
 				{
-					arr[k] = get( obj, this.boolArr[i*7+k] );
+					arr[k] = get( obj, this.boolArr[i*8+k] );
 				}
-				// to fill excess bool7 space with false
-				for( ; k < 7; ++ k ){
+				// to fill excess bool8 space with false
+				for( ; k < 8; ++ k ){
 					arr[k] = false;
 				}
 				
 				++ i;
-				binOut += Bool7ToChar( arr );
+				binOut += Bool8ToChar( arr );
 			}
 			
 			// integer 
@@ -193,7 +193,7 @@ if( typeof require === 'function'){
 			
 			var ptr = 0;
 			
-			var n = Math.ceil( this.boolArr.length / 7 );
+			var n = Math.ceil( this.boolArr.length / 8 );
 
 			if( bin.length < ptr + n ){ // the amount of data given is not correct
 				throw new Error('Data is corrupted');
@@ -202,8 +202,8 @@ if( typeof require === 'function'){
 			var p = 0;
 			for( var c = 0; c < n; ++ c )
 			{
-				var arr = CharToBool7( bin[ptr ++ ] );
-				for( var i = 0; p < this.boolArr.length && i < 7; ++ p, ++i )
+				var arr = CharToBool8( bin[ptr ++ ] );
+				for( var i = 0; p < this.boolArr.length && i < 8; ++ p, ++i )
 				{
 					var name = this.boolArr[p];
 					obj[name] = arr[i];
@@ -254,7 +254,7 @@ if( typeof require === 'function'){
 		]);
 		
 		console.log( 
-			CharToBool7(cvt.convertToBin(
+			CharToBool8(cvt.convertToBin(
 				{
 					a : false,
 					b : true,
@@ -309,6 +309,9 @@ if( typeof require === 'function'){
 	})();
 
 	
+	global.CharToBool8 = CharToBool8;
+	global.Bool8ToChar = Bool8ToChar;
+	global.BCConverter = BCConverter;
 	
 })( this );
 
