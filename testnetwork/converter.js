@@ -90,7 +90,7 @@ if( typeof require === 'function'){
 
 	// binary <-> class converter
 	var BCConverter = (function(){
-		var BCConverter = function( dataOrder ){
+		var BCConverter = function( dataOrder, compress ){
 			var corder = copy( dataOrder ); 
 
 			var getName = function(y){ return y.name };
@@ -99,6 +99,8 @@ if( typeof require === 'function'){
 			this.numArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NUMBER }).map(getName).sort();
 			this.pstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.PASCAL_STRING }).map(getName).sort();
 			this.nstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NULL_TERMINATED_STRING }).map(getName).sort();
+
+			this.compress 	= ( typeof compress ==='undefined' ? true : !!compress );
 			
 			/**
 				Example : 
@@ -195,14 +197,18 @@ if( typeof require === 'function'){
 				binOut += '\0';
 			}
 
-			return LZString.compress( binOut );
+			if( this.compress )
+				return LZString.compress( binOut );
+			else
+				return binOut;
 		}
 		
 		BCConverter.prototype.convertToClass = function( bin ){
 			if( typeof bin !== 'string' ) 
 				throw new Error('binary data is not in the form of string');
 			
-			bin = LZString.decompress( bin );
+			if( this.compress ) 
+				bin = LZString.decompress( bin );
 			
 			var obj = {};
 			
@@ -339,6 +345,74 @@ if( typeof require === 'function'){
 	global.CharToBool8 = CharToBool8;
 	global.Bool8ToChar = Bool8ToChar;
 	global.BCConverter = BCConverter;
+	
+	var BCArrayConverter = (function(){
+		var BCArrayConverter = function( baseConverter, compress ){
+			// force not to compress data b/c compressing data twice give no benefit
+			baseConverter.compress = false;
+			
+			this.baseConverter = baseConverter;
+			this.compress 	= ( typeof compress ==='undefined' ? true : !!compress );
+		}
+		
+		BCArrayConverter.prototype.convertToArray = function( bin ){
+			if( this.compress )
+				bin = LZString.decompress( bin );
+			
+			var arr = [];
+			var ptr = 0;
+			var i = 0;
+			while( ptr < bin.length ){				
+				var length = BinToInt( bin, ptr );
+				ptr += 4;
+
+				arr[i++] = this.baseConverter.convertToClass( bin.substr( ptr, length ) );
+				ptr += length;
+			}
+			
+			return arr;
+		}
+		
+		BCArrayConverter.prototype.convertToBin = function( array ){
+			var binOut = "";
+
+			for( var i = 0; i < array.length; ++ i ){
+				var str = this.baseConverter.convertToBin( array[i] );
+				binOut += IntToBin( str.length );
+				binOut += str;
+			}
+			
+			if( this.compress ){
+				return LZString.compress( binOut );
+			}
+			else {
+				return binOut;
+			}
+		}
+		
+		
+		return BCArrayConverter;
+	})();
+	
+	var bcvt = new BCConverter([
+		{ name : 'nama', type : BCConverter.type.NSTRING },
+		{ name : 'umur', type : BCConverter.type.NUMBER },
+		{ name : 'ismarried', type : BCConverter.type.BOOLEAN },
+		{ name : 'minus', type : BCConverter.type.NUMBER }
+	]);
+	
+	var acvt = new BCArrayConverter( bcvt, true );
+	
+	
+	console.log(
+	acvt.convertToArray(
+		acvt.convertToBin([ 
+			{nama : 'rmxhaha', umur : 19, ismarried : false, minus : -100 } ,
+			{nama : 'rmxhoho', umur : 29, ismarried : true, minus : -1002 } 
+		])
+		)
+	)
+	
 	
 })( this );
 
