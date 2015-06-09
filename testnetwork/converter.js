@@ -50,7 +50,7 @@ if( typeof require === 'function'){
 
 		c = c.charCodeAt(0);
 		for( var i = 0; i < 8; ++ i ){
-			arr[i] = (c >> i) & 1;
+			arr[i] = !!((c >> i) & 1);
 		}
 		
 		return arr;
@@ -394,25 +394,8 @@ if( typeof require === 'function'){
 		return BCArrayConverter;
 	})();
 	
-	var bcvt = new BCConverter([
-		{ name : 'nama', type : BCConverter.type.NSTRING },
-		{ name : 'umur', type : BCConverter.type.NUMBER },
-		{ name : 'ismarried', type : BCConverter.type.BOOLEAN },
-		{ name : 'minus', type : BCConverter.type.NUMBER }
-	]);
-	
-	var acvt = new BCArrayConverter( bcvt, true );
-	
-	
-	console.log(
-	acvt.convertToArray(
-		acvt.convertToBin([ 
-			{nama : 'rmxhaha', umur : 19, ismarried : false, minus : -100 } ,
-			{nama : 'rmxhoho', umur : 29, ismarried : true, minus : -1002 } 
-		])
-		)
-	)
-	
+
+
 	
 })( this );
 
