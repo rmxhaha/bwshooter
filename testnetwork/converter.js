@@ -95,10 +95,11 @@ if( typeof require === 'function'){
 
 			var getName = function(y){ return y.name };
 			
-			this.boolArr = corder.filter(function(x){ return x.type == BCConverter.type.BOOLEAN }).map(getName).sort();
-			this.numArr = corder.filter(function(x){ return x.type == BCConverter.type.NUMBER }).map(getName).sort();
-			this.strArr = corder.filter(function(x){ return x.type == BCConverter.type.STRING }).map(getName).sort();
-
+			this.boolArr 	= corder.filter(function(x){ return x.type == BCConverter.type.BOOLEAN }).map(getName).sort();
+			this.numArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NUMBER }).map(getName).sort();
+			this.pstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.PASCAL_STRING }).map(getName).sort();
+			this.nstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NULL_TERMINATED_STRING }).map(getName).sort();
+			
 			/**
 				Example : 
 				[
@@ -110,7 +111,13 @@ if( typeof require === 'function'){
 
 		BCConverter.type = {
 			NUMBER : 0,
-			STRING : 1,
+
+			STRING : 1, // the default
+			PASCAL_STRING : 1, // 32 bit pascal string
+			NULL_TERMINATED_STRING : 3, // null terminated string
+			PSTRING : 1, // shortened version
+			NSTRING : 3, // shortened version
+
 			BOOLEAN : 2
 		};
 		
@@ -132,11 +139,12 @@ if( typeof require === 'function'){
 					}
 				}
 			}
-			
+
 			// check if all the names that will be copied is with the right type
 			checkType( this.boolArr, obj, 'boolean' );
-			checkType( this.strArr, obj, 'string' );
 			checkType( this.numArr, obj, 'number' );
+			checkType( this.pstrArr, obj, 'string' );
+			checkType( this.nstrArr, obj, 'string' );
 			
 			/**
 				write order 
@@ -173,11 +181,18 @@ if( typeof require === 'function'){
 				binOut += IntToBin( num );
 			}
 			
-			// string
-			for( var i = 0; i < this.strArr.length; ++ i ){
-				var str = get( obj, this.strArr[i] );
+			// pascal string 32
+			for( var i = 0; i < this.pstrArr.length; ++ i ){
+				var str = get( obj, this.pstrArr[i] );
 				binOut += IntToBin( str.length );
 				binOut += str;
+			}
+			
+			// null terminated string 
+			for( var i = 0; i < this.nstrArr.length; ++ i ){
+				var str = get( obj, this.nstrArr[i] );
+				binOut += str;
+				binOut += '\0';
 			}
 
 			return LZString.compress( binOut );
@@ -224,13 +239,25 @@ if( typeof require === 'function'){
 			
 			
 			// error message not coded yet
-			for( var i = 0; i < this.strArr.length; ++ i ){				
-				var name = this.strArr[i];
+			// pascal string
+			for( var i = 0; i < this.pstrArr.length; ++ i ){				
+				var name = this.pstrArr[i];
 				var length = BinToInt( bin, ptr );
 				ptr += 4;
 
 				obj[name] = bin.substr( ptr, length );
 				ptr += length;
+			}
+			
+			for( var i = 0; i < this.nstrArr.length; ++ i ){
+				var name = this.nstrArr[i];
+				var str = "";
+				while( bin[ptr] != '\0' ){
+					str += bin[ptr];
+					++ ptr;
+				}
+				obj[name] = str;
+				++ ptr;
 			}
 			
 			return obj;
@@ -294,18 +321,20 @@ if( typeof require === 'function'){
 	/**
 	//string test
 	var cvt = new BCConverter([
-		{name : 'a', type : BCConverter.type.STRING },
-		{name : 'b', type : BCConverter.type.STRING }
+		{name : 'a', type : BCConverter.type.NSTRING },
+		{name : 'b', type : BCConverter.type.NSTRING }
 	]);
 	
 	
 	console.log(
-		cvt.convertToBin({
-			a : 'asdfg',
-			b : 'fsda'
-		})[4]
+			cvt.convertToBin({
+				a : 'asdfg',
+				b : 'fsda'
+			}).length
 	);
 	*/
+	
+	
 	
 	global.CharToBool8 = CharToBool8;
 	global.Bool8ToChar = Bool8ToChar;
