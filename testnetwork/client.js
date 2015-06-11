@@ -1,23 +1,24 @@
-var P1 = new Player({
-	x : 0,
-	y : 0
+var socket = io.connect('http://localhost:30003');
+
+var kid = 0;
+var Players = new PlayerContainer;
+var PlayerViews = new PlayerCollectionView({ collection : Players });
+socket.on('keyid', function (data) {
+	console.log(data);
+	kid = data;
 });
 
-var PV1 = new PlayerView({
-	model : P1
+socket.on('update', function(players){
+	Players = new PlayerContainer( JSON.parse( players ) );
+	PlayerViews = new PlayerCollectionView({ collection : Players });
 });
-
-
-P1.moveRight();
-P1.moveUp();
 
 var latestKeyDown = 0;
 
 setInterval( function(){
-	P1.update( latestKeyDown );
-	PV1.render();
+	socket.emit('k', { keyid : kid, keypress : latestKeyDown } );
+	PlayerViews.render();
 }, 20 );
-
 
 window.addEventListener("keydown", function(event){
 	latestKeyDown = event.keyCode;
