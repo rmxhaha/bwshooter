@@ -1,4 +1,4 @@
-define(['utility/lz-string'], function(LZString){
+define(['Engine/utility/lz-string'], function(LZString){
 	
 	var Converter = {};
 	
