@@ -25,6 +25,10 @@
  *  		setProperties : function
  *  		object : {}  # pointer to the object that runs this mod
  *  	}
+ *		Mod should not be inside Unit, Player, Platform, Light 
+ *		Put Unit, Player, Platform, Light inside mod and maintain mod separately
+ *			GetAllProperties 
+ *		
  *	Data to fetch
  *		- death flag
  *		- Bullet, Hero spawn
@@ -63,7 +67,7 @@ function _extend(x, y) {
  *  	}
  *  );
  */
- 
+
 function copy( arr ){
 	if( typeof arr !== 'object' ) return arr;
 	if( arr.getAllProperties ){
@@ -326,7 +330,7 @@ var World = Class({
 		},
 		fixCoordinate : function(){
 			function isInBetween( bottom, data , top ){
-				return bottem < data && data < top;
+				return bottom < data && data < top;
 			}
 			
 			function isInPlatformArea( platform, minX, maxX ){

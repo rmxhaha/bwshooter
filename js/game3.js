@@ -108,22 +108,21 @@ var Class = function(setup){
 		setProperties : function( prop ){
 			_extend( this, prop );
 		},
-		getAllRawProperties : function(){
+		getAllProperties : function(){
 			var all = {};
+			
+			
+			console.log( this );
+			if( this.x == 400 ) return;
 			
 			for( var i in paramList ){
 				all[ paramList[i] ] = copy( this[ paramList[i] ] );
 			}
+
+			console.log( all );
 			
 			return all;
-		},
-		getAllProperties : function(){
-			var all = {};
-			for( var i in paramList ){
-				
-			}
 		}
-
 	});
 	
 	return c;
@@ -807,7 +806,6 @@ var LightFlickeringMod = Class({
 		flickerSpeed : 0.2
 	},
 	_private : {
-		object : false,
 		time : 0,
 		update : function( dt ){
 			var light = this.object;

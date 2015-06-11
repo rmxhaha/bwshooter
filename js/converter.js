@@ -1,5 +1,8 @@
-var Backbone = require('Backbone');
-var lz_string = require('./lz-string.js');
+if( typeof require === 'function'){
+	var Backbone = require('Backbone');
+	var lz_string = require('./lz-string.js');
+}
+
 (function(global){
 	var IntToBin = function( num ){
 		var range = 256;
