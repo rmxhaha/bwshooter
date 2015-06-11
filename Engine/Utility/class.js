@@ -1,4 +1,4 @@
-define([],function(){
+define([], function(){
 	Function.prototype.method = function (name, func) {
 		this.prototype[name] = func;
 		return this;
@@ -39,14 +39,8 @@ define([],function(){
 			var name = arguments[i];
 			this.prototype[name] = parent.prototype[name];
 		}
-		return this;
+		return	this;
 	});
-
-	function callf(){
-		console.log('ya');
-	}
 	
-	return { callf : callf }
-	
-	
+	return {};
 });
