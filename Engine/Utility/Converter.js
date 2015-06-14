@@ -14,9 +14,6 @@ define(['Engine/utility/lz-string'], function(LZString){
 	}
 
 	var BinToInt = function( binarr, s ){
-		var range = 256;
-		var maxVal = range * range * range * range / 2;
-
 		var number = 
 			(binarr[s+0].charCodeAt(0) << 0)+
 			(binarr[s+1].charCodeAt(0) << 8)+
@@ -29,6 +26,23 @@ define(['Engine/utility/lz-string'], function(LZString){
 	Converter.BinToInt = BinToInt;
 	Converter.IntToBin = IntToBin;
 	
+	var ShortToBin = function( num ){
+		return String.fromCharCode(
+			num & 0xff,
+			(num >> 8) & 0xff
+		);
+	}
+
+	var BinToShort = function( binarr, s ){
+		var number = 
+			(binarr[s+0].charCodeAt(0) << 0)+
+			(binarr[s+1].charCodeAt(0) << 8);
+	
+		return number;
+	}
+	
+	Converter.ShortToBin = ShortToBin;
+	Converter.BinToShort = BinToShort;
 	
 	/**
 	//Test Code for bin to int
