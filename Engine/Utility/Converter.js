@@ -372,8 +372,8 @@ define(['Engine/utility/lz-string'], function(LZString){
 			var ptr = 0;
 			var i = 0;
 			while( ptr < bin.length ){				
-				var length = BinToInt( bin, ptr );
-				ptr += 4;
+				var length = BinToShort( bin, ptr );
+				ptr += 2;
 
 				arr[i++] = this.baseConverter.convertToClass( bin.substr( ptr, length ) );
 				ptr += length;
@@ -387,7 +387,9 @@ define(['Engine/utility/lz-string'], function(LZString){
 
 			for( var i = 0; i < array.length; ++ i ){
 				var str = this.baseConverter.convertToBin( array[i] );
-				binOut += IntToBin( str.length );
+				if( str.length > 256 * 128 - 1 )
+					throw new Error('member of array is to big');
+				binOut += ShortToBin( str.length );
 				binOut += str;
 			}
 			
@@ -405,6 +407,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 	
 	Converter.BCArrayConverter = BCArrayConverter;
 	
-
+	
+	
 	return Converter;
 });
