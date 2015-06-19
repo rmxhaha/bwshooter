@@ -152,7 +152,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			}
 
 			// check if all the names that will be copied is with the right type
-			checkType( this.boolArr, obj, 'boolean' );
+			// boolean need no check
 			checkType( this.numArr, obj, 'number' );
 			checkType( this.pstrArr, obj, 'string' );
 			checkType( this.nstrArr, obj, 'string' );
@@ -175,7 +175,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 				var k = 0;
 				for( ; k < 8 && p < this.boolArr.length; ++ k, ++ p )
 				{
-					arr[k] = get( obj, this.boolArr[i*8+k] );
+					arr[k] = !!get( obj, this.boolArr[i*8+k] );
 				}
 				// to fill excess bool8 space with false
 				for( ; k < 8; ++ k ){
