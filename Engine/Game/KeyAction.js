@@ -9,7 +9,7 @@ define([], function(){
 	
 	var KeyAction = function( opt ){
 		_.extend( this, defaults );
-		_.extend( opt );
+		_.extend( this, opt );
 	}
 	
 	return KeyAction;
