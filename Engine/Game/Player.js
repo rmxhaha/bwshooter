@@ -56,7 +56,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 		topPlatform : false,
 		width : 90,
 		height : 140,
-		update : function( keyAction ){
+		update : function( keyAction, dt ){
 			if( !( keyAction instanceof KeyAction ) ) throw new Error('key act is not an instanceof `KeyAction`');
 			if( this.isDead ) return;
 			
@@ -74,8 +74,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			
 			if( keyAction.shoot ){
 				this.shoot();
-			}
-			
+			}			
 			
 			var movementDirection = ( this.sideRight ? 1 : -1 );
 			
