@@ -78,23 +78,18 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			
 			var movementDirection = ( this.sideRight ? 1 : -1 );
 			
-			switch( this.state ){
-			case 0:
-				this.vx = 0;
-				break;
-			case 1:
-				this.vx = movementDirection * this.walkVelocity;
-				break;
-			case 2:
-				this.vx =  movementDirection * this.sprintVelocity;
-				break;
+			var vx;
+			if( !(keyAction.left || keyAction.right) ){
+				vx = 0;
+			}
+			else {
+				vx = movementDirection * this.walkVelocity;
 			}
 
 			this.vy -= this.world.gravity * dt;
 
-			this.x += this.vx * dt;
+			this.x += vx * dt;
 			this.y += this.vy * dt;
-			
 		},
 		jump : function(){
 			if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
