@@ -7,7 +7,8 @@ define([], function(){
 		shoot : false
 	};
 	
-	var KeyAction = function(){
+	var KeyAction = function( opt ){
 		_.extend( this, defaults );
+		_.extend( opt );
 	}
 });
