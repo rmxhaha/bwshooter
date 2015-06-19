@@ -1,4 +1,4 @@
-define(['Engine/Utility/underscore'], function( _ ){
+define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/KeyAction'], function( _, Converter, KeyAction ){
 
 	function Player( option ){
 		var defaults = {
@@ -11,9 +11,8 @@ define(['Engine/Utility/underscore'], function( _ ){
 			 *   @param type 
 			 *  	0 for black 
 			 *  	1 for white
-			 *  	2 for dead
 			 */
-			type : 0, 
+			team : 0, 
 			/**
 			 * @param state  
 			 * 		0 for standing still
@@ -22,35 +21,61 @@ define(['Engine/Utility/underscore'], function( _ ){
 			 */
 			state : 0 ,
 			sideRight : true
-
 		};
+		
+		var defaults = {
+			x : 0,
+			y : 0,
+			vy : 0,
+			team : Player.team.black,
+			sideRight : true,
+			isDead : false
+
+			// vx and state is determined by keyAction
+			
+		}
 		_.extend( this, defaults );
 		_.extend( this, option );
 	}
 	
+	Player.team = {
+		black : 0,
+		white : 1
+	}
+	
 	Player.prototype = {
-		/**
-		 *   @param main
-		 *  	state whether this player is being played the user
-		 */
-		main : false,
-
 		walkVelocity : 300,
 		sprintVelocity : 450,
 
 		/** a time duration before the body is removed from the world*/
 		rotDuration : 2,
 		hasRotten : function(){
-			return this.isDead() && this.hasBeenDeadFor() >= this.rotDuration;
+			return this.isDead && this.hasBeenDeadFor() >= this.rotDuration;
 		},
 		fadeOutDuration : 0.5,
 		topPlatform : false,
 		width : 90,
 		height : 140,
-		update : function( dt ){
-			if( this.isDead() ){
-				return;
+		update : function( keyAction ){
+			if( !( keyAction instanceof KeyAction ) ) throw new Error('key act is not an instanceof `KeyAction`');
+			if( this.isDead ) return;
+			
+			// process key action
+			if( keyAction.left ){
+				this.sideRight = false;
 			}
+			else if( keyAction.right ){
+				this.sideRight = true;
+			}
+			
+			if( keyAction.jump ){
+				this.jump();
+			}
+			
+			if( keyAction.shoot ){
+				this.shoot();
+			}
+			
 			
 			var movementDirection = ( this.sideRight ? 1 : -1 );
 			
@@ -78,27 +103,15 @@ define(['Engine/Utility/underscore'], function( _ ){
 			}
 		},
 		goLeft : function(){
-			if ( this.isDead() ) return;
+			if ( this.isDead ) return;
 			this.walk();
 			this.sideRight = false;
 		},
 		goRight : function(){
-			if ( this.isDead() ) return;
+			if ( this.isDead ) return;
 			this.walk();
 			this.sideRight = true;		
 		},
-		standStill : function(){
-			this.state = 0;
-		},
-		walk : function(){
-			this.state = 1;
-		},
-		sprint : function(){
-			this.state = 2;
-		},
-		isWalking : function(){ return this.state == 1; },
-		isSprinting : function(){ return this.state == 2; },
-		isStandingStill : function(){ return this.state == 0; },
 		fall : function(){
 			if( !this.topPlatform.penetrable ) return;
 			
@@ -107,10 +120,7 @@ define(['Engine/Utility/underscore'], function( _ ){
 		dieTime : 0,
 		die : function(){
 			this.dieTime = new Date();
-			this.type = 2;
-		},
-		isDead : function(){
-			return this.type == 2;
+			this.isDead = true;
 		},
 		hasBeenDeadFor : function(){
 			return (new Date() - this.dieTime) / 1000;
@@ -130,7 +140,7 @@ define(['Engine/Utility/underscore'], function( _ ){
 				this.lastShoot = new Date();
 				var option = {};
 				
-				_extend( option, this.getGunCoordinate() );
+				_.extend( option, this.getGunCoordinate() );
 				option.direction = ( this.sideRight ? "right" : "left" );
 				
 				this.world.add( new Bullet( option ) );
@@ -141,6 +151,24 @@ define(['Engine/Utility/underscore'], function( _ ){
 		}
 	}
 	
+	
+	var PlayerDataConverter = Converter.BCConverter([
+		{ name : 'x', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'y', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'isDead', type : Converter.BCConverter.type.BOOLEAN },
+		{ name : 'team', type : Converter.BCConverter.type.BOOLEAN },
+		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN },
+	], false);
+	
+	Player.method('toBin', function(){
+		return PlayerDataConverter.convertToBin( this );
+	});
+	
+	Player.method('parseBin', function( bin ){
+		var data = PlayerDataConverter.convertToClass( bin );
+		_.extend( this, data );
+	});
 	
 	return Player;
 });
