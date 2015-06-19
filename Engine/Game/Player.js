@@ -82,6 +82,9 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			if( !(keyAction.left || keyAction.right) ){
 				vx = 0;
 			}
+			else if( keyAction.sprint ){
+				vx = movementDirection * this.sprintVelocity;
+			}
 			else {
 				vx = movementDirection * this.walkVelocity;
 			}
