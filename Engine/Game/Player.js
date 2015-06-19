@@ -61,11 +61,24 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			if( this.isDead ) return;
 			
 			// process key action
+			var movementDirection, vx;
 			if( keyAction.left ){
 				this.sideRight = false;
+				movementDirection = -1;
 			}
 			else if( keyAction.right ){
 				this.sideRight = true;
+				movementDirection = 1;
+			}
+			else {
+				movementDirection = 0;
+			}
+			
+			if( keyAction.sprint ){
+				vx = movementDirection * this.sprintVelocity;
+			}
+			else {
+				vx = movementDirection * this.walkVelocity;
 			}
 			
 			if( keyAction.jump ){
@@ -76,19 +89,6 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 				this.shoot();
 			}			
 			
-			var movementDirection = ( this.sideRight ? 1 : -1 );
-			
-			var vx;
-			if( !(keyAction.left || keyAction.right) ){
-				vx = 0;
-			}
-			else if( keyAction.sprint ){
-				vx = movementDirection * this.sprintVelocity;
-			}
-			else {
-				vx = movementDirection * this.walkVelocity;
-			}
-
 			this.vy -= this.world.gravity * dt;
 
 			this.x += vx * dt;
@@ -98,16 +98,6 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
 				this.vy = 800;
 			}
-		},
-		goLeft : function(){
-			if ( this.isDead ) return;
-			this.walk();
-			this.sideRight = false;
-		},
-		goRight : function(){
-			if ( this.isDead ) return;
-			this.walk();
-			this.sideRight = true;		
 		},
 		fall : function(){
 			if( !this.topPlatform.penetrable ) return;
@@ -149,7 +139,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 	}
 	
 	
-	var PlayerDataConverter = Converter.BCConverter([
+	var PlayerDataConverter = new Converter.BCConverter([
 		{ name : 'x', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'y', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
