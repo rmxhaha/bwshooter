@@ -11,4 +11,6 @@ define([], function(){
 		_.extend( this, defaults );
 		_.extend( opt );
 	}
+	
+	return KeyAction;
 });
