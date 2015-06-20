@@ -28,21 +28,23 @@ define(['Engine/Game/KeyAction','Engine/Utility/underscore'], function( KeyActio
 			
 			keyAction.left = keyDown[37]; // left arrow
 			keyAction.right = keyDown[39]; // right arrow
-			keyAction.right = keyDown[17] || keyDown[88]; // ctrl, X
+			keyAction.shoot = keyDown[17] || keyDown[88]; // ctrl, X
 			keyAction.sprint = keyDown[16]; // shift
 			
-			var jumpKeyPressed = keyDown[38] || keyDown[32] || keyDown[67]; // up arrow, spacebar, C
+			var jumpKeyPressed = keyDown[32] || keyDown[67]; // spacebar, C
 			
 			if( keyDown[40] ){ // arrow down
-				keyAction.jump = jumpKeyPressed;
-				keyAction.fall = false;
-			}
-			else{
 				keyAction.jump = false;				
 				keyAction.fall = jumpKeyPressed;
+			}
+			else{
+				keyAction.jump = jumpKeyPressed;
+				keyAction.fall = false;
 			}
 			
 			return keyAction;
 		}
 	}
+	
+	return KeyActionListener
 });

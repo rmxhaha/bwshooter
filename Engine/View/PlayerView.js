@@ -170,7 +170,7 @@ define(['Engine/Game/Player','Engine/Utility/underscore'],function( Player, _ ){
 			}
 		}
 
-		if( !this.isDead() && main ){
+		if( !this.isDead && main ){
 			// apply highlighting
 			ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
 			ctx.lineWidth = 3;
