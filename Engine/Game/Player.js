@@ -90,10 +90,14 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			if( keyAction.jump ){
 				this.jump();
 			}
+			else if( keyAction.fall ){
+				this.fall();
+			}
 			
 			if( keyAction.shoot ){
 				this.shoot();
 			}			
+			
 			
 			this.vy -= this.world.gravity * dt;
 
