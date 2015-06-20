@@ -4,7 +4,8 @@ define([], function(){
 		right : false,
 		jump : false,
 		sprint : false,
-		shoot : false
+		shoot : false,
+		fall : false
 	};
 	
 	var KeyAction = function( opt ){
