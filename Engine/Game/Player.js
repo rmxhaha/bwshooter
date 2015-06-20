@@ -46,6 +46,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 	Player.prototype = {
 		walkVelocity : 300,
 		sprintVelocity : 450,
+		jumpVelocity : 800,
 
 		/** a time duration before the body is removed from the world*/
 		rotDuration : 2,
@@ -96,7 +97,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 		},
 		jump : function(){
 			if( this.topPlatform && this.y - this.height == this.topPlatform.y ){
-				this.vy = 800;
+				this.vy = this.jumpVelocity;
 			}
 		},
 		fall : function(){
