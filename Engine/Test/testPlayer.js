@@ -18,20 +18,24 @@ requirejs(['Engine/Utility/class','Engine/Game/Player','Engine/Game/KeyAction'],
 	p.world = world;
 	p2.world = world;
 	
-	var keyAction = new KeyAction({
+	var keyActionSprint = new KeyAction({
 		left : true,
-		right : false,
-		sprint : true,
-		jump : false,
-		shoot : false
+		sprint : true
+	});
+
+	var keyActionJump = new KeyAction({
+		jump : true
 	});
 	
 	console.log('--- test going left ---');
-	console.log( keyAction );
+	console.log( keyActionSprint );
 	
 	console.log( p.x );
-	p.update( keyAction, 1 );
+	p.update( keyActionSprint, 1 );
 	console.log( p.x );
+	
+	
+	console.log('--- test jump ---');
 	
 	console.log('--- test binary convert ---');
 	console.log( p );
@@ -43,6 +47,8 @@ requirejs(['Engine/Utility/class','Engine/Game/Player','Engine/Game/KeyAction'],
 	console.log( p.isDead );
 	p.die();
 	console.log( p.isDead );
+	
+
 	
 	
 });
