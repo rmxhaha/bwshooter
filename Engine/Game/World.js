@@ -45,19 +45,9 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 				throw new Error('Unknown Type Added' );
 			}
 		},
-		updateEntities : function(dt){
+		updateModels : function(dt){
 			for( var i = 0; i < this.players.length; ++ i ){
 				this.players[i].update(dt);
-			}
-			
-		},
-		updateMods : function(dt){
-			for( var i = 0; i < this.players.length; ++ i ){
-				this.players[i].updateMod( dt );
-			}
-			
-			for( var i = 0; i < this.lights.length; ++ i ){
-				this.lights[i].updateMod( dt );
 			}
 			
 		},
