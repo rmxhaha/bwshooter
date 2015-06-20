@@ -126,14 +126,15 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 			
 			if( this.physicOn ){
 				while( this.timebuffer > dt ){
-					this.updateEntities(dt);
+					this.updateModels(dt);
 					this.fixCoordinate();
 					this.timebuffer -= dt;
 				}
 			}
-				
-			/** update that doesn't concern physical coordination */
-			this.updateMods( real_dt );
+
+			/**
+			
+			TODO : Plan if this need to be removed b/c rotten stuff can always be changed to respawned stuff
 
 			// removing dead stuff
 			for( var i = this.players.length; i --; ){
@@ -142,6 +143,7 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 					this.players.splice( i, 1 );
 				}
 			}
+			*/
 		},
 		draw : function(ctx){
 			ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -208,9 +210,7 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 			this.bullets.push( item );
 
 			var killedPlayer = result.wall;
-			if( killedPlayer ) killedPlayer.die();
-			
-			return !!killedPlayer;
+			return killedPlayer;
 		}
 		
 	}
