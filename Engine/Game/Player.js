@@ -54,6 +54,11 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			return this.isDead && this.hasBeenDeadFor() >= this.rotDuration;
 		},
 		fadeOutDuration : 0.5,
+		/**
+		topPlatform
+			topPlatform is the platform which player is standing on
+			topPlatform detection is set by world fixCoordinate function 
+		*/
 		topPlatform : false,
 		width : 90,
 		height : 140,
