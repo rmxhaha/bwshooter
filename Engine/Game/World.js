@@ -1,4 +1,6 @@
-define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
+define(['underscore','Engine/Utility/RayCast','Engine/Utility/Converter'], function( _, RayCast, Converter ){
+	/***
+	
 	var defaults = {
 		camera_x : 0,
 		camera_y : 0,
@@ -8,14 +10,13 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 		lights : [],
 		bullets : []
 	};
-	/**
-		Represent a game world
-		@constructor
-		@param {number} camera_x - camera horizontal coordinate
-		@param {number} camera_y - camera vertical coordinate
-		@param {number} gravity - world's gravity
+	
+	//	Represent a game world
+	//	@constructor
+	//	@param {number} camera_x - camera horizontal coordinate
+	//	@param {number} camera_y - camera vertical coordinate
+	//	@param {number} gravity - world's gravity
 		
-	*/
 	var World = function( options ){
 		_.extend( this, _.clone(defaults) );
 		_.extend( this, options );
@@ -121,7 +122,7 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 		update : function( real_dt ){
 			this.timebuffer += real_dt;
 			
-			/** fix time update for consistency */
+			// fix time update for consistency 
 			var dt = this.timestep;
 			
 			if( this.physicOn ){
@@ -132,18 +133,16 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 				}
 			}
 
-			/**
 			
-			TODO : Plan if this need to be removed b/c rotten stuff can always be changed to respawned stuff
+			//TODO : Plan if this need to be removed b/c rotten stuff can always be changed to respawned stuff
 
 			// removing dead stuff
-			for( var i = this.players.length; i --; ){
-				
-				if( this.players[i].hasRotten() ){
-					this.players.splice( i, 1 );
-				}
-			}
-			*/
+			//for( var i = this.players.length; i --; ){
+			//	
+			//	if( this.players[i].hasRotten() ){
+			//		this.players.splice( i, 1 );
+			//	}
+			//}
 		},
 		draw : function(ctx){
 			ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -160,7 +159,7 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 				this.bullets[i].draw(ctx);
 			}
 			
-			/* draw dead players on top of living players */
+			// draw dead players on top of living players 
 			for( var i = 0; i < this.players.length; ++ i ){
 				if( !this.players[i].isDead() ) 
 					this.players[i].draw(ctx);
@@ -170,7 +169,7 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 					this.players[i].draw(ctx);
 			}
 			
-			/** draw mods */
+			// draw mods 
 			for( var i = 0; i < this.players.length; ++ i ){
 				this.players[i].drawMod( ctx );
 			}
@@ -180,7 +179,7 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 		
 		/** 
 		 *  Ray Cast only to platforms for lighting convenience
-		 */
+		 
 		RayCast : function(option){
 			_.extend( option, { walls : this.platforms });
 			
@@ -216,4 +215,43 @@ define(['underscore','Engine/Utilities/RayCast'], function( _, RayCast ){
 	}
 	
 	return World;
+	*/
+	
+	var defaults = {
+		camera_x : 0,
+		camera_y : 0,
+		gravity : 1000,
+		players : [],
+		platforms : [],
+		lights : [],
+		bullets : [],
+		timestep : 0.05,
+		framecount : 0
+	};
+
+	//	Represent a game world
+	//	@constructor
+	//	@param {number} camera_x - camera horizontal coordinate
+	//	@param {number} camera_y - camera vertical coordinate
+	//	@param {number} gravity - world's gravity
+		
+	var World = function( options ){
+		_.extend( this, _.clone(defaults) );
+		_.extend( this, options );
+	}
+	
+	var WorldBaseConverter = Converter.BCConverter([
+		{ name : 'gravity', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'timestep', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'framecount', type : Converter.BCConverter.type.NUMBER }
+	]);
+	
+	World.prototype.parseBaseBin = function( bin ){
+		_.extend( this, WorldBaseConverter.convertToClass( bin ) );
+	}
+	
+	World.prototype.getBaseBin = function(){
+		return WorldBaseConverter.convertToBin( this );
+	}
+
 });
