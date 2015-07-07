@@ -14,8 +14,8 @@ requirejs(['Engine/Utility/class','Engine/Game/Player','Engine/Game/KeyAction'],
 	var p2 = new Player;
 	
 	// simulate the coupling 
-	var world = { gravity : 1000 };	
 	p.world = world;
+	var world = { gravity : 1000 };	
 	p2.world = world;
 	
 	var keyActionSprint = new KeyAction({

@@ -1,4 +1,4 @@
-define(['underscore','Engine/Utility/RayCast','Engine/Utility/Converter'], function( _, RayCast, Converter ){
+define(['Engine/Utility/underscore','Engine/Utility/RayCast','Engine/Utility/Converter'], function( _, RayCast, Converter ){
 	/***
 	
 	var defaults = {
@@ -240,7 +240,7 @@ define(['underscore','Engine/Utility/RayCast','Engine/Utility/Converter'], funct
 		_.extend( this, options );
 	}
 	
-	var WorldBaseConverter = Converter.BCConverter([
+	var WorldBaseConverter = new Converter.BCConverter([
 		{ name : 'gravity', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'timestep', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'framecount', type : Converter.BCConverter.type.NUMBER }
@@ -253,5 +253,7 @@ define(['underscore','Engine/Utility/RayCast','Engine/Utility/Converter'], funct
 	World.prototype.getBaseBin = function(){
 		return WorldBaseConverter.convertToBin( this );
 	}
+	
+	return World;
 
 });

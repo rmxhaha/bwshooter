@@ -7,7 +7,16 @@ require.config({
     }
 });
 
-require(['Engine/Utility/class','Engine/Game/Player','Engine/View/PlayerView','Engine/Game/KeyActionListener'],function( _class, Player, PlayerView, KAListener ){
+require(
+[
+	'Engine/Utility/class',
+	'Engine/Game/Player',
+	'Engine/View/PlayerView',
+	'Engine/Game/KeyActionListener'
+],
+
+function( _class, Player, PlayerView, KAListener )
+{
 	var p = new Player({
 		x : 940,
 		y : - 100,

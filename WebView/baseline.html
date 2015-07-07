@@ -1,0 +1,49 @@
+<head>
+	<script src="http://localhost:43001/socket.io/socket.io.js"></script>
+	<script src="js/require.js"></script>
+</head>
+<body>
+	<canvas id=canvas></canvas>
+	<script>
+	require.config({
+		baseUrl : '/',
+		shim: {
+			"Engine/Utility/underscore": {
+				exports: "_"
+			}
+		}
+	});
+	require([
+		'Engine/Utility/class',
+		'Engine/Game/World',
+		'Engine/View/WorldView'
+	],
+	function( _class, World ){				
+		var socket = io.connect('http://localhost:43001/');
+		var name;
+		
+		socket.emit('requestLogin', prompt('What is your name ?') );
+		
+		function startGame( basebin )
+		{
+			var world = new World;
+			world.parseBaseBin( basebin );
+			
+			function loop(){
+				
+				WorldView.render( context, world );
+				
+				requestAnimationFrame( loop );
+			}
+			
+			loop();
+		}
+		
+		socket.on('basedata', function( data ){
+			console.log( data );
+			name = data.name;
+			startGame( data.basebin );
+		});
+	});
+	</script>
+</body>
