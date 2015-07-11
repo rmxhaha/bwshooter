@@ -64,10 +64,11 @@ requirejs(['Engine/Utility/Converter'], function( Converter ){
 	*/
 	
 	//Integer Test
-	var cvt = new Converter.BCConverter([
-		{ name : 'a', type : Converter.type.NUMBER },
-		{ name : 'b', type : Converter.type.NUMBER }
-	], false);
+	/*
+	var cvt = new Converter.BCConverter({ 
+		a : Converter.type.NUMBER,
+		b : Converter.type.NUMBER
+	}, false);
 	
 	console.log( 
 		Converter.BinToInt( 
@@ -76,6 +77,7 @@ requirejs(['Engine/Utility/Converter'], function( Converter ){
 			), 4
 		)
 	);
+	*/
 
 	// short test
 	var cvt = new Converter.BCConverter([

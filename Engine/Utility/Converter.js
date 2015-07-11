@@ -98,15 +98,50 @@ define(['Engine/utility/lz-string'], function(LZString){
 	// binary <-> class converter
 	var BCConverter = (function(){
 		var BCConverter = function( dataOrder, compress ){
-			var corder = copy( dataOrder ); 
+			if( dataOrder instanceof Array ){
+				var corder = copy( dataOrder ); 
 
-			var getName = function(y){ return y.name };
-			
-			this.boolArr 	= corder.filter(function(x){ return x.type == BCConverter.type.BOOLEAN }).map(getName).sort();
-			this.numArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NUMBER }).map(getName).sort();
-			this.shortArr 	= corder.filter(function(x){ return x.type == BCConverter.type.SHORT }).map(getName).sort();
-			this.pstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.PASCAL_STRING }).map(getName).sort();
-			this.nstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NULL_TERMINATED_STRING }).map(getName).sort();
+				var getName = function(y){ return y.name };
+				
+				this.boolArr 	= corder.filter(function(x){ return x.type == BCConverter.type.BOOLEAN }).map(getName).sort();
+				this.numArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NUMBER }).map(getName).sort();
+				this.shortArr 	= corder.filter(function(x){ return x.type == BCConverter.type.SHORT }).map(getName).sort();
+				this.pstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.PASCAL_STRING }).map(getName).sort();
+				this.nstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NULL_TERMINATED_STRING }).map(getName).sort();
+			}
+			else if( typeof dataOrder == 'object' ){
+				// new schema 
+				var corder = copy( dataOrder ); 
+				
+				console.log('r');
+				
+				for( var key in corder ){
+					if( corder.hasOwnProperty( key ) ){
+						var value = corder[key];
+						
+						
+						if( value == Converter.type.BOOLEAN )
+							this.boolArr.push( key );
+						else if( value == Converter.type.NUMBER )
+							this.numArr.push( key );
+						else if( value == Converter.type.SHORT )
+							this.shortArr.push( key );
+						else if( value == Converter.type.PASCAL_STRING )
+							this.pstrArr.push( key );
+						else if( value == Converter.type.NULL_TERMINATED_STRING )
+							this.nstrArr.push( key );
+					}
+				}
+				
+				this.boolArr.sort();
+				this.numArr.sort();
+				this.shortArr.sort();
+				this.pstrArr.sort();
+				this.nstrArr.sort();
+			}
+			else {
+				throw new Error('data schema is unexpected');
+			}
 
 			this.compress 	= ( typeof compress ==='undefined' ? true : !!compress );
 			
