@@ -31,7 +31,7 @@ io.on('connection', function (socket) {
 		// TODO : do checking on name 
 		console.log( name );
 
-		socket.emit('basedata', {
+		socket.emit('base', {
 			name : name,
 			basebin : world.getBaseBin()
 		});

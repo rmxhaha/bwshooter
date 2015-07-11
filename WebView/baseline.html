@@ -18,7 +18,7 @@
 		'Engine/Game/World',
 		'Engine/View/WorldView'
 	],
-	function( _class, World ){				
+	function( _class, World, WorldView ){				
 		var socket = io.connect('http://localhost:43001/');
 		var name;
 		
@@ -30,7 +30,6 @@
 			world.parseBaseBin( basebin );
 			
 			function loop(){
-				
 				WorldView.render( context, world );
 				
 				requestAnimationFrame( loop );
@@ -39,7 +38,7 @@
 			loop();
 		}
 		
-		socket.on('basedata', function( data ){
+		socket.on('base', function( data ){
 			console.log( data );
 			name = data.name;
 			startGame( data.basebin );
