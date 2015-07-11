@@ -1,6 +1,11 @@
 <head>
 	<script src="http://localhost:43001/socket.io/socket.io.js"></script>
 	<script src="js/require.js"></script>
+	<style>
+	body {
+		margin : 0;
+	}
+	</style>
 </head>
 <body>
 	<canvas id=canvas></canvas>
@@ -26,7 +31,13 @@
 		
 		function startGame( basebin )
 		{
+			var canvas = document.getElementById('canvas');
+			var context = canvas.getContext('2d');
 			var world = new World;
+			
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			
 			world.parseBaseBin( basebin );
 			
 			function loop(){
