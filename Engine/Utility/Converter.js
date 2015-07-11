@@ -84,6 +84,8 @@ define(['Engine/utility/lz-string'], function(LZString){
 		return String.fromCharCode( bin );
 	}
 	
+	Converter.CharToBool8 = CharToBool8;
+	Converter.Bool8ToChar = Bool8ToChar;
 	
 	function copy( arr ){
 		if( typeof arr !== 'object' ) return arr;
@@ -329,9 +331,8 @@ define(['Engine/utility/lz-string'], function(LZString){
 	
 	
 	
-	Converter.CharToBool8 = CharToBool8;
-	Converter.Bool8ToChar = Bool8ToChar;
 	Converter.BCConverter = BCConverter;
+	Converter.ClassConverter = BCConverter;
 	
 	var BCArrayConverter = (function(){
 		var BCArrayConverter = function( baseConverter, compress ){
@@ -384,6 +385,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 	})();
 	
 	Converter.BCArrayConverter = BCArrayConverter;
+	Converter.ArrayConverter = BCArrayConverter;
 	
 	/**
 		New Class schema
