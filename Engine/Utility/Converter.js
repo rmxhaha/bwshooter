@@ -4,6 +4,10 @@ define(['Engine/utility/lz-string'], function(LZString){
 	
 	Converter.type = Object.freeze({
 		NUMBER : 0,
+		INTEGER : 0,
+		INT32 : 0,
+		INT16 : 4,
+		SHORT : 4,
 
 		STRING : 1, // the default
 		PASCAL_STRING : 1, // 32 bit pascal string
@@ -56,18 +60,6 @@ define(['Engine/utility/lz-string'], function(LZString){
 	Converter.ShortToBin = ShortToBin;
 	Converter.BinToShort = BinToShort;
 	
-	/**
-	//Test Code for bin to int
-
-	for( var i = 2000000; i--; ){
-		var pick = Math.floor( Math.random() * 224 * 224 * 224 * 224 * 224 - 224 * 224 * 224 * 224 * 224/2 );
-		if( BinToInt( IntToBin( pick )) !== pick ){
-			console.log( pick );
-		}
-	}
-	
-	console.log('R');
-*/
 	var CharToBool8 = function( c ){
 		var arr = [];
 		arr.length = 8;
@@ -92,15 +84,6 @@ define(['Engine/utility/lz-string'], function(LZString){
 		return String.fromCharCode( bin );
 	}
 	
-	/**
-		//Test char to 8 boolean
-		
-		console.log(
-			CharToBool8(
-				Bool8ToChar( [false, true, true, true, true, false, true, false] )
-			)
-		);
-	*/
 	
 	function copy( arr ){
 		if( typeof arr !== 'object' ) return arr;
@@ -121,6 +104,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			
 			this.boolArr 	= corder.filter(function(x){ return x.type == BCConverter.type.BOOLEAN }).map(getName).sort();
 			this.numArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NUMBER }).map(getName).sort();
+			this.shortArr 	= corder.filter(function(x){ return x.type == BCConverter.type.SHORT }).map(getName).sort();
 			this.pstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.PASCAL_STRING }).map(getName).sort();
 			this.nstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NULL_TERMINATED_STRING }).map(getName).sort();
 
@@ -140,7 +124,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 		BCConverter.prototype.convertToBin = function( obj ){
 			if( typeof obj !== 'object' ) return false;
 
-			function get( obh, index ){
+			function get( obj, index ){
 				return obj[ index ];
 			}
 			
@@ -156,6 +140,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			// check if all the names that will be copied is with the right type
 			// boolean need no check
 			checkType( this.numArr, obj, 'number' );
+			checkType( this.shortArr, obj, 'number' );
 			checkType( this.pstrArr, obj, 'string' );
 			checkType( this.nstrArr, obj, 'string' );
 			
@@ -194,6 +179,12 @@ define(['Engine/utility/lz-string'], function(LZString){
 				binOut += IntToBin( num );
 			}
 			
+			// short
+			for( var i = 0; i < this.shortArr.length; ++ i ){
+				var num = get( obj, this.shortArr[i] );
+				binOut += ShortToBin( num );
+			}
+			
 			// pascal string 32
 			for( var i = 0; i < this.pstrArr.length; ++ i ){
 				var str = get( obj, this.pstrArr[i] );
@@ -225,6 +216,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			
 			var ptr = 0;
 			
+			// boolean
 			var n = Math.ceil( this.boolArr.length / 8 );
 
 			if( bin.length < ptr + n ){ // the amount of data given is not correct
@@ -242,6 +234,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 				}
 			}
 			
+			// number
 			var n = this.numArr.length * 4;
 			
 			if( bin.length < ptr + n ){ // the amount of data given is not correct
@@ -252,6 +245,19 @@ define(['Engine/utility/lz-string'], function(LZString){
 				var name = this.numArr[i];
 				obj[name] = BinToInt( bin, ptr );
 				ptr += 4;
+			}
+
+			// short
+			var n = this.shortArr.length * 2;
+			
+			if( bin.length < ptr + n ){ // the amount of data given is not correct
+				throw new Error('Data is corrupted');
+			}
+			
+			for( var i = 0; i < this.shortArr.length; ++ i ){
+				var name = this.shortArr[i];
+				obj[name] = BinToShort( bin, ptr );
+				ptr += 2;
 			}
 			
 			
@@ -266,6 +272,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 				ptr += length;
 			}
 			
+			// null terminated string
 			for( var i = 0; i < this.nstrArr.length; ++ i ){
 				var name = this.nstrArr[i];
 				var str = "";
@@ -283,73 +290,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 		return BCConverter;
 	})();
 
-	/**
-	//Boolean test
 
-	var cvt = new BCConverter([
-		{name : 'a', type : BCConverter.type.BOOLEAN },
-		{name : 'b', type : BCConverter.type.BOOLEAN },
-		{name : 'c', type : BCConverter.type.BOOLEAN },
-		{name : 'd', type : BCConverter.type.BOOLEAN },
-		{name : 'e', type : BCConverter.type.BOOLEAN },
-		{name : 'f', type : BCConverter.type.BOOLEAN },
-		{name : 'g', type : BCConverter.type.BOOLEAN },
-		{name : 'h', type : BCConverter.type.BOOLEAN },
-		{name : 'i', type : BCConverter.type.BOOLEAN },
-		{name : 'j', type : BCConverter.type.BOOLEAN }
-	]);
-	
-	console.log( 
-		cvt.convertToClass(
-			cvt.convertToBin(
-				{
-					a : false,
-					b : true,
-					c : true,
-					d : true,
-					e : false,
-					f : true,
-					g : true,
-					h : true,
-					i : true,
-					j : true
-				}
-			)
-		)
-	);
-	*/
-	
-	/**
-	//Integer Test
-	var cvt = new BCConverter([
-		{ name : 'a', type : BCConverter.type.NUMBER },
-		{ name : 'b', type : BCConverter.type.NUMBER }
-	]);
-	
-	console.log( 
-		BinToInt( 
-			cvt.convertToBin(
-				{a : 32320, b : 434093 }
-			), 4
-		)
-	);
-	*/
-	
-	/**
-	//string test
-	var cvt = new BCConverter([
-		{name : 'a', type : BCConverter.type.NSTRING },
-		{name : 'b', type : BCConverter.type.NSTRING }
-	]);
-	
-	
-	console.log(
-			cvt.convertToBin({
-				a : 'asdfg',
-				b : 'fsda'
-			}).length
-	);
-	*/
 	
 	
 	
@@ -419,6 +360,10 @@ define(['Engine/utility/lz-string'], function(LZString){
 			columnName3 : 'number',
 			columnName4 : 'boolean',
 			columnName5 : 'bool'
+			columnName6 : {
+				columnName1 : Converter.type.INTEGER,
+				
+			}
 		}
 	*/
 	
