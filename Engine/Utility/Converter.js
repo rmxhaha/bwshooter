@@ -2,6 +2,18 @@ define(['Engine/utility/lz-string'], function(LZString){
 	
 	var Converter = {};
 	
+	Converter.type = Object.freeze({
+		NUMBER : 0,
+
+		STRING : 1, // the default
+		PASCAL_STRING : 1, // 32 bit pascal string
+		NULL_TERMINATED_STRING : 3, // null terminated string
+		PSTRING : 1, // shortened version
+		NSTRING : 3, // shortened version
+
+		BOOLEAN : 2
+	});
+	
 	var IntToBin = function( num ){
 		var range = 256;
 
@@ -123,17 +135,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			*/
 		}
 
-		BCConverter.type = {
-			NUMBER : 0,
-
-			STRING : 1, // the default
-			PASCAL_STRING : 1, // 32 bit pascal string
-			NULL_TERMINATED_STRING : 3, // null terminated string
-			PSTRING : 1, // shortened version
-			NSTRING : 3, // shortened version
-
-			BOOLEAN : 2
-		};
+		BCConverter.type = Converter.type;
 		
 		BCConverter.prototype.convertToBin = function( obj ){
 			if( typeof obj !== 'object' ) return false;
@@ -407,7 +409,18 @@ define(['Engine/utility/lz-string'], function(LZString){
 	
 	Converter.BCArrayConverter = BCArrayConverter;
 	
-	
+	/**
+		New Class schema
+		
+		{
+			columnName1 : 'integer',
+			columnName2 : 'int',
+			columnName3 : 'int32',
+			columnName3 : 'number',
+			columnName4 : 'boolean',
+			columnName5 : 'bool'
+		}
+	*/
 	
 	return Converter;
 });
