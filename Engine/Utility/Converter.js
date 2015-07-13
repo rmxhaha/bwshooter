@@ -115,15 +115,13 @@ define(['Engine/utility/lz-string'], function(LZString){
 				// new schema 
 				var corder = copy( dataOrder ); 
 				
-				console.log('r');
-				
+				this.numArr = [];
+				this.boolArr = [];
+				this.shortArr = [];
+				this.pstrArr = [];
+				this.nstrArr = [];
+
 				for( var key in corder ){
-					this.numArr = [];
-					this.boolArr = [];
-					this.shortArr = [];
-					this.pstrArr = [];
-					this.nstrArr = [];
-					
 					if( corder.hasOwnProperty( key ) ){
 						var value = corder[key];
 						
