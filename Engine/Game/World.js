@@ -1,4 +1,12 @@
-define(['Engine/Utility/underscore','Engine/Utility/RayCast','Engine/Utility/Converter'], function( _, RayCast, Converter ){
+define([
+	'Engine/Utility/underscore',
+	'Engine/Utility/RayCast',
+	'Engine/Utility/Converter',
+	'Engine/Game/Platform'
+], function( 
+	_, RayCast, Converter,
+	Platform
+){
 	/***
 	
 	var defaults = {
@@ -252,6 +260,17 @@ define(['Engine/Utility/underscore','Engine/Utility/RayCast','Engine/Utility/Con
 	World.prototype.getBaseBin = function(){
 		return WorldBaseConverter.convertToBin( this );
 	}
+	
+	_.extend( World.prototype, {
+		add : function( item ){
+			if( item instanceof Platform ){
+				this.platforms.push( item );
+			}
+			else {
+				throw new Error('type not found');
+			}
+		}
+	});
 	
 	return World;
 
