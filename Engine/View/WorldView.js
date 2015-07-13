@@ -1,5 +1,5 @@
 define([
-	'Engine/Utility/underscore'
+	'Engine/Utility/underscore',
 	'Engine/View/PlatformView'
 ], function( _, PlatformView ){
 	function renderBackground(){
