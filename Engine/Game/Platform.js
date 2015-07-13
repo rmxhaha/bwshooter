@@ -17,6 +17,8 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		width : Converter.type.NUMBER
 	});
 	
+	Platform.converter = PlatformConverter;
+	
 	_.extend( Platform.prototype, {
 		toBin : function(){
 			PlatformConverter.convertToBin( this );
