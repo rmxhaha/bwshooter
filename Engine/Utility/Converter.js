@@ -118,6 +118,12 @@ define(['Engine/utility/lz-string'], function(LZString){
 				console.log('r');
 				
 				for( var key in corder ){
+					this.numArr = [];
+					this.boolArr = [];
+					this.shortArr = [];
+					this.pstrArr = [];
+					this.nstrArr = [];
+					
 					if( corder.hasOwnProperty( key ) ){
 						var value = corder[key];
 						
