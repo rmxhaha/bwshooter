@@ -236,8 +236,7 @@ define(['Engine/Utility/underscore','Engine/Utility/RayCast','Engine/Utility/Con
 	//	@param {number} gravity - world's gravity
 		
 	var World = function( options ){
-		_.extend( this, _.clone(defaults) );
-		_.extend( this, options );
+		_.extend( this, _.defaults( options, _.clone(defaults) ) );
 	}
 	
 	var WorldBaseConverter = new Converter.BCConverter([
