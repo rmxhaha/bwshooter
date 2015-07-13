@@ -244,21 +244,36 @@ define([
 	//	@param {number} gravity - world's gravity
 		
 	var World = function( options ){
-		_.extend( this, _.defaults( options, _.clone(defaults) ) );
+		_.extend( this, _.clone(defaults) );
+		_.extend( this, options );
 	}
 	
 	var WorldBaseConverter = new Converter.BCConverter([
 		{ name : 'gravity', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'timestep', type : Converter.BCConverter.type.NUMBER },
-		{ name : 'framecount', type : Converter.BCConverter.type.NUMBER }
+		{ name : 'framecount', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'platforms', type : Converter.type.PSTRING }
 	]);
 	
+	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, true );
+	
 	World.prototype.parseBaseBin = function( bin ){
-		_.extend( this, WorldBaseConverter.convertToClass( bin ) );
+		var data = WorldBaseConverter.convertToClass( bin );
+
+		_.extend( this, _.pick( data, 'gravity','timestep','framecount' ) );
+		
+		// debug
+		console.log( PlatformsArrayConverter.convertToArray( data.platforms ) );
+
+		this.platforms = _.map( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ return new Platform(p) });
 	}
 	
 	World.prototype.getBaseBin = function(){
-		return WorldBaseConverter.convertToBin( this );
+		var data = _.pick( this, 'gravity','timestep','framecount' );
+		data.platforms = PlatformsArrayConverter.convertToBin( this.platforms );
+		
+		var bin = WorldBaseConverter.convertToBin( data );
+		return bin;
 	}
 	
 	_.extend( World.prototype, {
