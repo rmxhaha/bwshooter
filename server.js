@@ -7,7 +7,7 @@ requirejs.config({
     }
 });
 
-requirejs(['Engine/Utility/class','express', 'http', 'socket.io','Engine/Game/ServerWorld'], function( _class, express, http, socketio, World ){
+requirejs(['Engine/Utility/class','express', 'http', 'socket.io','Engine/Game/ServerWorld','Engine/Game/Platform'], function( _class, express, http, socketio, World, Platform ){
 
 var app = express();
 var server = http.Server(app);
@@ -22,6 +22,8 @@ app.listen( 43000 );
 
 
 var world = new World;
+
+world.add( new Platform({ x : 200, y : -300 }));
 
 
 io.on('connection', function (socket) {

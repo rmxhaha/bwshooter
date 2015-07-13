@@ -21,9 +21,10 @@
 	require([
 		'Engine/Utility/class',
 		'Engine/Game/World',
-		'Engine/View/WorldView'
+		'Engine/View/WorldView',
+		'Engine/Game/Platform'
 	],
-	function( _class, World, WorldView ){				
+	function( _class, World, WorldView, Platform ){				
 		var socket = io.connect('http://localhost:43001/');
 		var name;
 		
