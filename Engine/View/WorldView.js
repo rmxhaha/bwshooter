@@ -1,4 +1,7 @@
-define([], function(){
+define([
+	'Engine/Utility/underscore'
+	'Engine/View/PlatformView'
+], function( _, PlatformView ){
 	function renderBackground(){
 		
 	}
@@ -14,8 +17,9 @@ define([], function(){
 		// camera 
 		ctx.translate( world.camera_x, world.camera_y );
 		
-		
-		
+		_.each( world.platforms, function( platform ){
+			PlatformView.render( ctx, platform );
+		});
 		
 		ctx.restore();
 	}
