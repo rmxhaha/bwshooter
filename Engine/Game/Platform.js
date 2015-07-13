@@ -10,7 +10,7 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		_.extend( this, _.defaults( option, defaults ) );
 	}
 	
-	var PlatformConverter = new Converter.BasicConverter({
+	var PlatformConverter = new Converter.ClassConverter({
 		x : Converter.type.NUMBER,
 		y : Converter.type.NUMBER,
 		penetrable : Converter.type.BOOLEAN,
