@@ -8,29 +8,27 @@ define(['Engine/Utility/underscore'], function( _ ){
 		angle : 0, // in radian
 		angleWidth : Math.PI*2, // in radian
 		turnedOn : true, // true for on and false of off
-		fx : {
-			flicker : {
-				on : false,
-				onDuration : 1,
-				flickerDuration : 0.6,
-				flickerSpeed : 0.2,
-				time : 0
-			},
-			swinging : {
-				on : false,
-				speed : 0.5,
-				angleDeviation : Math.PI/10,
-				angleBase : Math.PI,
-				deg : 0
-			},
-			sun : {
-				on : false,
-				dayTime : 30, 
-				nightTime : 30,
-				switchTime : 3,
-				maxOpacity : 1,
-				time : 0
-			}
+		flickerFX : {
+			on : false,
+			onDuration : 1,
+			flickerDuration : 0.6,
+			flickerSpeed : 0.2,
+			time : 0
+		},
+		swingingFX : {
+			on : false,
+			speed : 0.5,
+			angleDeviation : Math.PI/10,
+			angleBase : Math.PI,
+			deg : 0
+		},
+		sunFX : {
+			on : false,
+			dayTime : 30, 
+			nightTime : 30,
+			switchTime : 3,
+			maxOpacity : 1,
+			time : 0
 		}
 	};
 	
@@ -51,14 +49,14 @@ define(['Engine/Utility/underscore'], function( _ ){
 		turnOff : function(){ this.turnedOn = false ;},
 		update : function(dt){
 			// FX 
-			var fx = this.fx;
 			
-			if( fx.flicker.on ) this.updateFxFlicker(dt);
-			if( fx.swinging.on ) this.updateFxSwing(dt);
-			if( fx.sun.on ) this.updateFxSun(dt);
+			if( this.flickerFX.on ) this.updateFxFlicker(dt);
+			if( this.swingingFX.on ) this.updateFxSwing(dt);
+			if( this.sunFX.on ) this.updateFxSun(dt);
 		},
 		updateFxFlicker : function(dt){
-			var settings = this.fx.flicker;
+			var settings = this.flickerFX;
+			var light = this;
 			
 			settings.time += dt;
 			
@@ -75,7 +73,7 @@ define(['Engine/Utility/underscore'], function( _ ){
 			}
 		},
 		updateFxSun : function(dt){
-			var settings = this.fx.sun;
+			var settings = this.sunFX;
 			var sun = this;
 			
 			settings.time += dt;
@@ -101,7 +99,7 @@ define(['Engine/Utility/underscore'], function( _ ){
 			}
 		},
 		updateFxSwing : function(dt){
-			var settings = this.fx.swinging;
+			var settings = this.swingingFX;
 			
 			this.direction = settings.angleBase + Math.sin( settings.deg ) * settings.angleDeviation;
 			settings.deg += settings.speed*Math.PI*2 * dt;
