@@ -28,7 +28,8 @@
 		var socket = io.connect('http://localhost:43001/');
 		var name;
 		
-		socket.emit('requestLogin', prompt('What is your name ?') );
+		//socket.emit('requestLogin', prompt('What is your name ?') );
+		socket.emit('requestLogin', "rmxhaha" );
 		
 		function startGame( basebin )
 		{
