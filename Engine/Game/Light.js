@@ -53,9 +53,9 @@ define(['Engine/Utility/underscore'], function( _ ){
 			// FX 
 			var fx = this.fx;
 			
-			if( fx.flicker.on ) updateFxFlicker(dt);
-			if( fx.swinging.on ) updateFxSwing(dt);
-			if( fx.sun.on ) updateFxSun(dt);
+			if( fx.flicker.on ) this.updateFxFlicker(dt);
+			if( fx.swinging.on ) this.updateFxSwing(dt);
+			if( fx.sun.on ) this.updateFxSun(dt);
 		},
 		updateFxFlicker : function(dt){
 			var settings = this.fx.flicker;
