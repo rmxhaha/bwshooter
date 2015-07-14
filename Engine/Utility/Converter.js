@@ -1,3 +1,4 @@
+var _ = require('underscore');
 define(['Engine/utility/lz-string'], function(LZString){
 	
 	var Converter = {};
@@ -120,13 +121,16 @@ define(['Engine/utility/lz-string'], function(LZString){
 				this.shortArr = [];
 				this.pstrArr = [];
 				this.nstrArr = [];
+				this.childArr = {};
 
 				for( var key in corder ){
 					if( corder.hasOwnProperty( key ) ){
 						var value = corder[key];
 						
 						
-						if( value == Converter.type.BOOLEAN )
+						if( typeof value == 'object' )
+							this.childArr[ key ] = new BCConverter( value );
+						else if( value == Converter.type.BOOLEAN )
 							this.boolArr.push( key );
 						else if( value == Converter.type.NUMBER )
 							this.numArr.push( key );
@@ -163,7 +167,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 		BCConverter.type = Converter.type;
 		
 		BCConverter.prototype.convertToBin = function( obj ){
-			if( typeof obj !== 'object' ) return false;
+			if( typeof obj !== 'object' ) throw new Error('first parameter is not an object');
 
 			function get( obj, index ){
 				return obj[ index ];
@@ -184,7 +188,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			checkType( this.shortArr, obj, 'number' );
 			checkType( this.pstrArr, obj, 'string' );
 			checkType( this.nstrArr, obj, 'string' );
-			
+
 			/**
 				write order 
 				1. boolean
@@ -239,6 +243,14 @@ define(['Engine/utility/lz-string'], function(LZString){
 				binOut += str;
 				binOut += '\0';
 			}
+			
+			// childs
+			_.each( _.pairs( this.childArr ), function( pair ){
+				var bin = pair[1].convertToBin(get( obj, pair[0] ));
+
+				binOut += IntToBin( bin.length );
+				binOut += bin;
+			});
 
 			if( this.compress )
 				return LZString.compress( binOut );
@@ -324,6 +336,17 @@ define(['Engine/utility/lz-string'], function(LZString){
 				obj[name] = str;
 				++ ptr;
 			}
+			
+			// child
+			_.each( _.pairs( this.childArr ), function( pair ){
+				var length = BinToInt( bin, ptr );
+				ptr += 4;
+				console.log( 'L' + length );
+				console.log( bin.substr(ptr, length) );
+				
+				obj[ pair[0] ] = pair[1].convertToClass( bin.substr(ptr, length) );
+				ptr += length;
+			});
 			
 			return obj;
 		}

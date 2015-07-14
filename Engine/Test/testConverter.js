@@ -1,9 +1,15 @@
 var requirejs = require('requirejs');
 requirejs.config({
-	baseUrl : 'E:/Labs/bwshooter'
+	baseUrl : 'E:/Labs/bwshooter',
+	shim: {
+		"Engine/Utility/underscore": {
+			exports: "_"
+		}
+	}
+
 });
 
-requirejs(['Engine/Utility/Converter'], function( Converter ){
+requirejs(['Engine/Utility/Converter', 'Engine/Utility/underscore'], function( Converter, _ ){
 	/**
 	//Test Code for bin to int
 
@@ -80,6 +86,7 @@ requirejs(['Engine/Utility/Converter'], function( Converter ){
 	*/
 
 	// short test
+	/**
 	var cvt = new Converter.BCConverter([
 		{ name : 'a', type : Converter.type.SHORT },
 		{ name : 'b', type : Converter.type.SHORT }
@@ -92,6 +99,7 @@ requirejs(['Engine/Utility/Converter'], function( Converter ){
 			)
 		)
 	);
+	*/
 
 	
 	
@@ -111,7 +119,34 @@ requirejs(['Engine/Utility/Converter'], function( Converter ){
 	);
 	*/
 	
+	// nested class
+	var cvt = new Converter.ClassConverter({
+		x : Converter.type.NUMBER,
+		y : {
+			x : Converter.type.NUMBER,
+			y : Converter.type.PSTRING
+		},
+		z : {
+			z : {
+				z : Converter.type.NUMBER
+			}
+		}
+		
+	}, false);
 	
-
+	console.log(
+	cvt.convertToClass(
+	cvt.convertToBin({
+		x : 10,
+		y : {
+			x : 20,
+			y : 'abc'
+		},
+		z : { z : {z : 300}}
+	})
+	)
+	);
+	
+	
 
 });
