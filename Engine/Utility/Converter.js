@@ -1,6 +1,6 @@
-var _ = require('underscore');
-define(['Engine/utility/lz-string'], function(LZString){
-	
+
+define(['Engine/utility/lz-string','Engine/Utility/underscore'], function(LZString,_){
+
 	var Converter = {};
 	
 	Converter.type = Object.freeze({
@@ -121,28 +121,51 @@ define(['Engine/utility/lz-string'], function(LZString){
 				this.shortArr = [];
 				this.pstrArr = [];
 				this.nstrArr = [];
-				this.childArr = {};
-
-				for( var key in corder ){
-					if( corder.hasOwnProperty( key ) ){
-						var value = corder[key];
-						
-						
-						if( typeof value == 'object' )
-							this.childArr[ key ] = new BCConverter( value );
-						else if( value == Converter.type.BOOLEAN )
-							this.boolArr.push( key );
-						else if( value == Converter.type.NUMBER )
-							this.numArr.push( key );
-						else if( value == Converter.type.SHORT )
-							this.shortArr.push( key );
-						else if( value == Converter.type.PASCAL_STRING )
-							this.pstrArr.push( key );
-						else if( value == Converter.type.NULL_TERMINATED_STRING )
-							this.nstrArr.push( key );
-					}
+				
+				function iterator( key, value ){
+					if( value == Converter.type.BOOLEAN )
+						this.boolArr.push( key );
+					else if( value == Converter.type.NUMBER )
+						this.numArr.push( key );
+					else if( value == Converter.type.SHORT )
+						this.shortArr.push( key );
+					else if( value == Converter.type.PASCAL_STRING )
+						this.pstrArr.push( key );
+					else if( value == Converter.type.NULL_TERMINATED_STRING )
+						this.nstrArr.push( key );
 				}
 				
+				function tree( o, parentKey, fn ){
+
+					_.each( _.pairs( o ), function( p ){
+						var key = ( parentKey == '' ? 
+								p[0] :
+								parentKey + '.' + p[0]
+							);
+						var value = p[1];
+						
+						if( typeof value == 'object' ){
+							tree( value, key, fn );
+						}
+						else {
+							fn( key, value );
+						}
+					});
+				}
+				
+				function buildMap( o ){
+ 
+					return _.chain( _.pairs(o) )
+						.filter(function(v){ return typeof v[1] == 'object'; })
+						.map(function(p){ return [ p[0], buildMap(p[1]) ]; })
+						.object()
+						.value()
+				}
+				
+				this.baseMap = buildMap( corder );
+
+				tree( corder, '', iterator.bind(this) );
+
 				this.boolArr.sort();
 				this.numArr.sort();
 				this.shortArr.sort();
@@ -170,7 +193,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			if( typeof obj !== 'object' ) throw new Error('first parameter is not an object');
 
 			function get( obj, index ){
-				return obj[ index ];
+				return _.reduce( index.split('.'), function( tmp, idx){ return tmp[idx] }, obj );
 			}
 			
 			function checkType( paramNames, obj, type ){
@@ -244,14 +267,8 @@ define(['Engine/utility/lz-string'], function(LZString){
 				binOut += '\0';
 			}
 			
-			// childs
-			_.each( _.pairs( this.childArr ), function( pair ){
-				var bin = pair[1].convertToBin(get( obj, pair[0] ));
 
-				binOut += IntToBin( bin.length );
-				binOut += bin;
-			});
-
+			
 			if( this.compress )
 				return LZString.compress( binOut );
 			else
@@ -265,7 +282,17 @@ define(['Engine/utility/lz-string'], function(LZString){
 			if( this.compress ) 
 				bin = LZString.decompress( bin );
 			
-			var obj = {};
+			var obj = _.clone(this.baseMap);
+
+			function set( obj, index, value ){
+				var idxs = index.split('.');
+				var tarr = _.chain(index.split('.'))
+					.initial()
+					.reduce( function(memo,idx){ return memo[idx]; }, obj )
+					.value();
+					
+				tarr[ _.last( idxs ) ] = value;
+			}
 			
 			var ptr = 0;
 			
@@ -283,7 +310,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 				for( var i = 0; p < this.boolArr.length && i < 8; ++ p, ++i )
 				{
 					var name = this.boolArr[p];
-					obj[name] = arr[i];
+					set( obj, name, arr[i] );
 				}
 			}
 			
@@ -296,7 +323,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			
 			for( var i = 0; i < this.numArr.length; ++ i ){
 				var name = this.numArr[i];
-				obj[name] = BinToInt( bin, ptr );
+				set( obj, name, BinToInt( bin, ptr ) );
 				ptr += 4;
 			}
 
@@ -309,7 +336,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 			
 			for( var i = 0; i < this.shortArr.length; ++ i ){
 				var name = this.shortArr[i];
-				obj[name] = BinToShort( bin, ptr );
+				set( obj, name, BinToShort( bin, ptr ) );
 				ptr += 2;
 			}
 			
@@ -321,7 +348,7 @@ define(['Engine/utility/lz-string'], function(LZString){
 				var length = BinToInt( bin, ptr );
 				ptr += 4;
 
-				obj[name] = bin.substr( ptr, length );
+				set( obj, name, bin.substr( ptr, length ));
 				ptr += length;
 			}
 			
@@ -333,20 +360,10 @@ define(['Engine/utility/lz-string'], function(LZString){
 					str += bin[ptr];
 					++ ptr;
 				}
-				obj[name] = str;
+				set( obj, name,  str );
 				++ ptr;
 			}
 			
-			// child
-			_.each( _.pairs( this.childArr ), function( pair ){
-				var length = BinToInt( bin, ptr );
-				ptr += 4;
-				console.log( 'L' + length );
-				console.log( bin.substr(ptr, length) );
-				
-				obj[ pair[0] ] = pair[1].convertToClass( bin.substr(ptr, length) );
-				ptr += length;
-			});
 			
 			return obj;
 		}
