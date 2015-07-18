@@ -263,14 +263,15 @@ define([
 		_.extend( this, _.pick( data, 'gravity','timestep','framecount' ) );
 		
 		// debug
-		console.log( PlatformsArrayConverter.convertToArray( data.platforms ) );
 
 		this.platforms = _.map( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ return new Platform(p) });
+		this.lights = _.map( PlatformsArrayConverter.convertToArray( data.lights ), function(p){ return new Light(p) });
 	}
 	
 	World.prototype.getBaseBin = function(){
 		var data = _.pick( this, 'gravity','timestep','framecount' );
 		data.platforms = PlatformsArrayConverter.convertToBin( this.platforms );
+		data.lights = 
 		
 		var bin = WorldBaseConverter.convertToBin( data );
 		return bin;
@@ -280,6 +281,9 @@ define([
 		add : function( item ){
 			if( item instanceof Platform ){
 				this.platforms.push( item );
+			}
+			if( item instanceof Light ){
+				this.lights.push( item );
 			}
 			else {
 				throw new Error('type not found');
