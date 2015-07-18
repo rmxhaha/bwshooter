@@ -1,5 +1,5 @@
 
-define(['Engine/utility/lz-string','Engine/Utility/underscore'], function(LZString,_){
+define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/bops'], function(LZString,_, bops){
 
 	var Converter = {};
 	
@@ -18,6 +18,12 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore'], function(LZStri
 
 		BOOLEAN : 2
 	});
+	
+	
+	var FloatToBin = function( num ){
+		var b = new bops(4);
+		
+	}
 	
 	var IntToBin = function( num ){
 		var range = 256;
@@ -72,6 +78,45 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore'], function(LZStri
 		
 		return arr;
 	}
+	
+	var FloatToBin = function( f ){
+		var buf = new Uint8Array(4);
+		bops.writeFloatLE( buf, f, 0 );
+		
+		return String.fromCharCode.apply( null, buf );
+	}
+	
+	var BinToFloat = function( bin ){
+		var buf = new Uint8Array(4);
+		for( var i = 0; i < 4; ++ i ){
+			buf[i] = bin[i].charCodeAt(0);
+		}
+				
+		return bops.readFloatLE( buf, 0 );
+	}
+	
+	Converter.FloatToBin = FloatToBin;
+	Converter.BinToFloat = BinToFloat;
+	
+	var DoubleToBin = function( f ){
+		var buf = new Uint8Array(8);
+		bops.writeDoubleLE( buf, f, 0 );
+		
+		return String.fromCharCode.apply( null, buf );
+	}
+	
+	var BinToDouble = function( bin ){
+		var buf = new Uint8Array(8);
+		for( var i = 0; i < 8; ++ i ){
+			buf[i] = bin[i].charCodeAt(0);
+		}
+				
+		return bops.readDoubleLE( buf, 0 );
+	}
+	
+	Converter.DoubleToBin = DoubleToBin;
+	Converter.BinToDouble = BinToDouble;
+	
 	
 	var Bool8ToChar = function( arr ){
 		var L = Math.min( arr.length, 8 );

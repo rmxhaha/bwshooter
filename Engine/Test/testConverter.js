@@ -118,7 +118,7 @@ requirejs(['Engine/Utility/Converter', 'Engine/Utility/underscore'], function( C
 			}).length
 	);
 	*/
-	
+	/**
 	// nested class
 	var cvt = new Converter.ClassConverter({
 		x : Converter.type.NUMBER,
@@ -146,6 +146,15 @@ requirejs(['Engine/Utility/Converter', 'Engine/Utility/underscore'], function( C
 	})
 	)
 	);
+	
+	*/
+	
+	var t = 0.9999999;
+	console.log( t );
+	console.log( Converter.FloatToBin( t ) );
+	console.log( Converter.BinToFloat( Converter.FloatToBin( t ) ) );
+	console.log( Converter.DoubleToBin( t ) );
+	console.log( Converter.BinToDouble( Converter.DoubleToBin( t ) ) );
 	
 	
 
