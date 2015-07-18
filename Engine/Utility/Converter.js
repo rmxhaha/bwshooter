@@ -8,6 +8,10 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 		INTEGER : 0,
 		INT32 : 0,
 		INT16 : 4,
+		
+		FLOAT : 5,
+		DOUBLE : 6,
+		
 		SHORT : 4,
 
 		STRING : 1, // the default
@@ -86,10 +90,10 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 		return String.fromCharCode.apply( null, buf );
 	}
 	
-	var BinToFloat = function( bin ){
+	var BinToFloat = function( bin, ptr ){
 		var buf = new Uint8Array(4);
 		for( var i = 0; i < 4; ++ i ){
-			buf[i] = bin[i].charCodeAt(0);
+			buf[i] = bin[ ptr + i ].charCodeAt(0);
 		}
 				
 		return bops.readFloatLE( buf, 0 );
@@ -105,10 +109,10 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 		return String.fromCharCode.apply( null, buf );
 	}
 	
-	var BinToDouble = function( bin ){
+	var BinToDouble = function( bin, ptr ){
 		var buf = new Uint8Array(8);
 		for( var i = 0; i < 8; ++ i ){
-			buf[i] = bin[i].charCodeAt(0);
+			buf[i] = bin[ ptr + i ].charCodeAt(0);
 		}
 				
 		return bops.readDoubleLE( buf, 0 );
@@ -147,6 +151,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 	var BCConverter = (function(){
 		var BCConverter = function( dataOrder, compress ){
 			if( dataOrder instanceof Array ){
+				// deprecated
 				var corder = copy( dataOrder ); 
 
 				var getName = function(y){ return y.name };
@@ -166,6 +171,8 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				this.shortArr = [];
 				this.pstrArr = [];
 				this.nstrArr = [];
+				this.floatArr = [];
+				this.doubleArr = [];
 				
 				function iterator( key, value ){
 					if( value == Converter.type.BOOLEAN )
@@ -178,6 +185,10 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 						this.pstrArr.push( key );
 					else if( value == Converter.type.NULL_TERMINATED_STRING )
 						this.nstrArr.push( key );
+					else if( value == Converter.type.FLOAT )
+						this.floatArr.push( key );
+					else if( value = Converter.type.DOUBLE )
+						this.doubleArr.push( key );
 				}
 				
 				function tree( o, parentKey, fn ){
@@ -216,6 +227,9 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				this.shortArr.sort();
 				this.pstrArr.sort();
 				this.nstrArr.sort();
+				this.doubleArr.sort();
+				this.floatArr.sort();
+
 			}
 			else {
 				throw new Error('data schema is unexpected');
@@ -254,6 +268,8 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 			// boolean need no check
 			checkType( this.numArr, obj, 'number' );
 			checkType( this.shortArr, obj, 'number' );
+			checkType( this.floatArr, obj, 'number' );
+			checkType( this.doubleArr, obj, 'number' );
 			checkType( this.pstrArr, obj, 'string' );
 			checkType( this.nstrArr, obj, 'string' );
 
@@ -297,6 +313,19 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				var num = get( obj, this.shortArr[i] );
 				binOut += ShortToBin( num );
 			}
+			
+			// float
+			for( var i = 0; i < this.floatArr.length; ++ i ){
+				var num = get( obj, this.floatArr[i] );
+				binOut += FloatToBin( num );
+			}
+			
+			// double
+			for( var i = 0; i < this.doubleArr.length; ++ i ){
+				var num = get( obj, this.doubleArr[i] );
+				binOut += DoubleToBin( num );
+			}
+			
 			
 			// pascal string 32
 			for( var i = 0; i < this.pstrArr.length; ++ i ){
@@ -371,6 +400,34 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				set( obj, name, BinToInt( bin, ptr ) );
 				ptr += 4;
 			}
+
+			// float
+			var n = this.floatArr.length * 4;
+			
+			if( bin.length < ptr + n ){ // the amount of data given is not correct
+				throw new Error('Data is corrupted');
+			}
+			
+			for( var i = 0; i < this.floatArr.length; ++ i ){
+				var name = this.floatArr[i];
+				set( obj, name, BinToFloat( bin, ptr ) );
+				ptr += 4;
+			}
+			
+			// double
+			var n = this.doubleArr.length * 8;
+			
+			if( bin.length < ptr + n ){ // the amount of data given is not correct
+				throw new Error('Data is corrupted');
+			}
+			
+			for( var i = 0; i < this.doubleArr.length; ++ i ){
+				var name = this.doubleArr[i];
+				set( obj, name, BinToDouble( bin, ptr ) );
+				ptr += 8;
+			}
+			
+			
 
 			// short
 			var n = this.shortArr.length * 2;

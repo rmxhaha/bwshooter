@@ -118,12 +118,12 @@ requirejs(['Engine/Utility/Converter', 'Engine/Utility/underscore'], function( C
 			}).length
 	);
 	*/
-	/**
+
 	// nested class
 	var cvt = new Converter.ClassConverter({
 		x : Converter.type.NUMBER,
 		y : {
-			x : Converter.type.NUMBER,
+			x : Converter.type.DOUBLE,
 			y : Converter.type.PSTRING
 		},
 		z : {
@@ -135,19 +135,20 @@ requirejs(['Engine/Utility/Converter', 'Engine/Utility/underscore'], function( C
 	}, false);
 	
 	console.log(
-	cvt.convertToClass(
-	cvt.convertToBin({
-		x : 10,
-		y : {
-			x : 20,
-			y : 'abc'
-		},
-		z : { z : {z : 300}}
-	})
-	)
+		cvt.convertToClass(
+			cvt.convertToBin({
+				x : 10,
+				y : {
+					x : 20.22,
+					y : 'abc'
+				},
+				z : { z : {z : 300}}
+			})
+		)
 	);
 	
-	*/
+
+	/**
 	
 	var t = 0.9999999;
 	console.log( t );
@@ -156,6 +157,6 @@ requirejs(['Engine/Utility/Converter', 'Engine/Utility/underscore'], function( C
 	console.log( Converter.DoubleToBin( t ) );
 	console.log( Converter.BinToDouble( Converter.DoubleToBin( t ) ) );
 	
-	
+	*/
 
 });
