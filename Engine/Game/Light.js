@@ -34,7 +34,7 @@ define(['Engine/Utility/underscore'], function( _ ){
 		}
 	};
 	
-	var LightConverter = new Converter.ClassConverter({
+	var LightBaseConverter = new Converter.ClassConverter({
 		x : Converter.type.INTEGER,
 		y : Converter.type.INTEGER,
 		maxRange : Converter.type.INTEGER,
@@ -68,6 +68,25 @@ define(['Engine/Utility/underscore'], function( _ ){
 			}
 		}
 	});
+	
+	var LightUpdateConverter = new Converter.ClassConverter({
+		opacity : Converter.type.FLOAT,
+		angle : Converter.type.FLOAT, // in radian
+		turnedOn : Converter.type.BOOLEAN, // true for on and false of off
+		fx : {
+			flicker : {
+				time : Converter.type.FLOAT
+			},
+			swinging : {
+				deg : Converter.type.FLOAT
+			},
+			sun : {
+				time : Converter.type.FLOAT
+			}
+		}
+	});
+	
+	
 	
 	
 	function Light( option ){
