@@ -34,7 +34,42 @@ define(['Engine/Utility/underscore'], function( _ ){
 		}
 	};
 	
-
+	var LightConverter = new Converter.ClassConverter({
+		x : Converter.type.INTEGER,
+		y : Converter.type.INTEGER,
+		maxRange : Converter.type.INTEGER,
+		color : Converter.type.NSTRING,
+		opacity : Converter.type.FLOAT,
+		angle : Converter.type.FLOAT, // in radian
+		angleWidth : Converter.type.FLOAT, // in radian
+		turnedOn : Converter.type.BOOLEAN, // true for on and false of off
+		fx : {
+			flicker : {
+				on : Converter.type.BOOLEAN,
+				onDuration : Converter.type.INTEGER,
+				flickerDuration : Converter.type.FLOAT,
+				flickerSpeed : Converter.type.FLOAT,
+				time : Converter.type.FLOAT
+			},
+			swinging : {
+				on : Converter.type.BOOLEAN,
+				speed : Converter.type.FLOAT,
+				angleDeviation : Converter.type.FLOAT,
+				angleBase : Converter.type.FLOAT,
+				deg : Converter.type.FLOAT
+			},
+			sun : {
+				on : Converter.type.BOOLEAN,
+				dayTime : Converter.type.FLOAT, 
+				nightTime : Converter.type.FLOAT,
+				switchTime : Converter.type.FLOAT,
+				maxOpacity : Converter.type.FLOAT,
+				time : Converter.type.FLOAT
+			}
+		}
+	});
+	
+	
 	function Light( option ){
 		_.extend( this, defaults );
 		_.extend( this, option );
