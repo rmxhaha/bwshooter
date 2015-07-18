@@ -101,6 +101,25 @@ define(['Engine/Utility/underscore'], function( _ ){
 		_.defaults( this, { rayCount : rayCount });
 	}
 	
+	Light.baseConverter = LightBaseConverter;
+	Light.updateConverter = LightUpdateConverter;
+	
+	_.extend( Light.prototype, {
+		getBaseBin : function(){
+			return LightBaseConverter.convertToBin( this );
+		},
+		parseBaseBin : function( bin ){
+			_.extend( this, LightBaseConverter.convertToClass( bin ) );
+		},
+		
+		getUpdateBin : function(){
+			return LightUpdateConverter.convertToBin( this );
+		},
+		parseUpdateBin : function( bin ){
+			_.extend( this, LightUpdateConverter.convertToClass( bin ));
+		}
+	});
+	
 	_.extend( Light.prototype, {
 		turnOn : function(){ this.turnedOn = true ;},
 		turnOff : function(){ this.turnedOn = false ;},
