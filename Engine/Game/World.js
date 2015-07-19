@@ -2,10 +2,12 @@ define([
 	'Engine/Utility/underscore',
 	'Engine/Utility/RayCast',
 	'Engine/Utility/Converter',
-	'Engine/Game/Platform'
+	'Engine/Game/Platform',
+	'Engine/Game/Light'
 ], function( 
 	_, RayCast, Converter,
-	Platform
+	Platform, 
+	Light
 ){
 	/***
 	
@@ -249,9 +251,9 @@ define([
 	}
 	
 	var WorldBaseConverter = new Converter.BCConverter([
-		{ name : 'gravity', type : Converter.BCConverter.type.NUMBER },
-		{ name : 'timestep', type : Converter.BCConverter.type.NUMBER },
-		{ name : 'framecount', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'gravity', type : Converter.BCConverter.type.FLOAT },
+		{ name : 'timestep', type : Converter.BCConverter.type.FLOAT },
+		{ name : 'framecount', type : Converter.BCConverter.type.INTEGER },
 		{ name : 'platforms', type : Converter.type.PSTRING }
 	]);
 	
@@ -271,7 +273,7 @@ define([
 	World.prototype.getBaseBin = function(){
 		var data = _.pick( this, 'gravity','timestep','framecount' );
 		data.platforms = PlatformsArrayConverter.convertToBin( this.platforms );
-		data.lights = 
+//		data.lights = LightsArrayConverter.convertToBin
 		
 		var bin = WorldBaseConverter.convertToBin( data );
 		return bin;
@@ -282,7 +284,7 @@ define([
 			if( item instanceof Platform ){
 				this.platforms.push( item );
 			}
-			if( item instanceof Light ){
+			else if( item instanceof Light ){
 				this.lights.push( item );
 			}
 			else {
@@ -292,5 +294,4 @@ define([
 	});
 	
 	return World;
-
 });
