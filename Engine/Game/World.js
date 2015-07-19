@@ -281,6 +281,7 @@ define([
 	
 	_.extend( World.prototype, {
 		add : function( item ){
+			item.world = this;
 			if( item instanceof Platform ){
 				this.platforms.push( item );
 			}
@@ -293,5 +294,15 @@ define([
 		}
 	});
 	
+	_.extend( World.prototype, {
+		/** 
+		 *  Ray Cast only to platforms for lighting convenience
+		 */
+		RayCast : function(option){
+			_.extend( option, { walls : this.platforms });
+			
+			return RayCast( option ).range;
+		}
+	});
 	return World;
 });
