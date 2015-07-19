@@ -161,6 +161,8 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				this.shortArr 	= corder.filter(function(x){ return x.type == BCConverter.type.SHORT }).map(getName).sort();
 				this.pstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.PASCAL_STRING }).map(getName).sort();
 				this.nstrArr 	= corder.filter(function(x){ return x.type == BCConverter.type.NULL_TERMINATED_STRING }).map(getName).sort();
+				this.floatArr 	= corder.filter(function(x){ return x.type == BCConverter.type.FLOAT }).map(getName).sort();
+				this.doubleArr 	= corder.filter(function(x){ return x.type == BCConverter.type.DOUBLE }).map(getName).sort();
 			}
 			else if( typeof dataOrder == 'object' ){
 				// new schema 
@@ -209,17 +211,6 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 					});
 				}
 				
-				function buildMap( o ){
- 
-					return _.chain( _.pairs(o) )
-						.filter(function(v){ return typeof v[1] == 'object'; })
-						.map(function(p){ return [ p[0], buildMap(p[1]) ]; })
-						.object()
-						.value()
-				}
-				
-				this.baseMap = buildMap( corder );
-
 				tree( corder, '', iterator.bind(this) );
 
 				this.boolArr.sort();
@@ -234,6 +225,17 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 			else {
 				throw new Error('data schema is unexpected');
 			}
+
+			function buildMap( o ){
+
+				return _.chain( _.pairs(o) )
+					.filter(function(v){ return typeof v[1] == 'object'; })
+					.map(function(p){ return [ p[0], buildMap(p[1]) ]; })
+					.object()
+					.value()
+			}
+			
+			this.baseMap = buildMap( corder );
 
 			this.compress 	= ( typeof compress ==='undefined' ? true : !!compress );
 			
@@ -266,6 +268,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 
 			// check if all the names that will be copied is with the right type
 			// boolean need no check
+			console.log( this );
 			checkType( this.numArr, obj, 'number' );
 			checkType( this.shortArr, obj, 'number' );
 			checkType( this.floatArr, obj, 'number' );
