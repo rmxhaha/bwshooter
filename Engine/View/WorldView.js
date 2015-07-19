@@ -1,7 +1,8 @@
 define([
 	'Engine/Utility/underscore',
-	'Engine/View/PlatformView'
-], function( _, PlatformView ){
+	'Engine/View/PlatformView',
+	'Engine/View/LightView'
+], function( _, PlatformView, LightView ){
 	function renderBackground(){
 		
 	}
@@ -17,9 +18,14 @@ define([
 		// camera 
 		ctx.translate( world.camera_x, world.camera_y );
 		
+		_.each( world.lights, function( light ){
+			LightView.render( ctx, light );
+		});
+
 		_.each( world.platforms, function( platform ){
 			PlatformView.render( ctx, platform );
 		});
+		
 		
 		ctx.restore();
 	}
