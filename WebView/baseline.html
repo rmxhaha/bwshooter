@@ -52,10 +52,19 @@
 				y : -200,
 				turnedOn : true,
 				angle : Math.PI,
-				angleWidth : Math.PI,
+				angleWidth : Math.PI / 5,
 				fx : {
 					swinging : {
 						on : true
+					},
+					flicker : {
+						on : true
+					},
+					sun : {
+						on : true,
+						dayTime : 3,
+						nightTime : 3,
+						time : 6
 					}
 				}
 			}) );
@@ -64,7 +73,7 @@
 			
 			function loop(){
 				WorldView.render( context, world );
-				world.update( time.reset() );
+				world.update( time.reset() / 1000 );
 				
 				requestAnimationFrame( loop );
 			}
