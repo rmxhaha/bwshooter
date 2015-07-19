@@ -18,7 +18,7 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 			},
 			swinging : {
 				on : false,
-				speed : 0.5,
+				speed : 0.0001,
 				angleDeviation : Math.PI/10,
 				angleBase : Math.PI,
 				deg : 0
@@ -86,13 +86,24 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		}
 	});
 	
-	
+	function deepCopy( target, o ){
+		_.each( o, function( v, k ){
+			if( typeof v == 'object') {
+				if( target[k] == undefined ) target[k] = {};
+				deepCopy( target[k], v );
+			}
+			else{
+				target[k] = v;
+			}
+		});
+	}
 	
 	
 	function Light( option ){
-		_.extend( this, defaults );
-		_.extend( this, option );
-		
+		deepCopy( this,defaults );
+		deepCopy( this,option );
+		console.log( this );
+				
 		// calculate recommended rayCount here
 		var distance_between_ray = 2; // in pixel
 		var tetha = Math.asin( distance_between_ray / 2 / this.maxRange );
@@ -126,7 +137,7 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		update : function(dt){
 			// FX 
 			var fx = this.fx;
-			
+
 			if( fx.flicker.on ) this.updateFxFlicker(dt);
 			if( fx.swinging.on ) this.updateFxSwing(dt);
 			if( fx.sun.on ) this.updateFxSun(dt);
@@ -177,7 +188,7 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		updateFxSwing : function(dt){
 			var settings = this.fx.swinging;
 			
-			this.direction = settings.angleBase + Math.sin( settings.deg ) * settings.angleDeviation;
+			this.angle = settings.angleBase + Math.sin( settings.deg ) * settings.angleDeviation;
 			settings.deg += settings.speed*Math.PI*2 * dt;
 		}
 		
