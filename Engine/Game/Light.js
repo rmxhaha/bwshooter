@@ -13,12 +13,12 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 				on : false,
 				onDuration : 1,
 				flickerDuration : 0.6,
-				flickerSpeed : 0.2,
+				flickerSpeed : 0.15,
 				time : 0
 			},
 			swinging : {
 				on : false,
-				speed : 0.0001,
+				speed : 0.5,
 				angleDeviation : Math.PI/10,
 				angleBase : Math.PI,
 				deg : 0
@@ -106,8 +106,8 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 				
 		// calculate recommended rayCount here
 		var distance_between_ray = 2; // in pixel
-		var tetha = Math.asin( distance_between_ray / 2 / this.maxRange );
-		var rayCount = this.angleWidth / 2 / tetha;
+		var tetha = Math.asin( distance_between_ray / 2 / this.maxRange  *2 );
+		var rayCount = this.angleWidth / tetha;
 		
 		_.defaults( this, { rayCount : rayCount });
 	}
@@ -144,19 +144,22 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		},
 		updateFxFlicker : function(dt){
 			var settings = this.fx.flicker;
+			var light = this;
 			
 			settings.time += dt;
 			
-			this.time %= settings.flickerDuration + settings.onDuration;
+			settings.time %= settings.flickerDuration + settings.onDuration;
 			
-			if( this.time < settings.flickerDuration ){
-				if( Math.floor( this.time / settings.flickerSpeed ) % 2 == 0 ) 
+			if( settings.time < settings.flickerDuration ){
+				if( Math.floor( settings.time / settings.flickerSpeed ) % 2 == 0 ) 
 					light.turnOn();
 				else 
 					light.turnOff();
+				
 			}
 			else { // time < flickerDuration + onDuration
 				light.turnOn();
+
 			}
 		},
 		updateFxSun : function(dt){
