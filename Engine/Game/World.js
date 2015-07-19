@@ -291,6 +291,24 @@ define([
 			else {
 				throw new Error('type not found');
 			}
+		},
+		timebuffer : 0,
+		update : function( real_dt ){
+			this.timebuffer += real_dt;
+			
+			// fix time update for consistency 
+			var dt = this.timestep;
+			
+			while( this.timebuffer > dt ){
+				updateLights.bind(this)(dt);
+				this.timebuffer -= dt;
+			}
+			
+			function updateLights(dt){
+				_.each( this.lights, function(light){
+					light.update(dt);
+				});
+			}
 		}
 	});
 	
