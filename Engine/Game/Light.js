@@ -1,4 +1,4 @@
-define(['Engine/Utility/underscore'], function( _ ){
+define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Converter ){
 	var defaults = {
 		x : 0,
 		y : 0,
@@ -182,6 +182,8 @@ define(['Engine/Utility/underscore'], function( _ ){
 		}
 		
 	});
+	
+	return Light;
 	
 	
 });
