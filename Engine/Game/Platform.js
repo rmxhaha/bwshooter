@@ -3,7 +3,8 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		x : 0,
 		y : 0,
 		penetrable : false,
-		width : 100
+		width : 100,
+		height : 30
 	};
 	
 	var Platform = function( option ){
