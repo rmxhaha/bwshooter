@@ -45,29 +45,7 @@
 			canvas.height = window.innerHeight;
 			
 			world.parseBaseBin( basebin );
-			
-			world.lights = [];
-			world.add( new Light({
-				x : 200, 
-				y : -200,
-				turnedOn : true,
-				angle : Math.PI,
-				angleWidth : Math.PI / 5,
-				fx : {
-					swinging : {
-						on : true
-					},
-					flicker : {
-						on : true
-					},
-					sun : {
-						on : true,
-						dayTime : 3,
-						nightTime : 3,
-						time : 6
-					}
-				}
-			}) );
+
 			
 			window.w = world;
 			
