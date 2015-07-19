@@ -7,7 +7,16 @@ requirejs.config({
     }
 });
 
-requirejs(['Engine/Utility/class','express', 'http', 'socket.io','Engine/Game/ServerWorld','Engine/Game/Platform'], function( _class, express, http, socketio, World, Platform ){
+requirejs([
+	'Engine/Utility/class',
+	'Engine/Utility/Time',
+	'express', 
+	'http', 
+	'socket.io',
+	'Engine/Game/ServerWorld',
+	'Engine/Game/Platform',
+	'Engine/Game/Light'
+], function( _class, Time, express, http, socketio, World, Platform, Light ){
 
 var app = express();
 var server = http.Server(app);
@@ -24,6 +33,33 @@ app.listen( 43000 );
 var world = new World;
 
 world.add( new Platform({ x : 200, y : -300 }));
+world.add( new Light({
+	x : 200, 
+	y : -200,
+	turnedOn : true,
+	angle : Math.PI,
+	angleWidth : Math.PI / 5,
+	fx : {
+		swinging : {
+			on : true
+		},
+		flicker : {
+			on : true
+		},
+		sun : {
+			on : true,
+			dayTime : 3,
+			nightTime : 3,
+			time : 6
+		}
+	}
+}) );
+
+var time = new Time;
+setInterval( function(){
+	world.update(time.reset() / 1000);
+},0);
+
 
 
 io.on('connection', function (socket) {
