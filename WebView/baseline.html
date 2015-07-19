@@ -22,9 +22,10 @@
 		'Engine/Utility/class',
 		'Engine/Game/World',
 		'Engine/View/WorldView',
-		'Engine/Game/Platform'
+		'Engine/Game/Platform',
+		'Engine/Game/Light'
 	],
-	function( _class, World, WorldView, Platform ){				
+	function( _class, World, WorldView, Platform, Light ){				
 		var socket = io.connect('http://localhost:43001/');
 		var name;
 		
@@ -37,10 +38,22 @@
 			var context = canvas.getContext('2d');
 			var world = new World;
 			
+			
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
 			
 			world.parseBaseBin( basebin );
+			
+			world.lights = [];
+			world.add( new Light({
+				x : 200, 
+				y : -200,
+				turnedOn : true,
+				angle : Math.PI,
+				angleWidth : Math.PI
+			}) );
+			
+			window.w = world;
 			
 			function loop(){
 				WorldView.render( context, world );
