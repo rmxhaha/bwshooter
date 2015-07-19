@@ -189,7 +189,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 						this.nstrArr.push( key );
 					else if( value == Converter.type.FLOAT )
 						this.floatArr.push( key );
-					else if( value = Converter.type.DOUBLE )
+					else if( value == Converter.type.DOUBLE )
 						this.doubleArr.push( key );
 				}
 				
@@ -268,7 +268,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 
 			// check if all the names that will be copied is with the right type
 			// boolean need no check
-			console.log( this );
+			
 			checkType( this.numArr, obj, 'number' );
 			checkType( this.shortArr, obj, 'number' );
 			checkType( this.floatArr, obj, 'number' );
