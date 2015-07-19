@@ -20,12 +20,14 @@
 	});
 	require([
 		'Engine/Utility/class',
+		'Engine/Utility/Time',
+		
 		'Engine/Game/World',
 		'Engine/View/WorldView',
 		'Engine/Game/Platform',
 		'Engine/Game/Light'
 	],
-	function( _class, World, WorldView, Platform, Light ){				
+	function( _class, Time, World, WorldView, Platform, Light ){				
 		var socket = io.connect('http://localhost:43001/');
 		var name;
 		
@@ -37,7 +39,7 @@
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
 			var world = new World;
-			
+			var time = new Time;
 			
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
@@ -50,13 +52,19 @@
 				y : -200,
 				turnedOn : true,
 				angle : Math.PI,
-				angleWidth : Math.PI
+				angleWidth : Math.PI,
+				fx : {
+					swinging : {
+						on : true
+					}
+				}
 			}) );
 			
 			window.w = world;
 			
 			function loop(){
 				WorldView.render( context, world );
+				world.update( time.reset() );
 				
 				requestAnimationFrame( loop );
 			}
