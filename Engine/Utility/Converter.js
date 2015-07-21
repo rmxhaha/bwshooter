@@ -403,7 +403,20 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				set( obj, name, BinToInt( bin, ptr ) );
 				ptr += 4;
 			}
-
+			
+			// short
+			var n = this.shortArr.length * 2;
+			
+			if( bin.length < ptr + n ){ // the amount of data given is not correct
+				throw new Error('Data is corrupted');
+			}
+			
+			for( var i = 0; i < this.shortArr.length; ++ i ){
+				var name = this.shortArr[i];
+				set( obj, name, BinToShort( bin, ptr ) );
+				ptr += 2;
+			}
+			
 			// float
 			var n = this.floatArr.length * 4;
 			
@@ -432,18 +445,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 			
 			
 
-			// short
-			var n = this.shortArr.length * 2;
-			
-			if( bin.length < ptr + n ){ // the amount of data given is not correct
-				throw new Error('Data is corrupted');
-			}
-			
-			for( var i = 0; i < this.shortArr.length; ++ i ){
-				var name = this.shortArr[i];
-				set( obj, name, BinToShort( bin, ptr ) );
-				ptr += 2;
-			}
+
 			
 			
 			// error message not coded yet
