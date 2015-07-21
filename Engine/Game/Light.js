@@ -128,6 +128,9 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 		},
 		parseUpdateBin : function( bin ){
 			_.extend( this, LightUpdateConverter.convertToClass( bin ));
+		},
+		parseUpdate : function( obj ){
+			deepCopy( this, obj );
 		}
 	});
 	
