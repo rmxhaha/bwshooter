@@ -34,18 +34,32 @@
 		//socket.emit('requestLogin', prompt('What is your name ?') );
 		socket.emit('requestLogin', "rmxhaha" );
 		
+		function pingServer( callback ){
+			var startTime = new Date();
+			socket.emit('ping');
+			socket.on('pong', function(){
+				var endTime = new Date();
+				callback( endTime.getTime() - startTime.getTime() );
+			});
+		}
+		
 		function startGame( basebin )
 		{
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
 			var world = new World;
 			var time = new Time;
+			var latency = 0;
 			
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
 			
 			world.parseBaseBin( basebin );
 
+			
+			socket.on('update', function( bin ){
+				world.parseUpdateBin( bin, latency );
+			});
 			
 			window.w = world;
 			
@@ -64,6 +78,7 @@
 			name = data.name;
 			startGame( data.basebin );
 		});
+		
 	});
 	</script>
 </body>

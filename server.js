@@ -55,9 +55,11 @@ world.add( new Light({
 	}
 }) );
 
+
 var time = new Time;
 setInterval( function(){
 	world.update(time.reset() / 1000);
+	io.to('Room1').emit( 'update', world.getUpdateBin() );
 },0);
 
 
@@ -65,16 +67,23 @@ setInterval( function(){
 io.on('connection', function (socket) {
 	console.log(socket.id);
 
+	socket.on('ping', function(){
+		socket.emit('pong');
+	});
+
 	socket.on('requestLogin', function( name ){
 		// TODO : do checking on name 
 		console.log( name );
 
+		socket.join('Room1');
+		
+		
 		socket.emit('base', {
 			name : name,
 			basebin : world.getBaseBin()
 		});
 	});
-	
+		
 	socket.on('disconnect', function () {
 		io.emit('user disconnected');
 	});
