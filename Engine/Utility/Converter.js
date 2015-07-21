@@ -175,7 +175,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				this.nstrArr = [];
 				this.floatArr = [];
 				this.doubleArr = [];
-				
+					
 				function iterator( key, value ){
 					if( value == Converter.type.BOOLEAN )
 						this.boolArr.push( key );
@@ -347,7 +347,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 
 			
 			if( this.compress )
-				return LZString.compress( binOut );
+				return LZString.compressToUTF16( binOut );
 			else
 				return binOut;
 		}
@@ -357,7 +357,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 				throw new Error('binary data is not in the form of string');
 			
 			if( this.compress ) 
-				bin = LZString.decompress( bin );
+				bin = LZString.decompressFromUTF16( bin );
 			
 			var obj = _.clone(this.baseMap);
 
@@ -496,7 +496,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 		
 		BCArrayConverter.prototype.convertToArray = function( bin ){
 			if( this.compress )
-				bin = LZString.decompress( bin );
+				bin = LZString.decompressFromUTF16( bin );
 			
 			var arr = [];
 			var ptr = 0;
@@ -524,7 +524,7 @@ define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 			}
 			
 			if( this.compress ){
-				return LZString.compress( binOut );
+				return LZString.compressToUTF16( binOut );
 			}
 			else {
 				return binOut;
