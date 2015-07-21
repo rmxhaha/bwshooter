@@ -250,16 +250,22 @@ define([
 		_.extend( this, options );
 	}
 	
-	var WorldBaseConverter = new Converter.BCConverter([
-		{ name : 'gravity', type : Converter.BCConverter.type.FLOAT },
-		{ name : 'timestep', type : Converter.BCConverter.type.FLOAT },
-		{ name : 'framecount', type : Converter.BCConverter.type.INTEGER },
-		{ name : 'platforms', type : Converter.type.PSTRING },
-		{ name : 'lights', type : Converter.type.PSTRING }
-	]);
+	var WorldBaseConverter = new Converter.BCConverter({
+		gravity : Converter.type.FLOAT,
+		timestep : Converter.type.FLOAT,
+		framecount : Converter.type.INTEGER,
+		platforms : Converter.type.PSTRING,
+		lights : Converter.type.PSTRING
+	});
 	
-	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, true );
-	var LightsArrayConverter = new Converter.ArrayConverter( Light.baseConverter, true );
+	var WorldUpdateConverter = new Converter.ClassConverter({
+		lights : Converter.type.PSTRING,
+		framecount : Converter.type.INTEGER
+	}, false);
+	
+	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, false );
+	var LightsArrayConverter = new Converter.ArrayConverter( Light.baseConverter, false );
+	var LightArrayUpdateConverter = new Converter.ArrayConverter( Light.updateConverter, false );
 	
 	World.prototype.parseBaseBin = function( bin ){
 		var data = WorldBaseConverter.convertToClass( bin );
@@ -269,6 +275,7 @@ define([
 		// debug
 		this.platforms = [];
 		this.lights = [];
+		this.lastFrameUpdate = this.framecount;
 		
 		_.each( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ this.add( new Platform( p ) );}.bind(this));
 		_.each( LightsArrayConverter.convertToArray( data.lights ), function(p){ this.add( new Light( p ) );}.bind(this));
@@ -283,6 +290,31 @@ define([
 		var bin = WorldBaseConverter.convertToBin( data );
 		return bin;
 	}
+	
+	World.prototype.parseUpdateBin = function( bin ){
+		console.log( typeof bin.length == 'number' );
+		// do interpolation here
+		var data = WorldUpdateConverter.convertToClass( bin );
+		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
+		
+		for( var i = 0; i < lightsUpdate.length; ++ i ){
+			this.lights[i].parseUpdate( lightsUpdate[i] );
+		}
+		
+		this.framecount = data.framecount;
+
+		// interpolate
+		//this.update( (this.lastFrameUpdate - bin.framecount) / 2 * this.timestep );
+		
+		this.lastFrameUpdate = bin.framecount;
+	}
+	
+	World.prototype.getUpdateBin = function( bin ){
+		var data = _.pick( this, 'framecount');
+		data.lights = LightArrayUpdateConverter.convertToBin( this.lights )
+		
+		return WorldUpdateConverter.convertToBin( data );
+	} 
 	
 	_.extend( World.prototype, {
 		add : function( item ){
