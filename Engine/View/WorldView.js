@@ -3,7 +3,7 @@ define([
 	'Engine/View/PlatformView',
 	'Engine/View/LightView',
 	'Engine/View/PlayerView'
-], function( _, PlatformView, LightView ){
+], function( _, PlatformView, LightView, PlayerView ){
 	function renderBackground(){
 		
 	}
