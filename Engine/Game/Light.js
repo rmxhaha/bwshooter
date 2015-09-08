@@ -1,4 +1,4 @@
-define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Converter ){
+define(['Engine/Utility/underscore','Engine/Utility/Converter','Engine/Utility/deepCopy'], function( _, Converter, deepCopy ){
 	var defaults = {
 		x : 0,
 		y : 0,
@@ -85,19 +85,6 @@ define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Co
 			}
 		}
 	});
-	
-	function deepCopy( target, o ){
-		_.each( o, function( v, k ){
-			if( typeof v == 'object') {
-				if( target[k] == undefined ) target[k] = {};
-				deepCopy( target[k], v );
-			}
-			else{
-				target[k] = v;
-			}
-		});
-	}
-	
 	
 	function Light( option ){
 		deepCopy( this,defaults );
