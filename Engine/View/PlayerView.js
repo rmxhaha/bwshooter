@@ -147,14 +147,7 @@ define(['Engine/Game/Player','Engine/Utility/underscore'],function( Player, _ ){
 	}
 	
 	function adjustPlayerColor(ctx, main){
-		switch( this.type ){
-		case 0:
-			ctx.fillStyle = "black";
-			break;
-		case 1:
-			ctx.fillStyle = "white";
-			break;
-		case 2:
+		if( this.isDead ){
 			var duration = this.hasBeenDeadFor();
 
 			if( duration < this.rotDuration - this.fadeOutDuration ){
@@ -169,11 +162,23 @@ define(['Engine/Game/Player','Engine/Utility/underscore'],function( Player, _ ){
 				ctx.globalAlpha = 0;
 			}
 		}
+		else {
 
-		if( !this.isDead && main ){
-			// apply highlighting
-			ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
-			ctx.lineWidth = 3;
+			switch( this.team ){
+			case 0:
+				console.log("R");
+				ctx.fillStyle = "black";
+				break;
+			case 1:
+				ctx.fillStyle = "white";
+				break;
+			}
+
+			if( main ){
+				// apply highlighting
+				ctx.strokeStyle = ( this.type == 0 ? "white" : "black" );
+				ctx.lineWidth = 3;
+			}
 		}
 	}
 	
