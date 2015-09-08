@@ -336,6 +336,8 @@ define([
 			}
 			else if( item instanceof Light ){
 				this.lights.push( item );
+			}else if( item instanceof Player ){
+				this.players.push( item );
 			}
 			else {
 				throw new Error('type not found');
