@@ -15,8 +15,9 @@ requirejs([
 	'socket.io',
 	'Engine/Game/ServerWorld',
 	'Engine/Game/Platform',
-	'Engine/Game/Light'
-], function( _class, Time, express, http, socketio, World, Platform, Light ){
+	'Engine/Game/Light',
+	'Engine/Game/Player'
+], function( _class, Time, express, http, socketio, World, Platform, Light, Player ){
 
 var app = express();
 var server = http.Server(app);
@@ -34,6 +35,7 @@ var world = new World;
 
 world.add( new Platform({ x : 200, y : -300 }));
 world.add( new Platform({ x : 500, y : -300 }));
+world.add( new Player({ x : 500, y : -300, team : Player.team.white }));
 world.add( new Light({
 	x : 200, 
 	y : -200,

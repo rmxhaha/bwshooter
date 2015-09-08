@@ -25,7 +25,8 @@
 		'Engine/Game/World',
 		'Engine/View/WorldView',
 		'Engine/Game/Platform',
-		'Engine/Game/Light'
+		'Engine/Game/Light',
+		'Engine/Game/Player'
 	],
 	function( _class, Time, World, WorldView, Platform, Light ){				
 		var socket = io.connect('http://localhost:43001/');
@@ -59,7 +60,6 @@
 			canvas.height = window.innerHeight;
 			
 			world.parseBaseBin( basebin );
-
 			
 			var sum = 0;
 			var n = 0;
