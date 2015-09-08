@@ -176,7 +176,11 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 
 	Player.method('parseUpdateBin', function( bin ){
 		var data = Player.updateConverter.convertToClass( bin );
-		_.extend( this, data );		
+		this.parseUpdate( data );
+	});
+	
+	Player.method('parseUpdate', function(obj){
+		_.extend( obj );
 	});
 	
 	
