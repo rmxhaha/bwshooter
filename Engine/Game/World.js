@@ -261,11 +261,11 @@ define([
 	var WorldUpdateConverter = new Converter.ClassConverter({
 		lights : Converter.type.PSTRING,
 		framecount : Converter.type.INTEGER
-	}, false);
+	}, true);
 	
-	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, false );
-	var LightsArrayConverter = new Converter.ArrayConverter( Light.baseConverter, false );
-	var LightArrayUpdateConverter = new Converter.ArrayConverter( Light.updateConverter, false );
+	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, true );
+	var LightsArrayConverter = new Converter.ArrayConverter( Light.baseConverter, true );
+	var LightArrayUpdateConverter = new Converter.ArrayConverter( Light.updateConverter, true );
 	
 	World.prototype.parseBaseBin = function( bin ){
 		var data = WorldBaseConverter.convertToClass( bin );
@@ -291,7 +291,7 @@ define([
 		return bin;
 	}
 	
-	World.prototype.parseUpdateBin = function( bin ){
+	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
 		console.log( typeof bin.length == 'number' );
 		// do interpolation here
 		var data = WorldUpdateConverter.convertToClass( bin );
@@ -304,7 +304,7 @@ define([
 		this.framecount = data.framecount;
 
 		// interpolate
-		//this.update( (this.lastFrameUpdate - bin.framecount) / 2 * this.timestep );
+		this.update( latency / 2 );
 		
 		this.lastFrameUpdate = bin.framecount;
 	}

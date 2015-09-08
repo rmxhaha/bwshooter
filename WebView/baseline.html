@@ -51,14 +51,20 @@
 			var time = new Time;
 			var latency = 0;
 			
+			setInterval( function(){
+				pingServer( function(L){ latency = L; } );
+			}, 2000 );
+			
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
 			
 			world.parseBaseBin( basebin );
 
 			
+			var sum = 0;
+			var n = 0;
 			socket.on('update', function( bin ){
-				world.parseUpdateBin( bin, latency );
+				world.parseUpdateBin( bin, latency / 1000 );
 			});
 			
 			window.w = world;
