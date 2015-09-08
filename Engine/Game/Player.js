@@ -180,7 +180,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 	});
 	
 	Player.method('parseUpdate', function(obj){
-		_.extend( obj );
+		_.extend( this, obj );
 	});
 	
 	
