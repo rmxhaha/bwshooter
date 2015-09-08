@@ -299,7 +299,6 @@ define([
 	}
 	
 	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
-		console.log( typeof bin.length == 'number' );
 		// do interpolation here
 		var data = WorldUpdateConverter.convertToClass( bin );
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
