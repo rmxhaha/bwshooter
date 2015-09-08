@@ -158,6 +158,8 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN },
 	], false);
 	
+	Player.baseConverter = PlayerDataConverter;
+	
 	Player.method('toBin', function(){
 		return PlayerDataConverter.convertToBin( this );
 	});
