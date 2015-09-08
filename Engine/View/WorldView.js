@@ -1,7 +1,8 @@
 define([
 	'Engine/Utility/underscore',
 	'Engine/View/PlatformView',
-	'Engine/View/LightView'
+	'Engine/View/LightView',
+	'Engine/View/PlayerView'
 ], function( _, PlatformView, LightView ){
 	function renderBackground(){
 		
@@ -24,6 +25,10 @@ define([
 
 		_.each( world.platforms, function( platform ){
 			PlatformView.render( ctx, platform );
+		});
+
+		_.each( world.players, function( player ){
+			PlayerView.render( ctx, player );
 		});
 		
 		
