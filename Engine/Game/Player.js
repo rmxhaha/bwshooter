@@ -155,19 +155,30 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'isDead', type : Converter.BCConverter.type.BOOLEAN },
 		{ name : 'team', type : Converter.BCConverter.type.BOOLEAN },
-		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN },
+		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN }
 	], false);
 	
 	Player.baseConverter = PlayerDataConverter;
+	Player.updateConverter = PlayerDataConverter;
 	
-	Player.method('toBin', function(){
-		return PlayerDataConverter.convertToBin( this );
+	Player.method('getBaseBin', function(){
+		return Player.baseConverter.convertToBin( this );
 	});
 	
-	Player.method('parseBin', function( bin ){
-		var data = PlayerDataConverter.convertToClass( bin );
+	Player.method('parseBaseBin', function( bin ){
+		var data = Player.baseConverter.convertToClass( bin );
 		_.extend( this, data );
 	});
+	
+	Player.method('getUpdateBin', function( bin ){
+		return Player.updateConverter.convertToBin( this );		
+	});
+
+	Player.method('parseUpdateBin', function( bin ){
+		var data = Player.updateConverter.convertToClass( bin );
+		_.extend( this, data );		
+	});
+	
 	
 	return Player;
 });
