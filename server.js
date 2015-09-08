@@ -33,6 +33,7 @@ app.listen( 43000 );
 var world = new World;
 
 world.add( new Platform({ x : 200, y : -300 }));
+world.add( new Platform({ x : 500, y : -300 }));
 world.add( new Light({
 	x : 200, 
 	y : -200,
