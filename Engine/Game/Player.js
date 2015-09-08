@@ -154,7 +154,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 		{ name : 'y', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'isDead', type : Converter.BCConverter.type.BOOLEAN },
-		{ name : 'team', type : Converter.BCConverter.type.BOOLEAN },
+		{ name : 'team', type : Converter.BCConverter.type.SHORT },
 		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN }
 	], false);
 	
