@@ -3,11 +3,13 @@ define([
 	'Engine/Utility/RayCast',
 	'Engine/Utility/Converter',
 	'Engine/Game/Platform',
-	'Engine/Game/Light'
+	'Engine/Game/Light',
+	'Engine/Game/Player'
 ], function( 
 	_, RayCast, Converter,
 	Platform, 
-	Light
+	Light,
+	Player
 ){
 	/***
 	
@@ -255,17 +257,21 @@ define([
 		timestep : Converter.type.FLOAT,
 		framecount : Converter.type.INTEGER,
 		platforms : Converter.type.PSTRING,
-		lights : Converter.type.PSTRING
+		lights : Converter.type.PSTRING,
+		players : Converter.type.PSTRING,
 	});
 	
 	var WorldUpdateConverter = new Converter.ClassConverter({
 		lights : Converter.type.PSTRING,
+		players : Converter.type.PSTRING,
 		framecount : Converter.type.INTEGER
 	}, true);
 	
 	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, true );
 	var LightsArrayConverter = new Converter.ArrayConverter( Light.baseConverter, true );
 	var LightArrayUpdateConverter = new Converter.ArrayConverter( Light.updateConverter, true );
+	var PlayerArrayConverter = new Converter.ArrayConverter( Player.baseConverter, false );
+	var PlayerArrayUpdateConverter = new Converter.ArrayConverter( Player.updateConverter, false );
 	
 	World.prototype.parseBaseBin = function( bin ){
 		var data = WorldBaseConverter.convertToClass( bin );
@@ -279,14 +285,15 @@ define([
 		
 		_.each( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ this.add( new Platform( p ) );}.bind(this));
 		_.each( LightsArrayConverter.convertToArray( data.lights ), function(p){ this.add( new Light( p ) );}.bind(this));
-		
+		_.each( PlayerArrayConverter.convertToArray( data.players ), function(p){ this.add( new Player(p)); }.bind(this));
 	}
 	
 	World.prototype.getBaseBin = function(){
 		var data = _.pick( this, 'gravity','timestep','framecount' );
 		data.platforms = PlatformsArrayConverter.convertToBin( this.platforms );
 		data.lights = LightsArrayConverter.convertToBin( this.lights );
-		
+		data.players = PlayerArrayConverter.convertToBin( this.players );
+
 		var bin = WorldBaseConverter.convertToBin( data );
 		return bin;
 	}
@@ -296,9 +303,14 @@ define([
 		// do interpolation here
 		var data = WorldUpdateConverter.convertToClass( bin );
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
-		
+		var playerUpdate = PlayerArrayUpdateConverter.convertToArray( data.players );
+
 		for( var i = 0; i < lightsUpdate.length; ++ i ){
 			this.lights[i].parseUpdate( lightsUpdate[i] );
+		}
+		
+		for( var i = 0; i < playerUpdate.length; ++ i ){
+			this.players[i].parseUpdate( playerUpdate[i] );
 		}
 		
 		this.framecount = data.framecount;
@@ -311,8 +323,8 @@ define([
 	
 	World.prototype.getUpdateBin = function( bin ){
 		var data = _.pick( this, 'framecount');
-		data.lights = LightArrayUpdateConverter.convertToBin( this.lights )
-		
+		data.lights = LightArrayUpdateConverter.convertToBin( this.lights );
+		data.players = PlayerArrayUpdateConverter.convertToBin( this.players );
 		return WorldUpdateConverter.convertToBin( data );
 	} 
 	
