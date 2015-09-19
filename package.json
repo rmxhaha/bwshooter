@@ -1,0 +1,15 @@
+{
+	"name" : "bwshooter",
+	"version" : "v0.0.1",
+	"description" : "2d platformer shooter",
+	"contributors" : [{
+		"name" : "rmxhaha",
+		"email" : "code000123@gmail.com"
+	}],
+	"dependencies" : {
+		"requirejs" : "*",
+		"express" : "4.2.x",
+		"socket.io" : "1.3.6",
+		"underscore" : "*"
+	}
+}
