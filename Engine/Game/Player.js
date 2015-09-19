@@ -1,4 +1,4 @@
-define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/KeyAction'], function( _, Converter, KeyAction ){
+define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/KeyAction'], function( _, Converter, KeyAction ){
 
 	function Player( option ){
 		var defaults = {

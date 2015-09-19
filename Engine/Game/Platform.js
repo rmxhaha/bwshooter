@@ -1,4 +1,4 @@
-define(['Engine/Utility/underscore','Engine/Utility/Converter'], function( _, Converter ){
+define(['Engine/Utility/underscore','Engine/Utility/converter'], function( _, Converter ){
 	var defaults = {
 		x : 0,
 		y : 0,

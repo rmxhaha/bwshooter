@@ -1,7 +1,7 @@
 define([
 	'Engine/Utility/underscore',
-	'Engine/Utility/RayCast',
-	'Engine/Utility/Converter',
+	'Engine/Utility/raycast',
+	'Engine/Utility/converter',
 	'Engine/Game/Platform',
 	'Engine/Game/Light',
 	'Engine/Game/Player'

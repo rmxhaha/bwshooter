@@ -1,4 +1,4 @@
-define(['Engine/Utility/underscore','Engine/Utility/Converter','Engine/Utility/deepCopy'], function( _, Converter, deepCopy ){
+define(['Engine/Utility/underscore','Engine/Utility/converter','Engine/Utility/deepCopy'], function( _, Converter, deepCopy ){
 	var defaults = {
 		x : 0,
 		y : 0,

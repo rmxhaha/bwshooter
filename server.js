@@ -9,7 +9,7 @@ requirejs.config({
 
 requirejs([
 	'Engine/Utility/class',
-	'Engine/Utility/Time',
+	'Engine/Utility/time',
 	'express', 
 	'http', 
 	'socket.io',

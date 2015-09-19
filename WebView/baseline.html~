@@ -20,7 +20,7 @@
 	});
 	require([
 		'Engine/Utility/class',
-		'Engine/Utility/time',
+		'Engine/Utility/Time',
 		
 		'Engine/Game/World',
 		'Engine/View/WorldView',
