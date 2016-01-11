@@ -73,6 +73,14 @@ io.on('connection', function (socket) {
 	socket.on('ping', function(){
 		socket.emit('pong');
 	});
+	
+	var playerObject = new Player({
+		x : 200,
+		y : 0,
+		team : Player.team.white
+	});
+	
+	//playerObject.setKeyAction();
 
 	socket.on('requestLogin', function( name ){
 		// TODO : do checking on name 
@@ -80,11 +88,14 @@ io.on('connection', function (socket) {
 
 		socket.join('Room1');
 		
-		
 		socket.emit('base', {
 			name : name,
 			basebin : world.getBaseBin()
 		});
+	});
+	
+	socket.on('keyAct', function( keyAction ){
+
 	});
 		
 	socket.on('disconnect', function () {

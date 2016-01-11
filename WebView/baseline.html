@@ -26,9 +26,10 @@
 		'Engine/View/WorldView',
 		'Engine/Game/Platform',
 		'Engine/Game/Light',
-		'Engine/Game/Player'
+		'Engine/Game/Player',
+		'Engine/Game/KeyActionListener'
 	],
-	function( _class, Time, World, WorldView, Platform, Light ){				
+	function( _class, Time, World, WorldView, Platform, Light, Player, KeyActionListener ){
 		var socket = io.connect('http://localhost:43001/');
 		var name;
 		
@@ -51,10 +52,20 @@
 			var world = new World;
 			var time = new Time;
 			var latency = 0;
+			var updateRate = 120;
+			var updateTimeout = 1000 / updateRate;
+			var keyActionListener = new KeyActionListener;
 			
 			setInterval( function(){
 				pingServer( function(L){ latency = L; } );
 			}, 2000 );
+			
+			console.log("R");
+			console.log( keyActionListener );
+			
+			setInterval( function(){
+				socket.emit('keyAct', keyActionListener.getKeyAction() );
+			}, updateTimeout );
 			
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
@@ -63,6 +74,7 @@
 			
 			var sum = 0;
 			var n = 0;
+
 			socket.on('update', function( bin ){
 				world.parseUpdateBin( bin, latency / 1000 );
 			});
