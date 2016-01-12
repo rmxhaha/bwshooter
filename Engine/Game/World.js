@@ -298,6 +298,7 @@ define([
 		return bin;
 	}
 	
+	var i = 0;
 	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
 		// do interpolation here
 		var data = WorldUpdateConverter.convertToClass( bin );

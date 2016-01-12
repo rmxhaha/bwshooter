@@ -29,7 +29,8 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 			vy : 0,
 			team : Player.team.black,
 			sideRight : true,
-			isDead : false
+			isDead : false,
+			name : 'IhavenoName'
 
 			// vx and state is determined by keyAction
 			
@@ -158,7 +159,19 @@ define(['Engine/Utility/underscore', 'Engine/Utility/Converter','Engine/Game/Key
 		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN }
 	], false);
 	
-	Player.baseConverter = PlayerDataConverter;
+	var PlayerBaseDataConverter = new Converter.BCConverter([
+		{ name : 'x', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'y', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
+		{ name : 'isDead', type : Converter.BCConverter.type.BOOLEAN },
+		{ name : 'team', type : Converter.BCConverter.type.SHORT },
+		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN },
+		{ name : 'name', type : Converter.BCConverter.type.STRING }
+	], false);
+	
+	
+	
+	Player.baseConverter = PlayerBaseDataConverter;
 	Player.updateConverter = PlayerDataConverter;
 	
 	Player.method('getBaseBin', function(){
