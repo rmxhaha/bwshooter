@@ -343,6 +343,21 @@ define([
 				throw new Error('type not found');
 			}
 		},
+		remove : function(item){
+			if( item instanceof Player ){
+				for( var i = 0; i < this.players.length; ++ i ){
+					if( this.players[i] == item ){
+						this.players.splice(i,1);
+						return i;
+					}
+				}
+				
+				throw new Error('player not found on this world');
+			}
+			else {
+				throw new Error('type not found');				
+			}
+		},
 		timebuffer : 0,
 		update : function( real_dt ){
 			this.timebuffer += real_dt;

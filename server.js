@@ -127,15 +127,17 @@ io.on('connection', function (socket) {
 			name : name,
 			basebin : world.getBaseBin()
 		});
-
+		
+		
+		socket.on('disconnect', function(){
+			console.log( name + ' has left the room');
+			world.remove( playerObject );
+		});
 	});
 	
+
 	socket.on('keyAct', function( keyAction ){
 
-	});
-		
-	socket.on('disconnect', function () {
-		io.emit('user disconnected');
 	});
 });
 
