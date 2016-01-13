@@ -166,7 +166,6 @@ define(['Engine/Game/Player','Engine/Utility/underscore'],function( Player, _ ){
 
 			switch( this.team ){
 			case 0:
-				console.log("R");
 				ctx.fillStyle = "black";
 				break;
 			case 1:
