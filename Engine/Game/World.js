@@ -234,6 +234,7 @@ define([
 		camera_y : 0,
 		gravity : 1000,
 		players : [],
+		removed_player : [], // index of player remove (must be removed in an orderly manner)
 		platforms : [],
 		lights : [],
 		bullets : [],
@@ -264,7 +265,15 @@ define([
 	var WorldUpdateConverter = new Converter.ClassConverter({
 		lights : Converter.type.PSTRING,
 		players : Converter.type.PSTRING,
-		framecount : Converter.type.INTEGER
+		framecount : Converter.type.INTEGER,
+		player_remove_index : Converter.type.INT16 
+
+		/**
+			under the assumption of player leaving is rather unlikely if multiple player exit at similar time
+			player exit will be done in the next update and so on
+			
+			if no player exit then player_remove_index is 65535
+		*/
 	}, true);
 	
 	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, true );
@@ -305,6 +314,12 @@ define([
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
 		var playerUpdate = PlayerArrayUpdateConverter.convertToArray( data.players );
 
+		// remove player if player_remove_index existed
+		if( data.player_remove_index != 65535 ){
+			console.log( data.player_remove_index );
+			this.players.splice( data.player_remove_index , 1 );
+		}
+
 		for( var i = 0; i < lightsUpdate.length; ++ i ){
 			this.lights[i].parseUpdate( lightsUpdate[i] );
 		}
@@ -323,6 +338,8 @@ define([
 	
 	World.prototype.getUpdateBin = function( bin ){
 		var data = _.pick( this, 'framecount');
+		
+		data.player_remove_index = this.removed_player.shift() || 65535;
 		data.lights = LightArrayUpdateConverter.convertToBin( this.lights );
 		data.players = PlayerArrayUpdateConverter.convertToBin( this.players );
 		return WorldUpdateConverter.convertToBin( data );
@@ -348,6 +365,7 @@ define([
 				for( var i = 0; i < this.players.length; ++ i ){
 					if( this.players[i] == item ){
 						this.players.splice(i,1);
+						this.removed_player.push(i);
 						return i;
 					}
 				}

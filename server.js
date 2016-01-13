@@ -131,6 +131,8 @@ io.on('connection', function (socket) {
 		
 		socket.on('disconnect', function(){
 			console.log( name + ' has left the room');
+			
+			// world automatically send update query in the next update that this player is leaving
 			world.remove( playerObject );
 		});
 	});
