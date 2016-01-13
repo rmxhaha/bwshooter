@@ -1,5 +1,5 @@
 
-define(['Engine/utility/lz-string','Engine/Utility/underscore','Engine/Utility/bops'], function(LZString,_, bops){
+define(['Engine/Utility/lz-string','Engine/Utility/underscore','Engine/Utility/bops'], function(LZString,_, bops){
 
 	var Converter = {};
 	
