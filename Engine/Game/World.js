@@ -363,6 +363,9 @@ define([
 			else if( item instanceof Light ){
 				this.lights.push( item );
 			}else if( item instanceof Player ){
+				// set id of player
+				item.id = this.getVacantPlayerId();
+
 				this.players.push( item );
 			}
 			else {
@@ -415,7 +418,24 @@ define([
 			_.extend( option, { walls : this.platforms });
 			
 			return RayCast( option ).range;
+		},
+		getVacantPlayerId : function(){
+			// warning : 
+			// this function work under the assumption that
+			// this.players doesn't contain more than equal 65535
+			// the theoritical number of player is 65535 because id is sent as int16 when this function is written
+
+			if( this.players.length == 0 ) // all is vacant
+				return 1; // default first id
+
+			// search for gaps
+			var i = 0;
+			while( i < this.players.length && this.players[i].id == i + 1 ) ++ i;
+			
+			// vacany found after players[i-1]
+			return this.players[i-1].id + 1;
 		}
+
 	});
 	return World;
 });

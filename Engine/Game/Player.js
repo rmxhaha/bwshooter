@@ -3,6 +3,11 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 	function Player( option ){
 		var defaults = {
 			/** default parameter */
+			id : 0, 
+			/** @param id
+				0 is not a valid id 
+				World.add will set the id for player
+			*/
 			x : 0,
 			y : 0,
 			vy : 0,
@@ -160,6 +165,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 	], false);
 	
 	var PlayerBaseDataConverter = new Converter.BCConverter([
+		{ name : 'id', type : Converter.BCConverter.type.INT16 },
 		{ name : 'x', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'y', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
