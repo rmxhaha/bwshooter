@@ -354,6 +354,7 @@ define([
 		return WorldUpdateConverter.convertToBin( data );
 	} 
 	
+	
 	_.extend( World.prototype, {
 		add : function( item ){
 			item.world = this;
@@ -366,7 +367,28 @@ define([
 				// set id of player
 				item.id = this.getVacantPlayerId();
 
-				this.players.push( item );
+				// this.players must be ordered by id
+
+				var head = 0;
+				
+				if( this.players.length != 0 ){
+					// bin search lower bound
+					var i, step;
+					var count = this.players.length;
+					while( count > 0 ){
+						i = head;
+						step = Math.floor( count/2 );
+						i += step;
+						if( this.players[i].id < item.id ){
+							head = ++ i;
+							count -= step + 1;
+						}
+						else 
+							count = step;
+					}
+				}
+				
+				this.players.splice( head, 0, item );
 			}
 			else {
 				throw new Error('type not found');
