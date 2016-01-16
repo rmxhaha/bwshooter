@@ -239,7 +239,8 @@ define([
 		lights : [],
 		bullets : [],
 		timestep : 0.05,
-		framecount : 0
+		framecount : 0,
+		postupdate : function(){} // called after update
 	};
 
 	//	Represent a game world
@@ -266,11 +267,12 @@ define([
 		lights : Converter.type.PSTRING,
 		players : Converter.type.PSTRING,
 		framecount : Converter.type.INTEGER,
-		player_remove_index : Converter.type.INT16 
+		player_remove_index : Converter.type.INT16
 
 		/**
 			under the assumption of player leaving is rather unlikely if multiple player exit at similar time
-			player exit will be done in the next update and so on
+			player exit will be done 1 player per update which will probably make 1/30s delay on each player exit 
+			which is assumed to be not noticable
 			
 			if no player exit then player_remove_index is 65535
 		*/
@@ -336,10 +338,17 @@ define([
 		this.lastFrameUpdate = bin.framecount;
 	}
 	
+	// warning : sending update when framecount is not different 
+	// 			 will probably cause player being deleted
 	World.prototype.getUpdateBin = function( bin ){
 		var data = _.pick( this, 'framecount');
 		
-		data.player_remove_index = this.removed_player.shift() || 65535;
+		var removed_player_index = this.removed_player.shift() || 65535;
+		if( removed_player_index != 65535 ){
+			this.players.splice(removed_player_index,1);
+		}
+		
+		data.player_remove_index = removed_player_index;
 		data.lights = LightArrayUpdateConverter.convertToBin( this.lights );
 		data.players = PlayerArrayUpdateConverter.convertToBin( this.players );
 		return WorldUpdateConverter.convertToBin( data );
@@ -360,11 +369,12 @@ define([
 				throw new Error('type not found');
 			}
 		},
+		
+		// remove is server only code, runned on client side will cause problem
 		remove : function(item){
 			if( item instanceof Player ){
 				for( var i = 0; i < this.players.length; ++ i ){
 					if( this.players[i] == item ){
-						this.players.splice(i,1);
 						this.removed_player.push(i);
 						return i;
 					}
@@ -386,6 +396,7 @@ define([
 			while( this.timebuffer > dt ){
 				updateLights.bind(this)(dt);
 				this.timebuffer -= dt;
+				this.framecount ++;
 			}
 			
 			function updateLights(dt){
