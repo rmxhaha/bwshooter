@@ -45,7 +45,7 @@
 			});
 		}
 		
-		function startGame( basebin )
+		function startGame( basebin, cpacket_id )
 		{
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
@@ -75,9 +75,22 @@
 			var sum = 0;
 			var n = 0;
 
-			socket.on('update', function( bin ){
-				world.parseUpdateBin( bin, latency / 1000 );
+			var update_buffer = []; // max at 1000
+			
+			socket.on('update', function( packet_id, bin ){
+				update_buffer[packet_id] = bin;
+				checkout();
 			});
+			
+			function checkout(){
+				var npacket_id = (cpacket_id+1) % 1000;
+				while( typeof( update_buffer[npacket_id] ) != 'undefined'){
+					world.parseUpdateBin( update_buffer[npacket_id], latency / 1000 );
+					update_buffer[npacket_id] = undefined;
+					cpacket_id = npacket_id;
+					npacket_id = (cpacket_id+1) % 1000;
+				}
+			}
 			
 			window.w = world;
 			
@@ -94,7 +107,7 @@
 		socket.on('base', function( data ){
 			console.log( data );
 			name = data.name;
-			startGame( data.basebin );
+			startGame( data.basebin, data.packet_id );
 		});
 		
 	});

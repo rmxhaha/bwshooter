@@ -86,11 +86,14 @@ world.add( new Light({
 var time = new Time;
 setInterval( function(){
 	world.update(time.reset() / 1000);
-},0);
+},20);
 
 // this will be call inside world.update
+var packet_id = 0;
 world.postupdate = function(){
-	io.to('Room1').emit( 'update', world.getUpdateBin() );	
+	packet_id = ( packet_id + 1 ) % 1000;
+
+	io.to('Room1').emit( 'update', packet_id,world.getUpdateBin() );	
 }
 
 
@@ -128,6 +131,7 @@ io.on('connection', function (socket) {
 		
 		socket.emit('base', {
 			name : name,
+			packet_id : packet_id,
 			basebin : world.getBaseBin()
 		});
 		
