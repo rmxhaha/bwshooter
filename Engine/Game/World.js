@@ -449,13 +449,29 @@ define([
 
 			if( this.players.length == 0 ) // all is vacant
 				return 1; // default first id
-
-			// search for gaps
-			var i = 0;
-			while( i < this.players.length && this.players[i].id == i + 1 ) ++ i;
 			
-			// vacany found after players[i-1]
-			return this.players[i-1].id + 1;
+			function noVacant(i){
+				return this.players[i].id == i + 1;
+			}
+			
+			if( noVacant( this.players.length-1 ) )
+				return this.players.length;
+			else {
+				function f(head,tail){
+					if( head == tail ) return head;
+					var center = head + ( tail - head ) / 2;
+					
+					if( noVacant(center) )
+						return f(center+1,tail);
+					else
+						return f(head,center);
+				}
+				
+				var i = f(0,this.players.length);
+				if( i == 0 ) return 1;
+				
+				return this.players[i-1].id + 1;
+			}
 		}
 
 	});
