@@ -90,8 +90,9 @@ setInterval( function(){
 
 // this will be call inside world.update
 var packet_id = 0;
+var max_packet_buffer = 1000;
 world.postupdate = function(){
-	packet_id = ( packet_id + 1 ) % 1000;
+	packet_id = ( packet_id + 1 ) % max_packet_buffer;
 
 	io.to('Room1').emit( 'update', packet_id,world.getUpdateBin() );	
 }
@@ -132,6 +133,7 @@ io.on('connection', function (socket) {
 		socket.emit('base', {
 			name : name,
 			packet_id : packet_id,
+			max_packet_buffer : max_packet_buffer,
 			basebin : world.getBaseBin()
 		});
 		

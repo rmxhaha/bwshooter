@@ -45,7 +45,7 @@
 			});
 		}
 		
-		function startGame( basebin, cpacket_id )
+		function startGame( basebin, cpacket_id, max_packet_buffer )
 		{
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
@@ -75,7 +75,7 @@
 			var sum = 0;
 			var n = 0;
 
-			var update_buffer = []; // max at 1000
+			var update_buffer = []; // max at max_packet_buffer
 			
 			socket.on('update', function( packet_id, bin ){
 				update_buffer[packet_id] = bin;
@@ -83,12 +83,12 @@
 			});
 			
 			function checkout(){
-				var npacket_id = (cpacket_id+1) % 1000;
+				var npacket_id = (cpacket_id+1) % max_packet_buffer;
 				while( typeof( update_buffer[npacket_id] ) != 'undefined'){
 					world.parseUpdateBin( update_buffer[npacket_id], latency / 1000 );
 					update_buffer[npacket_id] = undefined;
 					cpacket_id = npacket_id;
-					npacket_id = (cpacket_id+1) % 1000;
+					npacket_id = (cpacket_id+1) % max_packet_buffer;
 				}
 			}
 			
@@ -107,7 +107,7 @@
 		socket.on('base', function( data ){
 			console.log( data );
 			name = data.name;
-			startGame( data.basebin, data.packet_id );
+			startGame( data.basebin, data.packet_id, data.max_packet_buffer );
 		});
 		
 	});
