@@ -54,6 +54,8 @@ define(['Engine/Utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 	Converter.IntToBin = IntToBin;
 	
 	var ShortToBin = function( num ){
+		num += 32767;
+		
 		return String.fromCharCode(
 			num & 0xff,
 			(num >> 8) & 0xff
@@ -65,7 +67,7 @@ define(['Engine/Utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 			(binarr[s+0].charCodeAt(0) << 0)+
 			(binarr[s+1].charCodeAt(0) << 8);
 	
-		return number;
+		return number - 32767;
 	}
 	
 	Converter.ShortToBin = ShortToBin;
