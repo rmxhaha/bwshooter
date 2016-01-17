@@ -241,7 +241,8 @@ define([
 		bullets : [],
 		timestep : 0.05,
 		framecount : 0,
-		postupdate : function(){} // called after update
+		postupdate : function(){}, // called after update
+		physicOn : true
 	};
 
 	//	Represent a game world
@@ -505,5 +506,15 @@ define([
 		}
 
 	});
+
+	_.extend( World.prototype, {
+		turnOffPhysic : function(){
+			this.physicOn = false;
+		},
+		turnOnPhysic : function(){
+			this.physicOn = true;
+		}
+	});
+
 	return World;
 });
