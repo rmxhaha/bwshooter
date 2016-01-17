@@ -89,7 +89,6 @@ define(['Engine/Utility/underscore','Engine/Utility/converter','Engine/Utility/d
 	function Light( option ){
 		deepCopy( this,defaults );
 		deepCopy( this,option );
-		console.log( this );
 				
 		// calculate recommended rayCount here
 		var distance_between_ray = 2; // in pixel

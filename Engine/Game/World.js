@@ -267,14 +267,9 @@ define([
 	var WorldUpdateConverter = new Converter.ClassConverter({
 		lights : Converter.type.PSTRING,
 		players : Converter.type.PSTRING,
-		framecount : Converter.type.INTEGER
-		/**
-			under the assumption of player leaving is rather unlikely if multiple player exit at similar time
-			player exit will be done 1 player per update which will probably make 1/30s delay on each player exit 
-			which is assumed to be not noticable
-			
-			if no player exit then player_remove_index is 65535
-		*/
+		framecount : Converter.type.INTEGER,
+		added_player : Converter.type.PSTRING,
+		removed_player : Converter.type.PSTRING
 	}, true);
 	
 	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, true );
@@ -282,7 +277,8 @@ define([
 	var LightArrayUpdateConverter = new Converter.ArrayConverter( Light.updateConverter, true );
 	var PlayerArrayConverter = new Converter.ArrayConverter( Player.baseConverter, false );
 	var PlayerArrayUpdateConverter = new Converter.ArrayConverter( Player.updateConverter, false );
-	
+	var RemovedPlayerArrayConverter = new Converter.PrimitiveArrayConverter( Converter.type.NUMBER, false );
+
 	World.prototype.parseBaseBin = function( bin ){
 		var data = WorldBaseConverter.convertToClass( bin );
 
@@ -309,8 +305,28 @@ define([
 	}
 	
 	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
-		// do interpolation here
 		var data = WorldUpdateConverter.convertToClass( bin );
+
+		// remove player
+		var world = this;
+		var pids = world.players.map(function(p){ return p.id; });
+		var removed_ids = RemovedPlayerArrayConverter.convertToArray( data.removed_player );
+		_.each( removed_ids, function(id){
+			var i = _.indexOf(pids, id, true);
+			console.log( id );
+			if( i == -1 )
+				throw new Error('removed player not found');
+
+			pids.splice(i,1);
+			world.players.splice(i,1);
+		});
+		
+		
+		// added player
+		_.each( PlayerArrayConverter.convertToArray( data.added_player ), function(p){ this.add( new Player(p)); }.bind(this));
+		
+	
+		// do interpolation here
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
 		var playerUpdate = PlayerArrayUpdateConverter.convertToArray( data.players );
 
@@ -339,6 +355,10 @@ define([
 	World.prototype.getUpdateBin = function(){
 		var data = _.pick( this, 'framecount');
 		
+		var removed_ids = this.removed_player.map(function(p){ return p.id;});
+		
+		data.removed_player = RemovedPlayerArrayConverter.convertToBin( removed_ids );
+		data.added_player = PlayerArrayConverter.convertToBin( this.added_player );
 		data.lights = LightArrayUpdateConverter.convertToBin( this.lights );
 		data.players = PlayerArrayUpdateConverter.convertToBin( this.players );
 		return WorldUpdateConverter.convertToBin( data );
@@ -355,7 +375,10 @@ define([
 				this.lights.push( item );
 			}else if( item instanceof Player ){
 				// set id of player
-				item.id = this.getVacantPlayerId();
+				if( item.id == 0 ) 
+					item.id = this.getVacantPlayerId();
+				
+				console.log("ADDED" + item.id );
 				
 				// this.players must be ordered by id
 

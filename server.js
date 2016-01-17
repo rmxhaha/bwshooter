@@ -85,9 +85,12 @@ world.add( new Light({
 var time = new Time;
 setInterval( function(){
 	world.update(time.reset() / 1000);
-	io.to('Room1').emit( 'update', world.getUpdateBin() );
 },0);
 
+// this will be call inside world.update
+world.postupdate = function(){
+	io.to('Room1').emit( 'update', world.getUpdateBin() );	
+}
 
 
 io.on('connection', function (socket) {
@@ -116,7 +119,6 @@ io.on('connection', function (socket) {
 			name : name
 		});
 		
-		world.add( playerObject );
 	
 		
 		// must send after player added
@@ -128,6 +130,7 @@ io.on('connection', function (socket) {
 			basebin : world.getBaseBin()
 		});
 		
+		world.add( playerObject );
 		
 		socket.on('disconnect', function(){
 			console.log( name + ' has left the room');

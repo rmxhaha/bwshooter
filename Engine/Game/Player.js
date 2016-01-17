@@ -2,12 +2,6 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 
 	function Player( option ){
 		var defaults = {
-			/** default parameter */
-			id : 0, 
-			/** @param id
-				0 is not a valid id 
-				World.add will set the id for player
-			*/
 			x : 0,
 			y : 0,
 			vy : 0,
@@ -29,6 +23,12 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 		};
 		
 		var defaults = {
+			/** default parameter */
+			id : 0, 
+			/** @param id
+				0 is not a valid id 
+				World.add will set the id for player
+			*/
 			x : 0,
 			y : 0,
 			vy : 0,
