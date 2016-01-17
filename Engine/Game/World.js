@@ -4,12 +4,14 @@ define([
 	'Engine/Utility/converter',
 	'Engine/Game/Platform',
 	'Engine/Game/Light',
-	'Engine/Game/Player'
+	'Engine/Game/Player',
+	'Engine/Game/KeyAction'
 ], function( 
 	_, RayCast, Converter,
 	Platform, 
 	Light,
-	Player
+	Player,
+	KeyAction
 ){
 	/***
 	
@@ -442,6 +444,12 @@ define([
 			while( this.timebuffer > dt ){
 				updateLights.bind(this)(dt);
 				this.timebuffer -= dt;
+
+				if( this.physicOn ){
+					updateModels.bind(this)(dt);
+					this.fixCoordinate();					
+				}
+				
 				this.framecount ++;
 			}
 			
@@ -449,6 +457,12 @@ define([
 				_.each( this.lights, function(light){
 					light.update(dt);
 				});
+			}
+			
+			function updateModels(){
+				for( var i = 0; i < this.players.length; ++ i ){
+					this.players[i].update(new KeyAction(), dt);
+				}
 			}
 			
 			// call post update
@@ -513,6 +527,64 @@ define([
 		},
 		turnOnPhysic : function(){
 			this.physicOn = true;
+		},
+		fixCoordinate : function(){
+			function isInBetween( bottom, data , top ){
+				return bottom < data && data < top;
+			}
+			
+			function isInPlatformArea( platform, minX, maxX ){
+				return( 
+					(platform.x < minX && minX < platform.x + platform.width) || 
+					(platform.x < maxX && maxX < platform.x + platform.width) );
+			}
+			
+			for( var i = 0; i < this.players.length; ++ i ){
+				var p = this.players[i];
+				
+				// don't check if hero is moving up
+				if( p.vy > 0 ) continue;
+
+				// pre-calculation
+				var leftX = p.x;
+				var rightX = p.x + p.width;
+				
+				var bottomY = p.y - p.height;
+				
+				// if previous data is still valid
+				if( p.topPlatform && isInPlatformArea( p.topPlatform, leftX, rightX ) ){
+					// coordinate need to be fixed
+					if( bottomY < p.topPlatform.y ){
+						// fix coordinate 
+						p.y = p.topPlatform.y + p.height;
+						p.vy = 0;
+
+						// previous data is still valid
+						continue;
+					}
+				}
+
+				// prepare data correction for next iteration			
+				var topPlatform = false;
+				
+				for( var k = 0; k < this.platforms.length; ++ k ){
+					var q = this.platforms[k];
+
+					if( q.y > bottomY ) continue;
+					
+					if( isInPlatformArea(q, leftX, rightX ) ){
+						if( !topPlatform || topPlatform.y < q.y ) 
+							topPlatform = q;
+					}
+				}
+				
+				if( topPlatform == false ){
+					throw new Error('bottemless pit is found');
+				}
+				
+				p.topPlatform = topPlatform;
+				
+			}
 		}
 	});
 

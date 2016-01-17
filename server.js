@@ -35,6 +35,7 @@ var world = new World;
 
 world.add( new Platform({ x : 200, y : -500 }));
 world.add( new Platform({ x : 500, y : -300 }));
+world.add( new Platform({ x : 0, y : -800, width: 2000 }));
 world.add( new Player({ x : 200, y : -300, team : Player.team.white, name : 'randomname' }));
 world.add( new Player({ x : 500, y : -150, team : Player.team.black }));
 world.add( new Light({
