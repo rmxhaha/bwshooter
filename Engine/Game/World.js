@@ -352,7 +352,9 @@ define([
 		this.framecount = data.framecount;
 
 		// interpolate
-		this.update( latency / 2 );
+		//this.update( latency / 2 );
+		this.update( this.timestep * (bin.framecount-this.lastFrameUpdate));
+		
 		
 		this.lastFrameUpdate = bin.framecount;
 	}
