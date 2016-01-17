@@ -555,5 +555,52 @@ define(['Engine/Utility/lz-string','Engine/Utility/underscore','Engine/Utility/b
 		}
 	*/
 	
+	var PrimitiveArrayConverter = (function(){
+		var PrimitiveArrayConverter = function(type, compress){
+			var supported = [Converter.type.NUMBER];
+			if( supported.indexOf(type) == -1 ) 
+				throw new Error('this primitive type is not supported');
+			
+			this.primitive_type = type;
+			this.compress 	= ( typeof compress ==='undefined' ? true : !!compress );			
+		}
+		
+		PrimitiveArrayConverter.prototype.convertToArray = function(bin){
+			var dataAppropriate = true;
+			
+			if( this.primitive_type == Converter.type.NUMBER ){
+				dataAppropriate = (bin.length % 4 == 0);
+			}
+			
+			if( !dataAppropriate )
+				throw new Error('data given is not convertable');
+
+			if( this.primitive_type == Converter.type.NUMBER ){
+				return _.map(
+					_.range(0,bin.length,4), 
+					function(x){return BinToInt(bin,x); }
+				);
+			}
+		}
+
+		PrimitiveArrayConverter.prototype.convertToBin = function(array){
+			var dataAppropriate = true;
+			if( this.primitive_type == Converter.type.NUMBER ){
+				dataAppropriate = _.reduce(array, function(memo,x){ return memo || (typeof(x) == 'number'); }, true);
+			}
+			
+			if( !dataAppropriate )
+				throw new Error('array given is not suitable');
+			
+			if( this.primitive_type == Converter.type.NUMBER ){
+				return _.reduce(_.map( array, function(x){return IntToBin(x)}), function(binOut, bin){ return binOut + bin }, "");
+			}
+		}
+		
+		return PrimitiveArrayConverter;
+	})();
+	
+	Converter.PrimitiveArrayConverter = PrimitiveArrayConverter;
+	
 	return Converter;
 });
