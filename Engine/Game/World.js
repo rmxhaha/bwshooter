@@ -308,27 +308,35 @@ define([
 		var data = WorldUpdateConverter.convertToClass( bin );
 
 		// remove player
-		var world = this;
-		var pids = world.players.map(function(p){ return p.id; });
 		var removed_ids = RemovedPlayerArrayConverter.convertToArray( data.removed_player );
-		_.each( removed_ids, function(id){
-			var i = _.indexOf(pids, id, true);
-			console.log( id );
-			if( i == -1 )
-				throw new Error('removed player not found');
+		
+		if( removed_ids.length > 0 ){
+			var world = this;
+			var pids = world.players.map(function(p){ return p.id; });
 
-			pids.splice(i,1);
-			world.players.splice(i,1);
-		});
+			_.each( removed_ids, function(id){
+				var i = _.indexOf(pids, id, true);
+				console.log( id );
+				if( i == -1 )
+					throw new Error('removed player not found');
+
+				pids.splice(i,1);
+				world.players.splice(i,1);
+			});
+		}
 		
 		
 		// added player
 		_.each( PlayerArrayConverter.convertToArray( data.added_player ), function(p){ this.add( new Player(p)); }.bind(this));
 		
-	
+		
+		
 		// do interpolation here
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
 		var playerUpdate = PlayerArrayUpdateConverter.convertToArray( data.players );
+
+		if( this.players.length != playerUpdate.length )
+			throw new Error('players count and player update is not synchronized');
 
 		for( var i = 0; i < lightsUpdate.length; ++ i ){
 			this.lights[i].parseUpdate( lightsUpdate[i] );
