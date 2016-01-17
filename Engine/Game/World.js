@@ -234,7 +234,8 @@ define([
 		camera_y : 0,
 		gravity : 1000,
 		players : [],
-		removed_player : [], // index of player remove (must be removed in an orderly manner)
+		removed_player : [], // player in world.players that is removed which will be purge after each update right after postupdate
+		added_player : [], // same as removed_player but this time it's player in world.players that is just added
 		platforms : [],
 		lights : [],
 		bullets : [],
@@ -266,9 +267,7 @@ define([
 	var WorldUpdateConverter = new Converter.ClassConverter({
 		lights : Converter.type.PSTRING,
 		players : Converter.type.PSTRING,
-		framecount : Converter.type.INTEGER,
-		player_remove_index : Converter.type.INT16
-
+		framecount : Converter.type.INTEGER
 		/**
 			under the assumption of player leaving is rather unlikely if multiple player exit at similar time
 			player exit will be done 1 player per update which will probably make 1/30s delay on each player exit 
@@ -309,18 +308,11 @@ define([
 		return bin;
 	}
 	
-	var i = 0;
 	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
 		// do interpolation here
 		var data = WorldUpdateConverter.convertToClass( bin );
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
 		var playerUpdate = PlayerArrayUpdateConverter.convertToArray( data.players );
-
-		// remove player if player_remove_index existed
-		if( data.player_remove_index != 65535 ){
-			console.log( data.player_remove_index );
-			this.players.splice( data.player_remove_index , 1 );
-		}
 
 		for( var i = 0; i < lightsUpdate.length; ++ i ){
 			this.lights[i].parseUpdate( lightsUpdate[i] );
@@ -338,17 +330,15 @@ define([
 		this.lastFrameUpdate = bin.framecount;
 	}
 	
-	// warning : sending update when framecount is not different 
-	// 			 will probably cause player being deleted
-	World.prototype.getUpdateBin = function( bin ){
+	// although I want getUpdateBin to be independently called
+	// I can't be due to design issue
+	// getUpdateBin must be called in the postupdate
+	// world.update function will removed world.added_player and world.removed_player after each update 
+	// it will be deleted them exactly after postupdate has been called
+	
+	World.prototype.getUpdateBin = function(){
 		var data = _.pick( this, 'framecount');
 		
-		var removed_player_index = this.removed_player.shift() || 65535;
-		if( removed_player_index != 65535 ){
-			this.players.splice(removed_player_index,1);
-		}
-		
-		data.player_remove_index = removed_player_index;
 		data.lights = LightArrayUpdateConverter.convertToBin( this.lights );
 		data.players = PlayerArrayUpdateConverter.convertToBin( this.players );
 		return WorldUpdateConverter.convertToBin( data );
@@ -366,7 +356,7 @@ define([
 			}else if( item instanceof Player ){
 				// set id of player
 				item.id = this.getVacantPlayerId();
-
+				
 				// this.players must be ordered by id
 
 				var head = 0;
@@ -389,6 +379,7 @@ define([
 				}
 				
 				this.players.splice( head, 0, item );
+				this.added_player.push( item );
 			}
 			else {
 				throw new Error('type not found');
@@ -398,14 +389,12 @@ define([
 		// remove is server only code, runned on client side will cause problem
 		remove : function(item){
 			if( item instanceof Player ){
-				for( var i = 0; i < this.players.length; ++ i ){
-					if( this.players[i] == item ){
-						this.removed_player.push(i);
-						return i;
-					}
-				}
+				var idx = this.players.indexOf(item);
+				if( idx == -1 ) 
+					throw new Error('player not found on this world');
 				
-				throw new Error('player not found on this world');
+				this.players.splice(idx,1);
+				this.removed_player.push( item );
 			}
 			else {
 				throw new Error('type not found');				
@@ -429,6 +418,14 @@ define([
 					light.update(dt);
 				});
 			}
+			
+			// call post update
+			this.postupdate();
+			
+			// purge added_player and removed_player
+			this.added_player.length = 0;
+			this.removed_player.length = 0;
+			
 		}
 	});
 	
@@ -450,16 +447,18 @@ define([
 			if( this.players.length == 0 ) // all is vacant
 				return 1; // default first id
 			
+			var world = this;
+
 			function noVacant(i){
-				return this.players[i].id == i + 1;
+				return world.players[i].id == i + 1;
 			}
 			
 			if( noVacant( this.players.length-1 ) )
-				return this.players.length;
+				return this.players.length+1;
 			else {
 				function f(head,tail){
 					if( head == tail ) return head;
-					var center = head + ( tail - head ) / 2;
+					var center = Math.floor( head + ( tail - head ) / 2 );
 					
 					if( noVacant(center) )
 						return f(center+1,tail);
