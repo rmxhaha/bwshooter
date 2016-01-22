@@ -1,4 +1,5 @@
 define([
+	'Engine/Utility/async',
 	'Engine/Utility/underscore',
 	'Engine/Utility/raycast',
 	'Engine/Utility/converter',
@@ -7,7 +8,7 @@ define([
 	'Engine/Game/Player',
 	'Engine/Game/KeyAction'
 ], function( 
-	_, RayCast, Converter,
+	async,_, RayCast, Converter,
 	Platform, 
 	Light,
 	Player,
@@ -292,9 +293,13 @@ define([
 		this.lights = [];
 		this.lastFrameUpdate = this.framecount;
 		
-		_.each( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ this.add( new Platform( p ) );}.bind(this));
-		_.each( LightsArrayConverter.convertToArray( data.lights ), function(p){ this.add( new Light( p ) );}.bind(this));
-		_.each( PlayerArrayConverter.convertToArray( data.players ), function(p){ this.add( new Player(p)); }.bind(this));
+		var world = this;
+		
+		async.series( [
+			function(){ _.each( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ world.add( new Platform( p ) );});},
+			function(){ _.each( LightsArrayConverter.convertToArray( data.lights ), function(p){ world.add( new Light( p ) );}); },
+			function(){ _.each( PlayerArrayConverter.convertToArray( data.players ), function(p){ world.add( new Player(p)); }); }
+		]);
 	}
 	
 	World.prototype.getBaseBin = function(){
@@ -330,7 +335,10 @@ define([
 		
 		
 		// added player
-		_.each( PlayerArrayConverter.convertToArray( data.added_player ), function(p){ this.add( new Player(p)); }.bind(this));
+		_.each( PlayerArrayConverter.convertToArray( data.added_player ), function(p){ 
+			this.add( new Player(p)); 
+		}.bind(this));
+		
 		
 		
 		// throws away late data
