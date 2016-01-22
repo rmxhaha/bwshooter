@@ -442,6 +442,8 @@ define([
 			
 			// fix time update for consistency 
 			var dt = this.timestep;
+			var beforeUpdateFrameCount = this.framecount;
+			
 			
 			while( this.timebuffer > dt ){
 				updateLights.bind(this)(dt);
@@ -467,13 +469,16 @@ define([
 				}
 			}
 			
+			// no update is done
+			if( this.beforeUpdateFrameCount == this.framecount )
+				return;
+
 			// call post update
 			this.postupdate();
 			
 			// purge added_player and removed_player
 			this.added_player.length = 0;
 			this.removed_player.length = 0;
-			
 		}
 	});
 	
