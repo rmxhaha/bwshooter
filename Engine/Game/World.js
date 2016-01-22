@@ -237,15 +237,15 @@ define([
 		camera_y : 0,
 		gravity : 1000,
 		players : [],
-		removed_player : [], // player in world.players that is removed which will be purge after each update right after postupdate
-		added_player : [], // same as removed_player but this time it's player in world.players that is just added
 		platforms : [],
 		lights : [],
 		bullets : [],
 		timestep : 0.05,
 		framecount : 0,
 		postupdate : function(){}, // called after update
-		physicOn : true
+		onaddedplayer : function(){}, 
+		onremovedplayer : function(){},
+		physicOn : true,
 	};
 
 	//	Represent a game world
@@ -271,9 +271,7 @@ define([
 	var WorldUpdateConverter = new Converter.ClassConverter({
 		lights : Converter.type.PSTRING,
 		players : Converter.type.PSTRING,
-		framecount : Converter.type.INTEGER,
-		added_player : Converter.type.PSTRING,
-		removed_player : Converter.type.PSTRING
+		framecount : Converter.type.INTEGER
 	}, true);
 	
 	var PlatformsArrayConverter = new Converter.ArrayConverter( Platform.converter, true );
@@ -294,12 +292,10 @@ define([
 		this.lastFrameUpdate = this.framecount;
 		
 		var world = this;
+		_.each( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ world.add( new Platform( p ) );});
+		_.each( LightsArrayConverter.convertToArray( data.lights ), function(p){ world.add( new Light( p ) );});
+		_.each( PlayerArrayConverter.convertToArray( data.players ), function(p){ world.add( new Player(p)); });
 		
-		async.series( [
-			function(){ _.each( PlatformsArrayConverter.convertToArray( data.platforms ), function(p){ world.add( new Platform( p ) );});},
-			function(){ _.each( LightsArrayConverter.convertToArray( data.lights ), function(p){ world.add( new Light( p ) );}); },
-			function(){ _.each( PlayerArrayConverter.convertToArray( data.players ), function(p){ world.add( new Player(p)); }); }
-		]);
 	}
 	
 	World.prototype.getBaseBin = function(){
@@ -314,7 +310,7 @@ define([
 	
 	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
 		var data = WorldUpdateConverter.convertToClass( bin );
-
+/*
 		// remove player
 		var removed_ids = RemovedPlayerArrayConverter.convertToArray( data.removed_player );
 		
@@ -338,7 +334,7 @@ define([
 		_.each( PlayerArrayConverter.convertToArray( data.added_player ), function(p){ 
 			this.add( new Player(p)); 
 		}.bind(this));
-		
+	*/	
 		
 		
 		// throws away late data
@@ -348,7 +344,7 @@ define([
 		// do interpolation here
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
 		var playerUpdate = PlayerArrayUpdateConverter.convertToArray( data.players );
-
+		
 		if( this.players.length != playerUpdate.length )
 			throw new Error('players count and player update is not synchronized');
 
@@ -378,11 +374,6 @@ define([
 	
 	World.prototype.getUpdateBin = function(){
 		var data = _.pick( this, 'framecount');
-		
-		var removed_ids = this.removed_player.map(function(p){ return p.id;});
-		
-		data.removed_player = RemovedPlayerArrayConverter.convertToBin( removed_ids );
-		data.added_player = PlayerArrayConverter.convertToBin( this.added_player );
 		data.lights = LightArrayUpdateConverter.convertToBin( this.lights );
 		data.players = PlayerArrayUpdateConverter.convertToBin( this.players );
 		return WorldUpdateConverter.convertToBin( data );
@@ -426,7 +417,7 @@ define([
 				}
 				
 				this.players.splice( head, 0, item );
-				this.added_player.push( item );
+				this.onaddedplayer( item );
 			}
 			else {
 				throw new Error('type not found');
@@ -441,7 +432,7 @@ define([
 					throw new Error('player not found on this world');
 				
 				this.players.splice(idx,1);
-				this.removed_player.push( item );
+				this.onremovedplayer( item );
 			}
 			else {
 				throw new Error('type not found');				
@@ -486,10 +477,6 @@ define([
 
 			// call post update
 			this.postupdate();
-			
-			// purge added_player and removed_player
-			this.added_player.length = 0;
-			this.removed_player.length = 0;
 		}
 	});
 	
@@ -535,6 +522,14 @@ define([
 				
 				return this.players[i-1].id + 1;
 			}
+		},
+		getPlayerById : function(id){
+			var pids = world.players.map(function(p){ return p.id; });
+			var idx = _.indexOf(pids, id, true);
+			if( idx == -1 )
+				throw new Error('player not found');
+			
+			return this.players[idx];
 		}
 
 	});

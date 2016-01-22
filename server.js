@@ -89,12 +89,19 @@ setInterval( function(){
 },20);
 
 // this will be call inside world.update
-var packet_id = 0;
-var max_packet_buffer = 1000;
 world.postupdate = function(){
-	packet_id = ( packet_id + 1 ) % max_packet_buffer;
+	var update = world.getUpdateBin();
+	setTimeout( function(){
+		io.to('Room1').emit( 'update', update );	
+	}, 1000 + 100 * Math.random() );
+}
 
-	io.to('Room1').emit( 'update', packet_id,world.getUpdateBin() );	
+world.onaddedplayer = function(item){
+	io.to('Room1').emit('new_player', Player.baseConverter.convertToBin( item ) );
+}
+
+world.onremovedplayer = function(item){
+	io.to('Room1').emit('leaving_player', item.id );
 }
 
 
@@ -132,8 +139,6 @@ io.on('connection', function (socket) {
 		
 		socket.emit('base', {
 			name : name,
-			packet_id : packet_id,
-			max_packet_buffer : max_packet_buffer,
 			basebin : world.getBaseBin()
 		});
 		

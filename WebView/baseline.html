@@ -45,7 +45,7 @@
 			});
 		}
 		
-		function startGame( basebin, cpacket_id, max_packet_buffer )
+		function startGame( basebin )
 		{
 			var canvas = document.getElementById('canvas');
 			var context = canvas.getContext('2d');
@@ -72,7 +72,7 @@
 			
 			world.parseBaseBin( basebin );
 			
-			socket.on('update', function( packet_id, bin ){
+			socket.on('update', function( bin ){
 			
 				// catch error caused by racing data
 				try {
@@ -81,6 +81,16 @@
 				catch( err ){
 					console.log( err );
 				}
+			});
+			
+			socket.on('new_player', function( bin ){
+				var player = new Player( Player.baseConverter.convertToClass( bin ) );
+				world.add(player);
+			});
+			
+			socket.on('leaving_player', function(id){
+				var player = world.getPlayerById(id);
+				world.remove(player);
 			});
 			
 			
@@ -99,7 +109,7 @@
 		socket.on('base', function( data ){
 			console.log( data );
 			name = data.name;
-			startGame( data.basebin, data.packet_id, data.max_packet_buffer );
+			startGame( data.basebin );
 		});
 		
 	});
