@@ -310,10 +310,6 @@ define([
 	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
 		var data = WorldUpdateConverter.convertToClass( bin );
 
-		// throws away late data
-		if( data.framecount < this.lastFrameUpdate )
-			return;
-		
 		// remove player
 		var removed_ids = RemovedPlayerArrayConverter.convertToArray( data.removed_player );
 		
@@ -337,6 +333,9 @@ define([
 		_.each( PlayerArrayConverter.convertToArray( data.added_player ), function(p){ this.add( new Player(p)); }.bind(this));
 		
 		
+		// throws away late data
+		if( data.framecount < this.lastFrameUpdate )
+			return;
 		
 		// do interpolation here
 		var lightsUpdate = LightArrayUpdateConverter.convertToArray( data.lights );
