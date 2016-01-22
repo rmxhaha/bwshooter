@@ -137,10 +137,14 @@ io.on('connection', function (socket) {
 		// system cannot handle new player
 		// TODO : make it so it can
 		
-		socket.emit('base', {
+		var base = {
 			name : name,
 			basebin : world.getBaseBin()
-		});
+		};
+		setTimeout( function(){
+			socket.emit('base', base);
+			
+		}, 2000);
 		
 		world.add( playerObject );
 		

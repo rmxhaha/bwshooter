@@ -21,6 +21,7 @@
 	require([
 		'Engine/Utility/class',
 		'Engine/Utility/time',
+		'Engine/Utility/underscore',
 		
 		'Engine/Game/World',
 		'Engine/View/WorldView',
@@ -29,7 +30,7 @@
 		'Engine/Game/Player',
 		'Engine/Game/KeyActionListener'
 	],
-	function( _class, Time, World, WorldView, Platform, Light, Player, KeyActionListener ){
+	function( _class, Time, _, World, WorldView, Platform, Light, Player, KeyActionListener ){
 		var socket = io.connect('http://localhost:43001/');
 		var name;
 		
@@ -45,6 +46,21 @@
 			});
 		}
 		
+		
+		var delayed_new_player_bin = [];
+		var delayed_leaving_player_id = [];
+		
+		var delayed_new_player_handler = function( bin ){
+			delayed_new_player_bin.push(bin);
+		};
+		
+		var delayed_leaving_player_handler = function( id ){
+			delayed_leaving_player_id.push(id);
+		};
+		
+		socket.on('new_player', delayed_new_player_handler );
+		socket.on('leaving_player', delayed_leaving_player_handler );
+
 		function startGame( basebin )
 		{
 			var canvas = document.getElementById('canvas');
@@ -71,6 +87,35 @@
 			canvas.height = window.innerHeight;
 			
 			world.parseBaseBin( basebin );
+			socket.removeListener('new_player',delayed_new_player_handler);
+			socket.removeListener('leaving_player', delayed_leaving_player_handler );
+
+			// process delayed start game
+			function process_new_player(bin){
+				var player = new Player( Player.baseConverter.convertToClass( bin ) );
+				world.add(player);
+			}
+		
+			function process_leaving_player(id){
+				var player = world.getPlayerById(id);
+				world.remove(player);
+			}
+
+			_.each( delayed_leaving_player_id, function(id){
+				process_leaving_player(id);
+			});
+			
+			_.each( delayed_new_player_bin, function(bin){
+				process_new_player(bin);
+			});
+
+			socket.on('new_player', function( bin ){
+				process_new_player(bin);
+			});
+			
+			socket.on('leaving_player', function(id){
+				process_leaving_player(id);
+			});
 			
 			socket.on('update', function( bin ){
 			
@@ -83,15 +128,6 @@
 				}
 			});
 			
-			socket.on('new_player', function( bin ){
-				var player = new Player( Player.baseConverter.convertToClass( bin ) );
-				world.add(player);
-			});
-			
-			socket.on('leaving_player', function(id){
-				var player = world.getPlayerById(id);
-				world.remove(player);
-			});
 			
 			
 			window.w = world;
