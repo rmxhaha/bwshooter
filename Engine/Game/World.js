@@ -310,6 +310,10 @@ define([
 	World.prototype.parseUpdateBin = function( bin, latency ){ // latency is in seconds
 		var data = WorldUpdateConverter.convertToClass( bin );
 
+		// throws away late data
+		if( data.framecount < this.lastFrameUpdate )
+			return;
+		
 		// remove player
 		var removed_ids = RemovedPlayerArrayConverter.convertToArray( data.removed_player );
 		
@@ -356,7 +360,7 @@ define([
 		this.update( this.timestep * (bin.framecount-this.lastFrameUpdate));
 		
 		
-		this.lastFrameUpdate = bin.framecount;
+		this.lastFrameUpdate = data.framecount;
 	}
 	
 	// although I want getUpdateBin to be independently called

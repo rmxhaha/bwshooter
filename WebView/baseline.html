@@ -72,25 +72,17 @@
 			
 			world.parseBaseBin( basebin );
 			
-			var sum = 0;
-			var n = 0;
-
-			var update_buffer = []; // max at max_packet_buffer
-			
 			socket.on('update', function( packet_id, bin ){
-				update_buffer[packet_id] = bin;
-				checkout();
+			
+				// catch error caused by racing data
+				try {
+					world.parseUpdateBin( bin, latency / 1000 );
+				}
+				catch( err ){
+					console.error( err );
+				}
 			});
 			
-			function checkout(){
-				var npacket_id = (cpacket_id+1) % max_packet_buffer;
-				while( typeof( update_buffer[npacket_id] ) != 'undefined'){
-					world.parseUpdateBin( update_buffer[npacket_id], latency / 1000 );
-					update_buffer[npacket_id] = undefined;
-					cpacket_id = npacket_id;
-					npacket_id = (cpacket_id+1) % max_packet_buffer;
-				}
-			}
 			
 			window.w = world;
 			
