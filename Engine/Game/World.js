@@ -524,7 +524,7 @@ define([
 			}
 		},
 		getPlayerById : function(id){
-			var pids = world.players.map(function(p){ return p.id; });
+			var pids = this.players.map(function(p){ return p.id; });
 			var idx = _.indexOf(pids, id, true);
 			if( idx == -1 )
 				throw new Error('player not found');
