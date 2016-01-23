@@ -18,13 +18,18 @@ define([], function(){
 				}
 			  };
 			},
-			publish: function(topic, info) {
+			publish: function(topic) {
 			  // If the topic doesn't exist, or there's no listeners in queue, just leave
 			  if(!hOP.call(topics, topic)) return;
 
+			  var args = [].slice.call(arguments);
+			  args.shift();
+			  console.log( args );
+			  
 			  // Cycle through topics queue, fire!
-			  topics[topic].forEach(function(item) {
-					item(info != undefined ? info : {});
+			  topics[topic].forEach(function(listener) {
+				  listener.apply(null, args);
+				  //item(info != undefined ? info : {});
 			  });
 			}
 		};
