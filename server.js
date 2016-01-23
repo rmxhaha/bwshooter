@@ -91,9 +91,9 @@ setInterval( function(){
 // this will be call inside world.update
 world.postupdate = function(){
 	var update = world.getUpdateBin();
-	setTimeout( function(){
+//	setTimeout( function(){
 		io.to('Room1').emit( 'update', update );	
-	}, 1000 + 100 * Math.random() );
+//	}, 1000 + 100 * Math.random() );
 }
 
 world.onaddedplayer = function(item){
@@ -141,10 +141,11 @@ io.on('connection', function (socket) {
 			name : name,
 			basebin : world.getBaseBin()
 		};
-		setTimeout( function(){
+
+//		setTimeout( function(){
 			socket.emit('base', base);
 			
-		}, 2000);
+//		}, 2000);
 		
 		world.add( playerObject );
 		
