@@ -360,7 +360,7 @@ define([
 
 		// interpolate
 		//this.update( latency / 2 );
-		this.update( this.timestep * (bin.framecount-this.lastFrameUpdate));
+		//this.update( this.timestep * (bin.framecount-this.lastFrameUpdate));
 		
 		
 		this.lastFrameUpdate = data.framecount;
@@ -531,7 +531,6 @@ define([
 			
 			return this.players[idx];
 		}
-
 	});
 
 	_.extend( World.prototype, {
@@ -579,6 +578,7 @@ define([
 
 				// prepare data correction for next iteration			
 				var topPlatform = false;
+				var topPlatformIdx = -1;
 				
 				for( var k = 0; k < this.platforms.length; ++ k ){
 					var q = this.platforms[k];
@@ -586,8 +586,10 @@ define([
 					if( q.y > bottomY ) continue;
 					
 					if( isInPlatformArea(q, leftX, rightX ) ){
-						if( !topPlatform || topPlatform.y < q.y ) 
+						if( !topPlatform || topPlatform.y < q.y ) {
 							topPlatform = q;
+							topPlatformIdx = k;
+						}
 					}
 				}
 				
@@ -596,6 +598,7 @@ define([
 				}
 				
 				p.topPlatform = topPlatform;
+				p.topPlatformIdx = topPlatformIdx;
 				
 			}
 		}

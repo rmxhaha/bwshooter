@@ -66,6 +66,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 			topPlatform detection is set by world fixCoordinate function 
 		*/
 		topPlatform : false,
+		topPlatformIdx : 0,
 		width : 90,
 		height : 140,
 		update : function( keyAction, dt ){
@@ -161,6 +162,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'isDead', type : Converter.BCConverter.type.BOOLEAN },
 		{ name : 'team', type : Converter.BCConverter.type.SHORT },
+		{ name : 'topPlatformIdx', type : Converter.BCConverter.type.SHORT },
 		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN }
 	], false);
 	
@@ -171,6 +173,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 		{ name : 'vy', type : Converter.BCConverter.type.NUMBER },
 		{ name : 'isDead', type : Converter.BCConverter.type.BOOLEAN },
 		{ name : 'team', type : Converter.BCConverter.type.SHORT },
+		{ name : 'topPlatformIdx', type : Converter.BCConverter.type.SHORT },
 		{ name : 'sideRight', type : Converter.BCConverter.type.BOOLEAN },
 		{ name : 'name', type : Converter.BCConverter.type.STRING }
 	], false);
@@ -186,7 +189,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 	
 	Player.method('parseBaseBin', function( bin ){
 		var data = Player.baseConverter.convertToClass( bin );
-		_.extend( this, data );
+		this.parseUpdate( data );
 	});
 	
 	Player.method('getUpdateBin', function( bin ){
@@ -200,6 +203,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 	
 	Player.method('parseUpdate', function(obj){
 		_.extend( this, obj );
+		this.topPlatform = this.world.platforms[ obj.topPlatformIdx ];
 	});
 	
 	
