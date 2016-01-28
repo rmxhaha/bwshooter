@@ -43,7 +43,7 @@
 		function pingServer( callback ){
 			var startTime = new Date();
 			socket.emit('ping');
-			socket.on('pong', function(){
+			socket.once('pong', function(){
 				var endTime = new Date();
 				callback( endTime.getTime() - startTime.getTime() );
 			});
@@ -65,7 +65,7 @@
 			var keyActionListener = new KeyActionListener;
 			
 			setInterval( function(){
-				pingServer( function(L){ latency = L; } );
+				pingServer( function(L){ latency = L; console.log(latency); } );
 			}, 2000 );
 			
 			console.log( keyActionListener );
