@@ -468,7 +468,7 @@ define([
 			
 			function updateModels(){
 				for( var i = 0; i < this.players.length; ++ i ){
-					this.players[i].update(new KeyAction(), dt);
+					this.players[i].update(this.players[i].keyAction, dt);
 				}
 			}
 			

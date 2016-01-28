@@ -35,7 +35,8 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 			team : Player.team.black,
 			sideRight : true,
 			isDead : false,
-			name : 'IhavenoName'
+			name : 'IhavenoName',
+			keyAction : new KeyAction
 
 			// vx and state is determined by keyAction
 			
@@ -70,7 +71,7 @@ define(['Engine/Utility/underscore', 'Engine/Utility/converter','Engine/Game/Key
 		width : 90,
 		height : 140,
 		update : function( keyAction, dt ){
-			if( !( keyAction instanceof KeyAction ) ) throw new Error('key act is not an instanceof `KeyAction`');
+//			if( !( keyAction instanceof KeyAction ) ) throw new Error('key act is not an instanceof `KeyAction`');
 			if( this.isDead ) return;
 			
 			// process key action

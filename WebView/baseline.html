@@ -60,15 +60,13 @@
 			var world = new World;
 			var time = new Time;
 			var latency = 0;
-			var updateRate = 120;
+			var updateRate = 50;
 			var updateTimeout = 1000 / updateRate;
 			var keyActionListener = new KeyActionListener;
 			
 			setInterval( function(){
 				pingServer( function(L){ latency = L; console.log(latency); } );
 			}, 2000 );
-			
-			console.log( keyActionListener );
 			
 			setInterval( function(){
 				socket.emit('keyAct', keyActionListener.getKeyAction() );

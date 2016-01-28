@@ -148,6 +148,9 @@ io.on('connection', function (socket) {
 //		}, 2000);
 		
 		world.add( playerObject );
+		socket.on('keyAct', function(ka){
+			playerObject.keyAction = ka;
+		});
 		
 		socket.on('disconnect', function(){
 			console.log( name + ' has left the room');
