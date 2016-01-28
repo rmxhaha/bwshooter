@@ -1,0 +1,90 @@
+<head>
+	<script src="http://localhost:43001/socket.io/socket.io.js"></script>
+	<script src="js/lib/require.js"></script>
+	<style>
+	body {
+		margin : 0;
+	}
+	</style>
+</head>
+<body>
+	<canvas id=canvas></canvas>
+	<script>
+	require.config({
+		baseUrl : '/',
+		shim: {
+			"Engine/Utility/underscore": {
+				exports: "_"
+			}
+		}
+	});
+	require([
+		'Engine/Utility/class',
+		'Engine/Utility/Time',
+		
+		'Engine/Game/World',
+		'Engine/View/WorldView',
+		'Engine/Game/Platform',
+		'Engine/Game/Light',
+		'Engine/Game/Player'
+	],
+	function( _class, Time, World, WorldView, Platform, Light ){				
+		var socket = io.connect('http://localhost:43001/');
+		var name;
+		
+		//socket.emit('requestLogin', prompt('What is your name ?') );
+		socket.emit('requestLogin', "rmxhaha" );
+		
+		function pingServer( callback ){
+			var startTime = new Date();
+			socket.emit('ping');
+			socket.on('pong', function(){
+				var endTime = new Date();
+				callback( endTime.getTime() - startTime.getTime() );
+			});
+		}
+		
+		function startGame( basebin )
+		{
+			var canvas = document.getElementById('canvas');
+			var context = canvas.getContext('2d');
+			var world = new World;
+			var time = new Time;
+			var latency = 0;
+			
+			setInterval( function(){
+				pingServer( function(L){ latency = L; } );
+			}, 2000 );
+			
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			
+			world.parseBaseBin( basebin );
+			
+			var sum = 0;
+			var n = 0;
+			socket.on('update', function( bin ){
+				world.parseUpdateBin( bin, latency / 1000 );
+			});
+			
+			window.w = world;
+			
+			function loop(){
+				WorldView.render( context, world );
+				world.update( time.reset() / 1000 );
+				
+				requestAnimationFrame( loop );
+			}
+			
+			loop();
+		}
+		
+		socket.on('base', function( data ){
+			console.log( data );
+			name = data.name;
+			startGame( data.basebin );
+		});
+		
+	});
+	</script>
+</body>
