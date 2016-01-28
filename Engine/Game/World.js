@@ -356,11 +356,11 @@ define([
 			this.players[i].parseUpdate( playerUpdate[i] );
 		}
 		
+		this.update( this.timestep * (bin.framecount-this.framecount));
 		this.framecount = data.framecount;
 
 		// interpolate
 		//this.update( latency / 2 );
-		//this.update( this.timestep * (bin.framecount-this.lastFrameUpdate));
 		
 		
 		this.lastFrameUpdate = data.framecount;
