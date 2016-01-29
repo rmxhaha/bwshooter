@@ -16,7 +16,7 @@ requirejs([
 	'Engine/Game/Platform',
 	'Engine/Game/Light',
 	'Engine/Game/Player',
-	'Engine/Utility/Converter',
+	'Engine/Utility/converter',
 	'Engine/Utility/late'
 ], function( _class, Time, express, http, socketio, World, Platform, Light, Player, c, Late ){
 	var converter = new c.PrimitiveArrayConverter(c.type.NUMBER);
