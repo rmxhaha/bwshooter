@@ -88,13 +88,24 @@ setInterval( function(){
 	world.update(time.reset() / 1000);
 },20);
 
-// this will be call inside world.update
-world.postupdate = function(){
+var sendUpdateBin = _.throttle( function(){
 	var update = world.getUpdateBin();
 //	setTimeout( function(){
 		io.to('Room1').emit( 'update', update );	
 //	}, 1000 + 100 * Math.random() );
+}, 500);
+
+var sendKeyAct = function(){
+	var ka = world.getKeyActsBin();
+	io.to('Room1').emit('keyAct', ka );
+};
+
+// this will be call inside world.update
+world.postupdate = function(){
+	sendUpdateBin();
+	sendKeyAct();
 }
+
 
 world.onaddedplayer = function(item){
 	io.to('Room1').emit('new_player', Player.baseConverter.convertToBin( item ) );

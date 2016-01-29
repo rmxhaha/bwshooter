@@ -367,6 +367,28 @@ define([
 		this.lastFrameUpdate = data.framecount;
 	}
 	
+	World.prototype.getKeyActsBin = function(){
+		
+		var bin = "";
+		var ar  = [];
+		for( var i = 0; i < this.players.length; ++ i ){
+			ar.push(this.players[i].keyAction);
+			bin += KeyAction.converter.convertToBin( this.players[i].keyAction );
+		}
+		
+		return ar;
+	}
+	
+	World.prototype.parseKeyActsBin = function(bin){
+		for( var i =0,k = 0; i < bin.length; k += KeyAction.converter.size, ++i ){
+//			var pbin = bin.substr(k, KeyAction.converter.size);
+//			this.players[i].keyAction = KeyAction.converter.convertToClass( pbin );
+			this.players[i].keyAction = bin[i];
+			if( i == 2 ) console.log(this.players[i].keyAction);
+		}
+		
+	}
+	
 	// although I want getUpdateBin to be independently called
 	// I can't be due to design issue
 	// getUpdateBin must be called in the postupdate

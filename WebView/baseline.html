@@ -99,6 +99,10 @@
 				}
 			});
 			
+			socket.on('keyAct', function(bin){
+				world.parseKeyActsBin(bin);
+			});
+			
 			
 			
 			window.w = world;
@@ -106,7 +110,6 @@
 			function loop(){
 				WorldView.render( context, world );
 				world.update( time.reset() / 1000 );
-				
 				requestAnimationFrame( loop );
 			}
 			

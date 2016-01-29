@@ -22,6 +22,8 @@ define(['Engine/Utility/Converter'], function( Converter ){
 		fall : Converter.type.BOOLEAN
 	});
 	
+	converter.size = converter.convertToBin( new KeyAction() ).length; // please change this accordingly
+	
 	KeyAction.converter = converter
 	
 	KeyAction.prototype = {
