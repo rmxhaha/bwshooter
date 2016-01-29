@@ -1,4 +1,4 @@
-define(['Engine/Utility/Converter'], function( Converter ){
+define(['Engine/Utility/converter'], function( Converter ){
 	var defaults = {
 		left : false,
 		right : false,

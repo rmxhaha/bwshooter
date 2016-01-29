@@ -9,7 +9,7 @@ requirejs.config({
 
 });
 
-requirejs(['Engine/Utility/Converter', 'Engine/Utility/underscore'], function( Converter, _ ){
+requirejs(['Engine/Utility/converter', 'Engine/Utility/underscore'], function( Converter, _ ){
 	/**
 	//Test Code for bin to int
 
