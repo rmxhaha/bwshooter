@@ -33,7 +33,7 @@
 		'Engine/Game/KeyActionListener'
 	],
 	function( _class, Time, _, Late, Events, World, WorldView, Platform, Light, Player, KeyActionListener ){
-		var socket = io.connect('http://localhost:43000/');
+		var socket = io.connect('http://' + location.host + '/');
 		var name;
 		var event = Events();
 		
