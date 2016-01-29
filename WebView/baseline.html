@@ -1,5 +1,5 @@
 <head>
-	<script src="http://localhost:43001/socket.io/socket.io.js"></script>
+	<script src="http://localhost:43000/socket.io/socket.io.js"></script>
 	<script src="js/lib/require.js"></script>
 	<style>
 	body {
@@ -33,7 +33,7 @@
 		'Engine/Game/KeyActionListener'
 	],
 	function( _class, Time, _, Late, Events, World, WorldView, Platform, Light, Player, KeyActionListener ){
-		var socket = io.connect('http://localhost:43001/');
+		var socket = io.connect('http://localhost:43000/');
 		var name;
 		var event = Events();
 		

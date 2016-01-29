@@ -20,15 +20,16 @@ requirejs([
 ], function( _class, Time, express, http, socketio, World, Platform, Light, Player ){
 
 var app = express();
-var server = http.Server(app);
-var io = socketio(43001);
+//var server = http.Server(app);
+var server = require('http').Server(app);
+var io = socketio(server);
 
 app.use('/', express.static( './' ));
 app.get('/', function( req, res ){
 	res.redirect('/WebView/');
 });
 
-app.listen( 43000 );
+server.listen( 43000 );
 
 
 var world = new World;
